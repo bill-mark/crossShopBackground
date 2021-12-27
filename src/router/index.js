@@ -1,6 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
+const original = VueRouter.prototype.push;
+
+VueRouter.prototype.push = function push(location) {
+  return original.call(this, location).catch(err => err)
+}
+
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -14,7 +21,11 @@ const routes = [
         path:'home',
         name:'manage_home',
         component:()=>import(/* webpackChunkName: "manage_home" */ '@/views/manage/home.vue')
-    },
+      }, {
+        path:'equipment',
+        name:'equipment',
+        component:()=>import(/* webpackChunkName: "equipment" */ '@/views/equipment/index.vue')
+      },
     ]
   },
 ]
