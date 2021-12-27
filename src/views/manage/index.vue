@@ -104,7 +104,7 @@ export default {
 </style>
 <style scoped lang="less">
 .manage_wrap {
-  background: #666;
+  background:#e6e6e6;
   margin-left: 40px;
   min-width: 1845px;
   //overflow-x: auto;
