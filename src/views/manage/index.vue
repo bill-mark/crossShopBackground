@@ -8,7 +8,7 @@
           :class="index == check_nav ? 'nav_cell_now' : 'nav_cell_no'"
           v-for="(item, index) in nav_list"
           :key="item.value"
-          @click="nav_click(index)"
+          @click="nav_click(index, item.menuName)"
         >
           {{ item.name }}
         </div>
@@ -43,30 +43,38 @@ export default {
         {
           name: "首页",
           value: "1",
+          menuName: "manage"
         },
         {
           name: "设备管理",
           value: "2",
+          menuName: 'equipment'
         },
         {
           name: "成员管理",
           value: "3",
+          menuName: 'member'
         },
         {
           name: "安全管理",
           value: "4",
+          menuName: 'security'
         },
         {
           name: "店铺报表",
           value: "5",
+          menuName: 'shop'
         },
         {
           name: "企业配置",
           value: "6",
+          menuName: 'enterprise'
+
         },
         {
           name: "费用管理",
           value: "7",
+          menuName: 'fee'
         },
       ],
       check_nav: 0,
@@ -74,8 +82,12 @@ export default {
     };
   },
   methods: {
-    nav_click(index) {
+    nav_click(index, menuName) {
+      // const {value: index, menuName} = item;
+      console.log('index', index);
       this.check_nav = index;
+      this.$router.push({name: menuName})
+
     },
   },
 };
