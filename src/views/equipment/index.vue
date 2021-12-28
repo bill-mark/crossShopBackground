@@ -36,10 +36,15 @@
         </a-menu-item>
       </a-menu>
     </div>
+    <div class="content">
+      <no-equipment></no-equipment>
+    </div> 
   </div>
 </template>
 <script>
+import noEquipment from './noEquipment.vue'
 export default {
+  components: { noEquipment },
   name: 'equipment',
   data() {
     return {}
@@ -102,6 +107,12 @@ export default {
     }
     
 
+  }
+  .content {
+    flex: 1;
+    margin-left: 11px;
+    height: calc(100vh - 126px);
+    background-color: #fff;
   }
 }
 </style>
