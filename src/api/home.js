@@ -1,18 +1,28 @@
 import request from "@/utils/request";
 
-// 数据地图
-export const login = params =>{
+export const analysis_save = (data) => {
     return request({
-        url:"/login",
-        method:"POST",
-        data:params,
+        url: " /analysis/analysis/save",
+        method: "POST",
+        data
     })
 }
 
-export const gethotshop = params =>{
+
+
+export const environment_index = data =>{
     return request({
-        url:"/hotshop",
-        method:"GET",
-        params:params,
+        url:"/client_v1/environment/index",
+        method:"POST",
+        data,
+    })
+}
+
+//环境 - 首页统计信息
+export const environment_first_count = data =>{
+    return request({
+        url:"/client_v1/environment/first-count",
+        method:"POST",
+        data,
     })
 }
