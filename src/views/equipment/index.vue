@@ -44,7 +44,7 @@
           <a-radio-button value="small" class="eq_radio">本地虚拟设备</a-radio-button>
         </a-radio-group>
         <a-button type="primary" class="eq_buy_btn">购买设备</a-button>
-        <a-button type="primary" class="eq_buy_btn" :disabled="canRenew">续费设备</a-button>
+        <a-button type="primary" class="eq_buy_btn" :disabled="selectedRowKeys.length > 0">续费设备</a-button>
         <a-dropdown class="eq_buy_btn">
           <a-menu slot="overlay" @click="handleMenuClick">
             <a-menu-item key="1">单个添加</a-menu-item>
@@ -55,7 +55,20 @@
         <a-input-search class="eq_buy_btn" style="width: 460px" placeholder="多个店铺名/设备名称/设备信息/归属 请用逗号间隔" @search="onSearch" />
         <a-button @click="showDrawer" class="fliter_drawer">筛选</a-button>
       </div>
-      <no-equipment></no-equipment>
+      <div class="eq_info">
+        <a-table
+          :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+          :columns="columns"
+          :data-source="list"
+          v-if="list.length > 0"
+        >
+        <template slot="operation" slot-scope="text, record">
+          <a-button type="primary" @click="onRenew(record)">续费</a-button>
+          <a-button @click="view(record)" class="view_btn">详情</a-button>
+        </template>
+        </a-table>
+        <no-equipment v-else></no-equipment>
+      </div>
     </div> 
     <a-drawer
       title="Basic Drawer"
@@ -72,14 +85,59 @@
   </div>
 </template>
 <script>
-import noEquipment from './noEquipment.vue'
+import noEquipment from './noEquipment.vue';
+const columns = [
+  {
+    title: '设备名称',
+    dataIndex: 'name',
+  },{
+    title: '设备信息',
+    dataIndex: 'name',
+  },{
+    title: '绑定环境',
+    dataIndex: 'name',
+  },{
+    title: '设备归属',
+    dataIndex: 'name',
+  },{
+    title: '远程状态',
+    dataIndex: 'name',
+  },{
+    title: '网络属性',
+    dataIndex: 'name',
+  },{
+    title: '自动续费状态',
+    dataIndex: 'name',
+  },{
+    title: '设备状态',
+    dataIndex: 'name',
+  },{
+    title: '可用天数',
+    dataIndex: 'name',
+  },{
+    title: '设备到期时间',
+    dataIndex: 'name',
+  },{
+    title: '操作',
+    dataIndex: 'operation',
+    scopedSlots: { customRender: 'operation' },
+  },
+];
 export default {
   components: { noEquipment },
   name: 'equipment',
   data() {
     return {
-      canRenew: true,
+      // canRenew: true,
       visible: false,
+      list: [],
+      columns,
+      selectedRowKeys: [], // Check here to configure the default column
+    }
+  },
+  computed: {
+    hasSelected() {
+      return this.selectedRowKeys.length > 0;
     }
   },
   methods: {
@@ -103,6 +161,16 @@ export default {
     onClose() {
       this.visible = false;
     },
+    onSelectChange(selectedRowKeys) {
+      console.log('selectedRowKeys changed: ', selectedRowKeys);
+      this.selectedRowKeys = selectedRowKeys;
+    },
+    onRenew: function() {
+      
+    },
+    view: function() {
+
+    }
   }
 }
 </script>
@@ -175,6 +243,12 @@ export default {
       .fliter_drawer {
         float: right;
         right: 20px;
+      }
+    }
+    .eq_info {
+      margin-top: 18px;
+      .view_btn {
+        margin-left: 10px;
       }
     }
   }
