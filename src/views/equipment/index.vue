@@ -247,6 +247,7 @@ export default {
     }
     .eq_info {
       margin-top: 18px;
+      height: 100%;
       .view_btn {
         margin-left: 10px;
       }
