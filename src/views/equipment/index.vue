@@ -37,8 +37,38 @@
       </a-menu>
     </div>
     <div class="content">
+      <div class="search_panel">
+        <a-radio-group  @change="changeEqType">
+          <a-radio-button value="large" class="eq_radio">平台设备</a-radio-button>
+          <a-radio-button value="default" class="eq_radio">自有设备</a-radio-button>
+          <a-radio-button value="small" class="eq_radio">本地虚拟设备</a-radio-button>
+        </a-radio-group>
+        <a-button type="primary" class="eq_buy_btn">购买设备</a-button>
+        <a-button type="primary" class="eq_buy_btn" :disabled="canRenew">续费设备</a-button>
+        <a-dropdown class="eq_buy_btn">
+          <a-menu slot="overlay" @click="handleMenuClick">
+            <a-menu-item key="1">单个添加</a-menu-item>
+            <a-menu-item key="2">批量导入</a-menu-item>
+          </a-menu>
+          <a-button> 添加自有设备 <a-icon type="down" /> </a-button>
+        </a-dropdown>
+        <a-input-search class="eq_buy_btn" style="width: 460px" placeholder="多个店铺名/设备名称/设备信息/归属 请用逗号间隔" @search="onSearch" />
+        <a-button @click="showDrawer" class="fliter_drawer">筛选</a-button>
+      </div>
       <no-equipment></no-equipment>
     </div> 
+    <a-drawer
+      title="Basic Drawer"
+      placement="right"
+      :closable="false"
+      :visible="visible"
+      :after-visible-change="afterVisibleChange"
+      @close="onClose"
+    >
+      <p>Some contents...</p>
+      <p>Some contents...</p>
+      <p>Some contents...</p>
+    </a-drawer>
   </div>
 </template>
 <script>
@@ -47,12 +77,32 @@ export default {
   components: { noEquipment },
   name: 'equipment',
   data() {
-    return {}
+    return {
+      canRenew: true,
+      visible: false,
+    }
   },
   methods: {
     handleClick: function() {
 
-    }
+    },
+    // 设备类别改变
+    changeEqType: function() {
+
+    },
+    handleMenuClick(e) {
+      console.log('click', e);
+    },
+    onSearch: function() {},
+    afterVisibleChange(val) {
+      console.log('visible', val);
+    },
+    showDrawer() {
+      this.visible = true;
+    },
+    onClose() {
+      this.visible = false;
+    },
   }
 }
 </script>
@@ -113,6 +163,20 @@ export default {
     margin-left: 11px;
     height: calc(100vh - 126px);
     background-color: #fff;
+    .search_panel {
+      margin-top: 25px;
+      margin-left: 36px;
+      .eq_radio {
+        min-width: 102px;
+      }
+      .eq_buy_btn {
+        margin-left: 9px;
+      }
+      .fliter_drawer {
+        float: right;
+        right: 20px;
+      }
+    }
   }
 }
 </style>
