@@ -23,13 +23,12 @@ export default {
 </script>
 <style lang="less" scoped>
 .no_eq {
-  // width: 100%;
-  height: calc(100vh -126px);
+  height: 100%;
   .no_eq_container {
     min-width: 151px;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    // text-align: center;
     justify-content: center; /* 水平居中 */
     align-items: center;     /* 垂直居中 */
     .back {
@@ -37,6 +36,7 @@ export default {
       height: 134px;
       background-image: url('../../assets/img/equipment/non_equipment@2x.png');
       background-repeat: no-repeat;
+      background-size: 151px auto;
     }
     .instruction {
       font-size: 14px;
@@ -50,8 +50,6 @@ export default {
       display: flex;
       flex-direction: row;
       .buy_btn {
-        width: 57px;
-        height: 14px;
         font-size: 14px;
         font-family: Source Han Sans CN;
         font-weight: 400;
