@@ -26,17 +26,17 @@
           <div class="my_equipment renewal"></div>
           <div class="title">自动续费的设备</div>
         </a-menu-item>
-        <a-menu-item key="7" class="menu_one">
+        <!-- <a-menu-item key="7" class="menu_one">
           <div class="my_equipment renewal"></div>
           <div class="title">设备标签</div>
-        </a-menu-item>
+        </a-menu-item> -->
         <a-menu-item key="8" class="menu_one">
           <div class="my_equipment renewal"></div>
           <div class="title">标签管理</div>
         </a-menu-item>
       </a-menu>
     </div>
-    <div class="content">
+    <div class="content" v-if="showEqList">
       <div class="search_panel">
         <a-radio-group  @change="changeEqType">
           <a-radio-button value="large" class="eq_radio">平台设备</a-radio-button>
@@ -69,7 +69,10 @@
         </a-table>
         <no-equipment v-else></no-equipment>
       </div>
-    </div> 
+    </div>
+    <div v-else>
+      <tag-list></tag-list>
+    </div>
     <a-drawer
       title="筛选"
       placement="right"
@@ -144,6 +147,7 @@
 </template>
 <script>
 import noEquipment from './noEquipment.vue';
+import TagList from './tagList.vue'
 const columns = [
   {
     title: '设备名称',
@@ -182,7 +186,7 @@ const columns = [
   },
 ];
 export default {
-  components: { noEquipment },
+  components: { noEquipment, TagList },
   name: 'equipment',
   data() {
     return {
@@ -196,6 +200,7 @@ export default {
       },
       labelCol: { span: 4 },
       wrapperCol: { span: 20 },
+      showEqList: true,
     }
   },
   computed: {
@@ -204,8 +209,13 @@ export default {
     }
   },
   methods: {
-    handleClick: function() {
-
+    handleClick: function({ key }) {
+      if(key === '8') {
+        // console.log('yyyy')
+        this.showEqList = false;
+      } else {
+        this.showEqList = true;
+      }
     },
     // 设备类别改变
     changeEqType: function() {
