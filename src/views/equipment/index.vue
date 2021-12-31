@@ -71,16 +71,74 @@
       </div>
     </div> 
     <a-drawer
-      title="Basic Drawer"
+      title="筛选"
       placement="right"
       :closable="false"
       :visible="visible"
       :after-visible-change="afterVisibleChange"
+      :width="450"
       @close="onClose"
     >
-      <p>Some contents...</p>
-      <p>Some contents...</p>
-      <p>Some contents...</p>
+      <a-form-model :model="query" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form-model-item>
+          <a-input v-model="query.name" placeholder="搜索环境名/设备名称/设备信息/归属" />
+        </a-form-model-item>
+        <a-form-model-item label="设备状态">
+          <a-radio-group v-model="query.resource">
+            <a-radio value="1">正常</a-radio>
+            <a-radio value="2">过期</a-radio>
+            <a-radio value="3">待分配</a-radio>
+            <a-radio value="4">故障</a-radio>
+          </a-radio-group>
+        </a-form-model-item>
+        <a-form-model-item label="设备标签">
+          <a-input v-model="query.name" placeholder="请选择或搜索设备标签" />
+        </a-form-model-item>
+        <a-form-model-item label="设备归属">
+          <a-input v-model="query.name" placeholder="请选择或搜索设备归属" />
+        </a-form-model-item>
+        <a-form-model-item label="企业简称">
+          <a-input v-model="query.name" placeholder="请选择或搜索企业简称" />
+        </a-form-model-item>
+        <a-form-model-item label="自动续费">
+          <a-radio-group v-model="query.resource">
+            <a-radio value="1">已开始</a-radio>
+            <a-radio value="2">已关闭</a-radio>
+          </a-radio-group>
+        </a-form-model-item>
+        <a-form-model-item label="属性">
+          <a-radio-group v-model="query.resource">
+            <a-radio value="1">静态</a-radio>
+            <a-radio value="2">动态</a-radio>
+          </a-radio-group>
+        </a-form-model-item>
+        <a-form-model-item label="远程状态">
+          <a-radio-group v-model="query.resource">
+            <a-radio value="1">可远程</a-radio>
+            <a-radio value="2">不可远程</a-radio>
+          </a-radio-group>
+        </a-form-model-item>
+      </a-form-model>
+      <div
+        :style="{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+          zIndex: 1,
+        }"
+      >
+        <!-- <a-button :style="{ marginRight: '8px' }" @click="onClose">
+          Cancel
+        </a-button> -->
+        <a-button type="primary" @click="onSearch">
+          确定筛选
+        </a-button>
+      </div>
     </a-drawer>
   </div>
 </template>
@@ -133,6 +191,11 @@ export default {
       list: [],
       columns,
       selectedRowKeys: [], // Check here to configure the default column
+      query: {
+
+      },
+      labelCol: { span: 4 },
+      wrapperCol: { span: 20 },
     }
   },
   computed: {
@@ -253,5 +316,9 @@ export default {
       }
     }
   }
+  .ant-drawer-content-wrapper {
+    width: 450px;
+  }
+
 }
 </style>
