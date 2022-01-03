@@ -70,9 +70,7 @@
         <no-equipment v-else></no-equipment>
       </div>
     </div>
-    <div v-else>
-      <tag-list></tag-list>
-    </div>
+    <tag-list v-else></tag-list>
     <a-drawer
       title="筛选"
       placement="right"
