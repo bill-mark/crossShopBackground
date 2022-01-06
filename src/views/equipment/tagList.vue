@@ -21,6 +21,7 @@
         <template slot="operation" slot-scope="text, record">
           <div class="editable-row-operations">
             <span><a @click="() => edit(record)">编辑</a></span>
+             <span><a @click="() => delTag(record)">删除</a></span>
           </div>
         </template>
       </a-table>
@@ -38,7 +39,7 @@
   </div>
 </template>
 <script>
-import {addTag, updateTag, fetchTagList} from '@/api/tag'
+import {addTag, updateTag, fetchTagList, delTag} from '@/api/tag'
 
 const columns = [{
   title: '标签ID',
@@ -141,6 +142,19 @@ export default {
       this.isEdit = true;
       this.showDialog = true;
       this.addForm = {id, tag};
+    },
+    delTag: function({id}) {
+      this.$confirm({
+        title: '删除',
+        content: '是否确认删除设备标签',
+        async onOk() {
+          const { data } = await delTag({id, ...this.common});
+          if (data && data.data) {
+            this.$messgae.success('删除成功');
+          }  
+        },
+        onCancel() {},
+      });
     }
   }
 }
