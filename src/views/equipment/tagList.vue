@@ -8,6 +8,8 @@
       </a-form-model>
       <a-button type="primary" @click="fetch" class="search_btn">查询</a-button>
       <a-button type="primary" @click="add" class="search_btn">添加设备标签</a-button>
+      <a-button type="primary" @click="() => batch('add')" class="search_btn">批量添加</a-button>
+      <a-button type="primary" @click="() => batch('del')" class="search_btn">批量清空</a-button>
     </div>
     <div class="tag_panel">
       <a-table
@@ -21,12 +23,12 @@
         <template slot="operation" slot-scope="text, record">
           <div class="editable-row-operations">
             <span><a @click="() => edit(record)">编辑</a></span>
-             <span><a @click="() => delTag(record)">删除</a></span>
+            <span><a @click="() => delTag(record)">删除</a></span>
           </div>
         </template>
       </a-table>
     </div>
-    <a-modal v-model="showDialog" title="添加/新增设备标签" @ok="handleOk">
+    <a-modal v-model="showDialog" title="添加/编辑设备标签" @ok="handleOk">
       <a-form-model :model="addForm" :label-col="labelCol" :wrapper-col="wrapperCol">
         <a-form-model-item label="标签名称">
           <a-input v-model="addForm.tag" />
@@ -36,10 +38,23 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+    <a-modal v-model="showBatchDialog" title="批量添加/移除设备标签" @ok="handleBatch">
+      <a-form-model :model="batchForm" :label-col="labelCol" :wrapper-col="wrapperCol">
+        <a-form-model-item label="标签id">
+          <a-input v-model="batchForm.id" placeholder="多个id请用英文逗号(,)分割"/>
+        </a-form-model-item>
+        <a-form-model-item label="标签名称" v-if="batchType === 'add'">
+          <a-input v-model="batchForm.tag" />
+        </a-form-model-item>
+        <a-form-model-item label="排序" v-if="batchType === 'add'">
+          <a-input v-model="batchForm.sort" />
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
   </div>
 </template>
 <script>
-import {addTag, updateTag, fetchTagList, delTag} from '@/api/tag'
+import {addTag, updateTag, fetchTagList, delTag, BatchTag} from '@/api/tag'
 
 const columns = [{
   title: '标签ID',
@@ -87,6 +102,13 @@ export default {
         platform: 1
       },
       isEdit: false,
+      batchType: 'add',
+      showBatchDialog: false,
+      batchForm: {
+        id: null,
+        tag: null,
+        sort: 0,
+      }
     }
   },
   mounted(){
@@ -155,6 +177,16 @@ export default {
         },
         onCancel() {},
       });
+    },
+    batch: function(type) {
+      this.batchType = type;
+      this.showBatchDialog = true;
+    },
+    async handleBatch() {
+      const { data } = await BatchTag(this.type, this.batchForm);
+      if (data && data.data) {
+        this.$messgae.success('删除成功');
+      } 
     }
   }
 }
