@@ -45,9 +45,13 @@ export const delTag = (data) => {
 }
 
 export const BatchTag = (type, data) => {
-  const url = (type === "add" ? '/client_v1/device/create-device-tag-more' : '/client_v1/device/clear-device-tag-more');
+  const urlMap = {
+    'add': '/client_v1/device/create-device-tag-more',
+    'del': '/client_v1/device/clear-device-tag-more',
+    'rep': '/client_v1/device/replace-device-tag-more'
+  };
   return request({
-    url,
+    url: urlMap[type],
     method: "POST",
     data: JSON.stringify(data),
     headers: {

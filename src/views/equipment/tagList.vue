@@ -10,6 +10,7 @@
       <a-button type="primary" @click="add" class="search_btn">添加设备标签</a-button>
       <a-button type="primary" @click="() => batch('add')" class="search_btn">批量添加</a-button>
       <a-button type="primary" @click="() => batch('del')" class="search_btn">批量清空</a-button>
+      <a-button type="primary" @click="() => batch('rep')" class="search_btn">批量替换</a-button>
     </div>
     <div class="tag_panel">
       <a-table
@@ -42,6 +43,9 @@
       <a-form-model :model="batchForm" :label-col="labelCol" :wrapper-col="wrapperCol">
         <a-form-model-item label="标签id">
           <a-input v-model="batchForm.id" placeholder="多个id请用英文逗号(,)分割"/>
+        </a-form-model-item>
+        <a-form-model-item label="Tag_id" v-if="batchType === 'rep'">
+          <a-input v-model="batchForm.tag_id" placeholder="多个tag_id请用英文逗号(,)分割"/>
         </a-form-model-item>
         <a-form-model-item label="标签名称" v-if="batchType === 'add'">
           <a-input v-model="batchForm.tag" />
@@ -108,6 +112,7 @@ export default {
         id: null,
         tag: null,
         sort: 0,
+        tag_id: null
       }
     }
   },
@@ -183,7 +188,7 @@ export default {
       this.showBatchDialog = true;
     },
     async handleBatch() {
-      const { data } = await BatchTag(this.type, this.batchForm);
+      const { data } = await BatchTag(this.batchType, this.batchForm);
       if (data && data.data) {
         this.$messgae.success('删除成功');
       } 
