@@ -21,9 +21,15 @@ const routes = [
         path:'home',
         name:'manage_home',
         component:()=>import(/* webpackChunkName: "manage_home" */ '@/views/manage/home.vue')
-      }, {
+      }, 
+      {
+        path:'environment',
+        name:'manage_environment',
+        component:()=>import(/* webpackChunkName: "manage_environment" */ '@/views/manage/environment.vue')
+      }, 
+      {
         path:'equipment',
-        name:'equipment',
+        name:'manage_equipment',
         component:()=>import(/* webpackChunkName: "equipment" */ '@/views/equipment/index.vue')
       },
     ]

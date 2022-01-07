@@ -255,6 +255,7 @@ export default {
 <style scoped lang="less">
 .manage_home_wrap {
   width: 1845px;
+  padding-left: 15px;
   margin: 0 auto;
   .top_wrap {
     display: flex;
