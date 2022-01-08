@@ -59,7 +59,7 @@ export default {
     }
   },
   mounted(){
-    //this.menu_init()
+    this.menu_init()
   },
   methods: {
     async menu_init(){

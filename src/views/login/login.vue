@@ -1,0 +1,230 @@
+<template>
+  <div class="login_wrap">
+    <div class="content">
+      <div class="top">
+        <div
+          :class="[type == 1 ? 'top_left_checked' : 'top_left']"
+          @click="change_type(1)"
+        >
+          验证码登录
+        </div>
+        <div
+          :class="[type == 3 ? 'top_right_checked' : 'top_right']"
+          @click="change_type(3)"
+        >
+          个人密码登录
+        </div>
+      </div>
+
+      <div class="middle_line">
+        <div class="middle_p_left">手机号：</div>
+        <a-input-group compact>
+          <a-select default-value="+86">
+            <a-select-option value="+86"> 中国(+86) </a-select-option>
+            <a-select-option value="+1"> 美国(+1) </a-select-option>
+          </a-select>
+          <a-input
+            style="width: 200px"
+            placeholder="输入手机号"
+            v-model="phone"
+          />
+        </a-input-group>
+      </div>
+
+      <div class="middle_password_line" v-show="type == 3">
+        <div class="middle_p_left">密码：</div>
+        <a-input-password
+          placeholder="输入密码"
+          v-model="password"
+          style="width: 300px"
+        />
+      </div>
+
+      <div class="middle_password_line" v-show="type == 1">
+        <div class="middle_p_left">验证码：</div>
+        <a-input-number
+          placeholder="请输入验证码"
+          v-model="messagecode"
+          style="width: 120px"
+        />
+        <a-button
+          type="primary"
+          :loading="get_messagecode_state"
+          @click="get_messagecode"
+          style="margin-left: 20px"
+        >
+          获取验证码
+        </a-button>
+      </div>
+
+      <div class="middle_down">
+        <a-checkbox
+          v-show="type == 3"
+          class="middle_d_left"
+          :checked="checked"
+          @change="rember_password"
+        >
+          记住密码
+        </a-checkbox>
+
+        <div class="middle_d_right" v-show="type == 3">
+            找回密码
+        </div>
+      </div>
+
+      <a-button type="primary" class="down_btn" @click="go_login">
+      登录
+    </a-button>
+    </div>
+  </div>
+</template>
+<script>
+import {user_login} from '@/api/login'
+export default {
+  data() {
+    return {
+      type: 1,
+      phone: "",
+      password: '',
+      messagecode: null,
+      get_messagecode_state: false,
+      checked: true, //是否记住密码
+    };
+  },
+  mounted(){
+     if(localStorage.user_password){
+       this.password = localStorage.user_password
+       this.phone = localStorage.user_phone 
+     }
+  },
+  methods: {
+    test(){
+          console.log('test')
+          console.log(this.phone)
+    },
+    change_type(data) {
+      this.type = data;
+    },
+    get_messagecode() {
+
+    },
+    rember_password(e) {
+      this.checked = e.target.checked;
+      console.log(this.checked);
+    },
+    async go_login(){
+        if(this.type == 3){
+            if(this.checked){
+                localStorage.user_password = this.password
+                localStorage.user_phone = this.phone
+            }else{
+                localStorage.user_password = ''
+            }
+        }
+
+        let {data} = await user_login({
+            phone:this.phone,
+            type:this.type,
+            verify_code:this.messagecode,
+            password:this.password,
+        })
+        console.log(data)
+        if(data.code ==200){
+            localStorage.member = JSON.stringify(data.data.member)
+            localStorage.user = JSON.stringify(data.data.user)
+            localStorage.token = data.data.token
+            this.$router.push({name:'manage_home'})
+        }
+    }
+  },
+};
+</script>
+
+<style scoped lang="less">
+.login_wrap {
+  background: white;
+  margin-left: 40px;
+  .content {
+    width: 450px;
+    height: 520px;
+    margin: 0 auto;
+    margin-top: 40px;
+    border: 1px solid #e6e6e6;
+    .top {
+      display: flex;
+      justify-content: center;
+      margin-top: 60px;
+      height: 50px;
+      .top_left {
+        font-size: 16px;
+        line-height: 50px;
+        cursor: pointer;
+      }
+      .top_left:hover {
+        color: #4c84ff;
+      }
+      .top_left_checked {
+        line-height: 50px;
+        font-size: 24px;
+        font-weight: bold;
+      }
+      .top_right {
+        margin-left: 40px;
+        font-size: 16px;
+        line-height: 50px;
+        cursor: pointer;
+      }
+      .top_right:hover {
+        color: #4c84ff;
+      }
+      .top_right_checked {
+        margin-left: 40px;
+        line-height: 50px;
+        font-size: 24px;
+        font-weight: bold;
+      }
+    }
+    .middle_line {
+      display: flex;
+      height: 30px;
+      margin-top: 50px;
+      .middle_p_left {
+        line-height: 30px;
+        width: 70px;
+        flex: none;
+        margin-left: 30px;
+      }
+    }
+    .middle_password_line {
+      display: flex;
+      height: 40px;
+      margin-top: 30px;
+      .middle_p_left {
+        line-height: 30px;
+        width: 70px;
+        flex: none;
+        margin-left: 30px;
+      }
+    }
+    .middle_down {
+      display: flex;
+      height: 40px;
+      margin-top: 40px;
+      justify-content: space-between;
+      .middle_d_left {
+        margin-left: 33px;
+      }
+      .middle_d_right{
+          margin-right: 40px;
+          color: #4c84ff;
+          cursor: pointer;
+      }
+    }
+    .down_btn{
+        margin-left: 33px;
+        margin-top: 20px;
+        width: 380px;
+    }
+  }
+}
+</style>

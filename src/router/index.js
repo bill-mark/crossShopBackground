@@ -13,6 +13,11 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
+    name:'home',
+    component: ()=>import('@/views/home.vue'),
+  },
+  {
+    path: '/manage',
     name: 'manage',
     component: ()=>import('@/views/manage/index.vue'),
     redirect: { name: 'manage_home' },
@@ -34,6 +39,19 @@ const routes = [
       },
     ]
   },
+  {
+    path:'/login',
+    name:'login',
+    component: ()=>import('@/views/login/index.vue'),
+    redirect: { name: 'login_login' },
+    children:[
+      {
+        path:'login',
+        name:'login_login',
+        component:()=>import(/* webpackChunkName: "login_login" */ '@/views/login/login.vue')
+      }, 
+    ]
+  }
 ]
 
 const router = new VueRouter({

@@ -22,6 +22,7 @@ request.interceptors.request.use(
         mask: "desk",
         platform: "1",
         app: null,
+        token:localStorage.token,
         ...config.data,
       };
     } else if (config.method === "get") {
@@ -30,6 +31,7 @@ request.interceptors.request.use(
         mask: "desk",
         platform: "1",
         app: null,
+        token:localStorage.token,
         ...config.params,
       };
     }
