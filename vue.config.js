@@ -1,4 +1,16 @@
 module.exports = {
+  css: {
+    loaderOptions: {
+      less: {
+        lessOptions: {
+          modifyVars: {
+              'primary-color': '#4C84FFed',// 全局主色
+          },
+          javascriptEnabled: true,
+        },
+      },
+    },
+  },
     devServer: {
         host: "",
         port: 8089,
