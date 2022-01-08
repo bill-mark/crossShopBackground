@@ -52,14 +52,18 @@
           </a-menu>
           <a-button> 添加自有设备 <a-icon type="down" /> </a-button>
         </a-dropdown>
-        <a-input-search class="eq_buy_btn" style="width: 460px" placeholder="多个店铺名/设备名称/设备信息/归属 请用逗号间隔" @search="onSearch" />
+        <a-input-search class="eq_buy_btn" style="width: 460px" placeholder="多个店铺名/设备名称/设备信息/归属 请用逗号间隔" @search="onSearchKey" />
         <a-button @click="showDrawer" class="fliter_drawer">筛选</a-button>
       </div>
       <div class="eq_info">
         <a-table
           :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+          :row-key="record => record.id"
           :columns="columns"
           :data-source="list"
+          :pagination="pagination"
+          :loading="loading"
+          @change="handleTableChange"
           v-if="list.length > 0"
         >
         <template slot="operation" slot-scope="text, record">
@@ -81,42 +85,55 @@
       @close="onClose"
     >
       <a-form-model :model="query" :label-col="labelCol" :wrapper-col="wrapperCol">
-        <a-form-model-item>
-          <a-input v-model="query.name" placeholder="搜索环境名/设备名称/设备信息/归属" />
-        </a-form-model-item>
+        <!-- <a-form-model-item>
+          <a-input v-model="query.keyword" placeholder="搜索环境名/设备名称/设备信息/归属" />
+        </a-form-model-item> -->
         <a-form-model-item label="设备状态">
-          <a-radio-group v-model="query.resource">
-            <a-radio value="1">正常</a-radio>
-            <a-radio value="2">过期</a-radio>
-            <a-radio value="3">待分配</a-radio>
-            <a-radio value="4">故障</a-radio>
+          <a-radio-group v-model="query.status">
+            <a-radio value="all">全部</a-radio>
+            <a-radio value="0">正常</a-radio>
+            <a-radio value="1">过期</a-radio>
+            <a-radio value="2">待分配</a-radio>
+            <a-radio value="3">故障</a-radio>
           </a-radio-group>
+        </a-form-model-item>
+        <a-form-model-item label="设备名称">
+          <a-input v-model="query.device_name" placeholder="请选择或搜索设备名称" />
+        </a-form-model-item>
+        <a-form-model-item label="环境名称">
+          <a-input v-model="query.env_name" placeholder="请选择或搜索环境名称" />
+        </a-form-model-item>
+        <a-form-model-item label="设备IP">
+          <a-input v-model="query.device_ip" placeholder="请选择或搜索设备IP" />
         </a-form-model-item>
         <a-form-model-item label="设备标签">
-          <a-input v-model="query.name" placeholder="请选择或搜索设备标签" />
+          <a-input v-model="query.tags" placeholder="请选择或搜索设备标签" />
         </a-form-model-item>
-        <a-form-model-item label="设备归属">
-          <a-input v-model="query.name" placeholder="请选择或搜索设备归属" />
+        <a-form-model-item label="设备国家">
+          <a-input v-model="query.country" placeholder="请选择或搜索设备国家" />
         </a-form-model-item>
-        <a-form-model-item label="企业简称">
+        <!-- <a-form-model-item label="企业简称">
           <a-input v-model="query.name" placeholder="请选择或搜索企业简称" />
-        </a-form-model-item>
+        </a-form-model-item> -->
         <a-form-model-item label="自动续费">
-          <a-radio-group v-model="query.resource">
-            <a-radio value="1">已开始</a-radio>
-            <a-radio value="2">已关闭</a-radio>
+          <a-radio-group v-model="query.renew_status">
+            <a-radio value="all">全部</a-radio>
+            <a-radio value="0">未开启</a-radio>
+            <a-radio value="1">开启</a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-form-model-item label="属性">
-          <a-radio-group v-model="query.resource">
-            <a-radio value="1">静态</a-radio>
-            <a-radio value="2">动态</a-radio>
+        <a-form-model-item label="标签设备">
+          <a-radio-group v-model="query.no_tag">
+            <a-radio value="all">全部</a-radio>
+            <a-radio value="0">无标签</a-radio>
+            <a-radio value="1">有标签</a-radio>
           </a-radio-group>
         </a-form-model-item>
         <a-form-model-item label="远程状态">
-          <a-radio-group v-model="query.resource">
+          <a-radio-group v-model="query.device_remote">
+            <a-radio value="all">全部</a-radio>
             <a-radio value="1">可远程</a-radio>
-            <a-radio value="2">不可远程</a-radio>
+            <a-radio value="0">不可远程</a-radio>
           </a-radio-group>
         </a-form-model-item>
       </a-form-model>
@@ -145,7 +162,9 @@
 </template>
 <script>
 import noEquipment from './noEquipment.vue';
-import TagList from './tagList.vue'
+import TagList from './tagList.vue';
+import {getList} from '@/api/equipment';
+
 const columns = [
   {
     title: '设备名称',
@@ -183,6 +202,22 @@ const columns = [
     scopedSlots: { customRender: 'operation' },
   },
 ];
+const query = {
+  keyword: null, //关键词
+  device_name: null, //设备名称
+  env_name: null, //环境名称
+  device_ip: null, //设备IP
+  country: null, //设备国家
+  tags: null, //标签
+  status: null, //状态 全部 all 0 正常 1 过期 2 待分配 3 故障 4 已删除(设备回收站)
+  expire: null,  //过期 全部 all 1 已过期 2 将要过期
+  renew_status: null, //是否自动续费 全部 all 0 未开启 1 开启
+  device_remote: null, //是否可远程 全部 all 0 不可远程 1 可远程 
+  no_tag: null, //有无标签设备 全部 all 0 无标签 1 有标签
+  bind_env: null, //绑定环境 全部 all 0 已绑定环境 1 未绑定
+  pagesize: 20,
+  page: null
+};
 export default {
   components: { noEquipment, TagList },
   name: 'equipment',
@@ -193,18 +228,26 @@ export default {
       list: [],
       columns,
       selectedRowKeys: [], // Check here to configure the default column
-      query: {
-
+      query,
+      common: {
+        version: '1.0.0',
+        mask: 'dev',
+        platform: 1
       },
       labelCol: { span: 4 },
-      wrapperCol: { span: 20 },
+      wrapperCol: { span: 24 },
       showEqList: true,
+      pagination: {},
+      loading: false,
     }
   },
   computed: {
     hasSelected() {
       return this.selectedRowKeys.length > 0;
     }
+  },
+  mounted() {
+    this.fetchList();
   },
   methods: {
     handleClick: function({ key }) {
@@ -214,6 +257,23 @@ export default {
       } else {
         this.showEqList = true;
       }
+
+      // key 1 query all  2 expire(2) 3 expire(1) 4 status(4) 5 bind_env(1) 6 renew_status(1)
+      if (key === '1') {
+        this.query = query;
+      } else if (key === '2') {
+        this.query = {...query, expire: 2};
+      } else if (key === '3') {
+        this.query = {...query, expire: 1};
+      } else if (key === '4') {
+        this.query = {...query, status: 4};
+      } else if (key === '5') {
+        this.query = {...query, bind_env: 1};
+      } else if (key === '6') {
+        this.query = {...query, renew_status: 1};
+      }
+
+      this.fetchList();
     },
     // 设备类别改变
     changeEqType: function() {
@@ -222,7 +282,9 @@ export default {
     handleMenuClick(e) {
       console.log('click', e);
     },
-    onSearch: function() {},
+    onSearch: function() {
+      this.fetchList();
+    },
     afterVisibleChange(val) {
       console.log('visible', val);
     },
@@ -241,7 +303,38 @@ export default {
     },
     view: function() {
 
+    },
+    async fetchList() {
+      
+      this.loading = true;
+      const {data: list, total} = await getList({
+        ...this.query,
+        version: '1.0.0',
+        mask: 'dev',
+        platform: 1
+      });
+      // console.log('result', result);
+      const pagination = { ...this.pagination };
+      pagination.total = total;
+      this.loading = false;
+      this.list = list;
+      this.pagination = pagination;
+    },
+    handleTableChange(pagination) {
+      console.log(pagination);
+      const pager = { ...this.pagination };
+      pager.current = pagination.current;
+      this.query.page = pagination.current;
+      this.pagination = pager;
+      // const {tag, pagesize} = this.query;
+      this.fetchList();
+    },
+    onSearchKey: function(key) {
+      // console.log('key', key);
+      this.query.keyword = key;
+      this.fetchList();
     }
+
   }
 }
 </script>
