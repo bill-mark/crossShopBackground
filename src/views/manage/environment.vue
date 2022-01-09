@@ -38,44 +38,85 @@
     </div>
 
     <div class="content_right">
-       <div class="top_line">
-           <div class="top_l_left">
-               <a-button type="primary">
-                    新建环境
-                    </a-button>
-           </div>
-           <div class="top_l_right"></div>
-       </div>
-    </div>
+      <div class="top_line">
+        <div class="top_l_left">
+          <a-button type="primary" class="top_btn" @click="go_addenv"> 新建环境 </a-button>
 
+          <a-button class="top_btn"> 标签管理 </a-button>
+          <a-button class="top_btn"> 批量操作 </a-button>
+          <a-input-search
+            placeholder="多个环境名/设备名称/设备信息/环境标签间用逗号隔开搜索"
+            class="btn_search"
+            @search="onSearch"
+          />
+        </div>
+
+        <div class="top_l_right">
+          <a-select
+            default-value="1"
+            style="width: 120px"
+            @change="event_change"
+          >
+            <a-select-option value="1"> 环境管理 </a-select-option>
+            <a-select-option value="2"> 环境运营 </a-select-option>
+          </a-select>
+
+           <a-button class="top_btn"> 筛选 </a-button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
-import {environment_platform_list} from '@/api/environment.js'
+import { environment_index } from "@/api/home";
+import { environment_platform_list } from "@/api/environment.js";
 export default {
   data() {
     return {
-      current: '1',
-    }
+      current: "1",
+      event_guanli:"1",
+    };
   },
-  mounted(){
-    this.menu_init()
+  mounted() {
+    this.get_platformlist();
   },
   methods: {
-    async menu_init(){
-       let {data} = await environment_platform_list({
-           type:'all',
-           pagesize:100,
-           page:1,
-       })
-       console.log(data)
+    async get_platformlist() {
+      let { data } = await environment_platform_list({
+        type: "all",
+        pagesize: 100,
+        page: 1,
+      });
+      console.log(data);
     },
     menu_handleClick(e) {
-      console.log('click ', e);
+      console.log("click ", e);
       this.current = e.key;
     },
+
+    async onSearch(keywords) {
+      console.log(keywords);
+      let { data } = await environment_index({
+        keywords: keywords,
+        platform_id: this.platform_id,
+        recent_open: this.recent_open,
+        env_common: this.env_common,
+        pagesize: 20,
+        page: this.pagination.pageNum,
+      });
+      if (data.code == 200) {
+        this.pagination.total = data.data.total;
+      }
+    },
+    event_change(value){
+       console.log(value)
+       this.event_guanli = value
+    },
+    go_addenv(){
+      this.$router.push({name:'manage_addenv'})
+    }
   },
-}
+};
 </script>
 
 <style scoped lang="less">
@@ -92,14 +133,33 @@ export default {
     min-width: 220px;
     background-color: white;
   }
-  .content_right{ 
-      .top_line{
-         display: flex;
-        justify-content: space-between;
-        .top_l_left{
-
+  .content_right {
+    background-color: white;
+    flex: 1;
+    margin-right: 20px;
+    .top_line {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 25px;
+      .top_l_left {
+        display: flex;
+        .top_btn {
+          margin-left: 15px;
+        }
+        .btn_search {
+          margin-left: 15px;
+          width: 450px;
+          height: 30px;
         }
       }
+      .top_l_right{
+        display: flex;
+         .top_btn {
+          margin-left: 15px;
+          margin-right: 20px;
+        }
+      }
+    }
   }
 }
 </style>

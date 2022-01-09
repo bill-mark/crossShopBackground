@@ -31,6 +31,7 @@ export default {
 </script>
 <style lang="less" scoped>
 .left_nav{
+  z-index: 99;
   width: 40px;
   background-color: white;
   position: fixed;

@@ -195,8 +195,8 @@ export default {
       ],
     };
   },
-  creanted(){
-     //  this.init()
+  created(){
+       this.init()
   },
   methods: {
     click_env_common(data) {
@@ -220,9 +220,10 @@ export default {
     },
 
     async init(){
-      
       let {data} = await environment_first_count()
-      console.log(data)
+      if(data.code ==200){
+        this.huanjing = data.data.environment.no_bind_count
+      }
     },
 
     async onSearch(keywords) {
