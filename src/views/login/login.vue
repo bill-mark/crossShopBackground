@@ -19,10 +19,10 @@
       <div class="middle_line">
         <div class="middle_p_left">手机号：</div>
         <a-input-group compact>
-          <a-select default-value="+86">
+          <!-- <a-select default-value="+86">
             <a-select-option value="+86"> 中国(+86) </a-select-option>
             <a-select-option value="+1"> 美国(+1) </a-select-option>
-          </a-select>
+          </a-select> -->
           <a-input
             style="width: 200px"
             placeholder="输入手机号"
@@ -36,7 +36,7 @@
         <a-input-password
           placeholder="输入密码"
           v-model="password"
-          style="width: 300px"
+          style="width: 200px"
         />
       </div>
 
@@ -75,11 +75,16 @@
       <a-button type="primary" class="down_btn" @click="go_login">
       登录
     </a-button>
+
+    <a-button  class="com_btn" @click="go_company_login">
+      切换到企业登录
+    </a-button>
+
     </div>
   </div>
 </template>
 <script>
-import {user_login} from '@/api/login'
+import {user_login,user_send_sms} from '@/api/login'
 export default {
   data() {
     return {
@@ -99,18 +104,28 @@ export default {
   },
   methods: {
     test(){
-          console.log('test')
+          console.log('test 18210190263 1')
           console.log(this.phone)
+    },
+    go_company_login(){
+      this.$router.push({name:'login_company'})
     },
     change_type(data) {
       this.type = data;
     },
-    get_messagecode() {
-
+    async get_messagecode() {
+      this.get_messagecode_state = true
+      let {data} = await user_send_sms({
+        phone:this.phone,
+      })
+      this.get_messagecode_state = false
+      if(data.code ==200){
+        
+        this.$message.success('验证码已发出')
+      }
     },
     rember_password(e) {
       this.checked = e.target.checked;
-      console.log(this.checked);
     },
     async go_login(){
         if(this.type == 3){
@@ -224,6 +239,10 @@ export default {
         margin-left: 33px;
         margin-top: 20px;
         width: 380px;
+    }
+    .com_btn{
+       margin-left: 33px;
+        margin-top: 40px;
     }
   }
 }

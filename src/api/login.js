@@ -9,3 +9,11 @@ export const user_login = (data) => {
         data
     })
 }
+
+export const user_send_sms = (data) => {
+    return request({
+        url: "/client_v1/verify/send-sms",
+        method: "POST",
+        data
+    })
+}

@@ -45,8 +45,10 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
+    //console.log(response)
     if (response.data.code != 200 && response.request.responseType != "arraybuffer") {
-      Vue.prototype.$message.error("接口报错:" + response.data.message);
+      let c_1 = response.data.message||response.data.msg
+      Vue.prototype.$message.error("接口报错:" + c_1);
       return response;
     }
     return response;
