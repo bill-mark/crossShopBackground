@@ -32,13 +32,13 @@
     </div>
 
     <div class="cell_line">
-      <div class="cell_lefttxt">店铺账号:</div>
+      <div class="cell_lefttxt red_title" >店铺账号:</div>
       <div class="cell_leftcont">
         <a-input placeholder="请输入店铺账号" v-model="shop_account" />
       </div>
-      <div class="cell_righttxt">店铺密码:</div>
+      <div class="cell_righttxt red_title">店铺密码:</div>
       <div class="cell_rightcont">
-        <a-input placeholder="请输入店铺密码" v-model="shop_password" />
+        <a-input-password placeholder="请输入店铺密码" v-model="shop_password" />
       </div>
     </div>
 
@@ -90,7 +90,7 @@
       </div>
       <div class="cell_righttxt">语言:</div>
       <div class="cell_rightcont">
-         <a-select  style="width: 380px"  default-value="0" @change="tagid_handleChange">
+         <a-select  style="width: 380px"  default-value="0" @change="lanage_handleChange">
             <a-select-option 
             :value="item.value" v-for="item in lanage_list" :key="item.value"
             >
@@ -173,6 +173,7 @@ export default {
       ],
       device_id:'',
       tagIds:[],
+      check_tagids:[],
 
       business_short:'',//企业简称
 
@@ -299,7 +300,9 @@ export default {
       }
     },
     tagid_handleChange(value){
-        console.log(value)
+        
+        this.check_tagids = value
+        console.log(this.check_tagids)
     },
 
     broser_handleChange(value){
@@ -312,18 +315,22 @@ export default {
     },
 
     async go_finish(){
+      console.log(this.tagIds)
+     // return
+
        let c_1 = {
          env_name:this.env_name,
          platform_id:this.platform_id,
          country_id:this.country_id,
          shop_account:this.shop_account,
          shop_password:this.shop_password,
-         tagIds:this.tagIds,
+         tagIds:this.check_tagids.toString(),
          business_short:this.business_short,
          member:'',
        }
        let c_2 = []
        c_2[0] = c_1
+       console.log(c_1)
        let {data} = await environment_create({
          environment:JSON.stringify(c_2),
          env_ua:this.checked_ua,
@@ -336,9 +343,9 @@ export default {
          linux:this.env_linux,
          android:this.env_android,
        })
-       console.log(data)
        if(data.code ==200){
-         console.log(data)
+         this.$message.success('环境创建成功')
+         this.$router.push({name:'manage_environment'})
        }
     }
 
