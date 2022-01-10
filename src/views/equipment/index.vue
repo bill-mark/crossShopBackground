@@ -9,10 +9,11 @@
         <a-menu-item key="2" class="menu_one">
           <div class="my_equipment will_expire"></div>
           <div class="title">即将过期设备</div>
+          <div class="count">{{ about_expire }}</div>
         </a-menu-item>
         <a-menu-item key="3" class="menu_one">
           <div class="my_equipment expired"></div>
-          <div class="title">已过期设备</div>
+          <div class="title">已过期设备 {{ expired }} </div>
         </a-menu-item>
         <a-menu-item key="4" class="menu_one">
           <div class="my_equipment bin"></div>
@@ -20,7 +21,7 @@
         </a-menu-item>
         <a-menu-item key="5" class="menu_one">
           <div class="my_equipment bound"></div>
-          <div class="title">代绑定环境设备</div>
+          <div class="title">代绑定环境设备 {{ no_bind_env }}</div>
         </a-menu-item>
         <a-menu-item key="6" class="menu_one">
           <div class="my_equipment renewal"></div>
@@ -43,8 +44,8 @@
           <a-radio-button value="default" class="eq_radio">自有设备</a-radio-button>
           <a-radio-button value="small" class="eq_radio">本地虚拟设备</a-radio-button>
         </a-radio-group>
-        <a-button type="primary" class="eq_buy_btn">购买设备</a-button>
-        <a-button type="primary" class="eq_buy_btn" :disabled="selectedRowKeys.length > 0">续费设备</a-button>
+        <a-button type="primary" class="eq_buy_btn" @click="buyEq">购买设备</a-button>
+        <a-button type="primary" class="eq_buy_btn" :disabled="selectedRowKeys.length === 0" @click="renewalEq">续费设备</a-button>
         <a-dropdown class="eq_buy_btn">
           <a-menu slot="overlay" @click="handleMenuClick">
             <a-menu-item key="1">单个添加</a-menu-item>
@@ -167,35 +168,71 @@ import {getList} from '@/api/equipment';
 
 const columns = [
   {
+    title: '设备id',
+    dataIndex: 'id',
+  },{
+    title: '设备信息id',
+    dataIndex: 'device_info_id',
+  },{
+    title: '设备类型id',
+    dataIndex: 'device_type_id',
+  },{
+    title: '设备地域id',
+    dataIndex: 'device_region_id',
+  },{
+    title: '设备地区id',
+    dataIndex: 'device_area_id',
+  },{
+    title: '设备套餐id',
+    dataIndex: 'device_package_id',
+  },{
+    title: '设备购买时长id',
+    dataIndex: 'device_purchase_id',
+  },{
+    title: '订单id',
+    dataIndex: 'order_id',
+  },{
     title: '设备名称',
-    dataIndex: 'name',
+    dataIndex: 'device_name',
   },{
-    title: '设备信息',
-    dataIndex: 'name',
-  },{
-    title: '绑定环境',
-    dataIndex: 'name',
-  },{
-    title: '设备归属',
-    dataIndex: 'name',
-  },{
-    title: '远程状态',
-    dataIndex: 'name',
-  },{
-    title: '网络属性',
-    dataIndex: 'name',
-  },{
-    title: '自动续费状态',
-    dataIndex: 'name',
+    title: '设备ip',
+    dataIndex: 'device_ip',
   },{
     title: '设备状态',
-    dataIndex: 'name',
+    dataIndex: 'status',
+  },{
+    title: '续费状态',
+    dataIndex: 'renew_status',
+  },{
+    title: '创建时间',
+    dataIndex: 'created_at',
+  },{
+    title: '编辑时间',
+    dataIndex: 'updated_at',
+  },{
+    title: '过期时间',
+    dataIndex: 'expired_at',
+  },{
+    title: '环境名称',
+    dataIndex: 'env_name',
+  },{
+    title: '站点',
+    dataIndex: 'site',
+  },{
+    title: '国家',
+    dataIndex: 'country',
+  },{
+    title: '设备远程',
+    dataIndex: 'device_remote',
+  },{
+    title: '设备类型',
+    dataIndex: 'device_type',
+  },{
+    title: '设备标签',
+    dataIndex: 'tags',
   },{
     title: '可用天数',
-    dataIndex: 'name',
-  },{
-    title: '设备到期时间',
-    dataIndex: 'name',
+    dataIndex: 'available_day',
   },{
     title: '操作',
     dataIndex: 'operation',
@@ -239,6 +276,9 @@ export default {
       showEqList: true,
       pagination: {},
       loading: false,
+      about_expire: 0,
+      expired: 0,
+      no_bind_env: 0
     }
   },
   computed: {
@@ -307,18 +347,24 @@ export default {
     async fetchList() {
       
       this.loading = true;
-      const {data: list, total} = await getList({
+      const {data: {data: {list, total, about_expire, expired, no_bind_env}}} = await getList({
         ...this.query,
         version: '1.0.0',
         mask: 'dev',
         platform: 1
       });
-      // console.log('result', result);
+      console.log('list', list);
       const pagination = { ...this.pagination };
       pagination.total = total;
       this.loading = false;
-      this.list = list;
+      // this.list = list;
+      this.list = [
+        {id: '11', device_info_id: '123',device_region_id: '322',device_area_id: '123',device_package_id: '123',device_purchase_id: '123',order_id: '123',device_name: '123',device_ip: '123',status: '123',renew_status: '123',created_at: '123',updated_at: '123',expired_at: '123',env_name: '123',site: '123',country: '123',device_remote: '123',device_type: '123',tags: '123',available_day: '123'},
+        {id: '112', device_info_id: '1232',device_region_id: '3222',device_area_id: '123',device_package_id: '123',device_purchase_id: '123',order_id: '123',device_name: '123',device_ip: '123',status: '123',renew_status: '123',created_at: '123',updated_at: '123',expired_at: '123',env_name: '123',site: '123',country: '123',device_remote: '123',device_type: '123',tags: '123',available_day: '123'}];
       this.pagination = pagination;
+      this.about_expire = about_expire;
+      this.expired = expired;
+      this.no_bind_env = no_bind_env;
     },
     handleTableChange(pagination) {
       console.log(pagination);
@@ -333,6 +379,14 @@ export default {
       // console.log('key', key);
       this.query.keyword = key;
       this.fetchList();
+    },
+    // 购买设备
+    buyEq: function() {
+
+    },
+    // 续费设备
+    renewalEq: function() {
+      console.log('this.selectedRowKeys', this.selectedRowKeys);
     }
 
   }
@@ -385,6 +439,9 @@ export default {
         font-weight: 400;
         color: #374567;
         line-height:46px;
+      }
+      .count {
+        border: 1px solid #374567;
       }
     }
     
