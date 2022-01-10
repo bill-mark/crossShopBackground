@@ -65,16 +65,26 @@
         </div>
       </div>
     </div>
+
+    <tag_manage v-if="show_tagmanage" :isshow="show_tagmanage" />
+
   </div>
 </template>
 <script>
 import { environment_index } from "@/api/home";
 import { environment_platform_list } from "@/api/environment.js";
+
+import tag_manage from './components/tag_manage.vue'
 export default {
+  components:{
+      tag_manage
+  },
   data() {
     return {
       current: "1",
       event_guanli:"1",
+
+      show_tagmanage:true,
     };
   },
   mounted() {

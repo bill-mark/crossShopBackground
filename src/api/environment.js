@@ -32,3 +32,11 @@ export const environment_tag_list = (data) => {
         data
     })
 }
+
+export const environment_create = (data) => {
+    return request({
+        url: "/client_v1/environment/create",
+        method: "POST",
+        data
+    })
+}
