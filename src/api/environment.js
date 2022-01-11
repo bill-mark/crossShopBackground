@@ -40,3 +40,27 @@ export const environment_create = (data) => {
         data
     })
 }
+
+export const update_environment_tag = (data) => {
+    return request({
+        url: "/client_v1/environment/update-environment-tag",
+        method: "POST",
+        data
+    })
+}
+
+export const create_environment_tag = (data) => {
+    return request({
+        url: "/client_v1/environment/create-environment-tag",
+        method: "POST",
+        data
+    })
+}
+
+export const delete_environment_tag = (data) => {
+    return request({
+        url: "/client_v1/environment/delete-environment-tag",
+        method: "POST",
+        data
+    })
+}
