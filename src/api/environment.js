@@ -64,3 +64,5 @@ export const delete_environment_tag = (data) => {
         data
     })
 }
+
+

@@ -43,8 +43,8 @@
             新建环境
           </a-button>
 
-          <a-button class="top_btn"> 标签管理 </a-button>
-          <a-button class="top_btn"> 批量操作 </a-button>
+          <a-button class="top_btn" @click="show_tagmanage = true"> 标签管理 </a-button>
+          <a-button class="top_btn" :disabled="selectedRowKeys.length === 0"> 批量操作 </a-button>
           <a-input-search
             placeholder="多个环境名/设备名称/设备信息/环境标签间用逗号隔开搜索"
             class="btn_search"
@@ -75,31 +75,81 @@
           :columns="columns"
           :data-source="table_data"
           :row-key="(r, i) => i.toString()"
-          :scroll="{ x: 1000, y: 600 }"
+          :scroll="{ x: 1200, }"
+          :pagination="pagination"
+          @change="handleTableChange"
         >
-          <div slot="env_name" slot-scope="text" class="content_envname">
+          
+
+         
+          <div slot="cell_envname" slot-scope="text" class="content_envname">
             {{ text }}
           </div>
 
-          <div slot="cell_device" slot-scope="text">
-            {{ text|format_deviceip }}
+           <div slot="cell_platform" slot-scope="text,record">
+            {{ text }}{{record.site}}
           </div>
 
-          <div slot="operate_cell" slot-scope="text, record, index, dataIndex" class="content_operate">
+          <div slot="cell_tag" slot-scope="text" >
+             <span v-for="item in text" :key="item.id">
+               {{item.tag}}
+             </span>
+          </div>
+
+          <div slot="cell_device" slot-scope="text,record">
+            {{ format_devicestate(text,record) }}
+          </div>
+
+           <div slot="cell_last" slot-scope="text,record">
+            {{ text }}({{record.business_name}})
+          </div>
+
+          <div slot="operaTitle" class="title_operate">
+              <div class="title_operate_left">操作</div>
+              <!-- <div class="title_operate_right">
+                 <a-icon type="setting" />
+              </div> -->
+          </div>
+
+          <div slot="cell_operate" slot-scope="text, record, index, dataIndex" class="content_operate">
               <div @click="go_bind(record)"
-                  v-if="!record.device_ip"
+                  v-if="!record.bind_status"
+                  class="cell_blue"
               >
-                绑定{{text}}
+                绑定
               </div>
 
-              <div @click="go_edit(text, record, index, dataIndex)">编辑</div>
+              <div @click="go_open(record)"
+                  v-if="record.bind_status"
+                  class="cell_blue"
+              >
+                打开
+              </div>
+
+              <div @click="go_edit( record, index, dataIndex)"
+                class="cell_blue"
+              >
+                编辑
+              </div>
+
+              <div 
+                class="cell_blue"
+              >
+                更多
+              </div>
           </div>
 
+
         </a-table>
+         <div class="down_txt">共{{pagination.total}}条数据</div>
       </div>
     </div>
 
-    <tag_manage v-if="show_tagmanage" :isshow="show_tagmanage" />
+    <tag_manage v-if="show_tagmanage" @cancel="cancel_tagmanage" :isshow="show_tagmanage" />
+    
+    <device_manage v-if="show_devicemanage" @cancel="cancel_devicemanage" 
+       :eventname="need_bind_eventname" :eventid="need_bind_eventid"
+      :isshow="show_devicemanage" />
   </div>
 </template>
 <script>
@@ -107,9 +157,11 @@ import { environment_index } from "@/api/home";
 import { environment_platform_list, environment_tag_list } from "@/api/environment.js";
 
 import tag_manage from './components/tag_manage.vue'
+import device_manage from './components/device_manage.vue'
 export default {
   components: {
-    tag_manage
+    tag_manage,
+    device_manage
   },
   data() {
     return {
@@ -119,6 +171,10 @@ export default {
 
       platform_list: [],//环境列表
       tag_list: [],//标签列表
+
+      show_devicemanage:true,
+      need_bind_eventname:'',
+      need_bind_eventid:'',
 
       //默认配置
       standard_config: {
@@ -143,7 +199,6 @@ export default {
       },
 
       table_data: [],
-
       pagination: {
         pageNum: 0, //当前页数
         pageSize: 20, //每页条数
@@ -154,38 +209,80 @@ export default {
       urgent_renewal_count: '',//待付费
 
       selectedRowKeys: [],
+      checked_columns:[],
       columns: [
         {
           title: '环境',
           dataIndex: 'env_name',
-          scopedSlots: { customRender: "env_name" },
+          scopedSlots: { customRender: "cell_envname" },
+          show:true,
         },
         {
           title: '所属平台',
-          dataIndex: 'platform_id',
+          dataIndex: 'country',
+          scopedSlots: { customRender: "cell_platform" },
+           show:true,
         },
+
+         {
+          title:'标签',
+          dataIndex: 'tag',
+          scopedSlots: { customRender: "cell_tag" },
+          show:false,
+        },
+        {
+          title: '企业简称',
+          dataIndex: 'business_short',
+          show:false,
+        },
+        {
+          title: '创建者',
+          dataIndex: 'username',
+          show:false,
+        },
+        {
+          title: '创建时间',
+          dataIndex: 'created_at',
+          show:false,
+        },
+        {
+          title: '更新时间',
+          dataIndex: 'updated_at',
+          show:false,
+        },
+
         {
           title: '设备名称',
           dataIndex: 'device_name',
+          show:true,
         },
         {
           title: '设备信息',
-          dataIndex: 'device_ip',
+          dataIndex: 'bind_status',
           scopedSlots: { customRender: "cell_device" },
+          show:true,
         },
         {
           title: '最后登陆者',
-          dataIndex: 'last_user_id',
+          dataIndex: 'last_username',
+          scopedSlots: { customRender: "cell_last" },
+          show:true,
         },
         {
           title: '最后登陆时间',
           dataIndex: 'last_login_time',
+          show:true,
         },
         {
-          title: '操作',
           dataIndex: 'operation',
-          scopedSlots: { customRender: "operate_cell" },
+          width: 250,
+          fixed: "right",
+          slots: { title: 'operaTitle' },
+          scopedSlots: { customRender: "cell_operate" },
+          show:true,
         },
+       
+        
       ],
     };
   },
@@ -195,17 +292,16 @@ export default {
 
     this.init()
   },
-  filters:{
-     format_deviceip(data){
-       console.log(data)
-       if(data){
-         return data
-       }else{
-         return '未绑定'
-       }
-     }
-  },
   methods: {
+    //取消标签管理
+    cancel_tagmanage(){
+       this.show_tagmanage = false
+    },
+    //取消添加设备
+    cancel_devicemanage(){
+        this.show_devicemanage = false
+    },
+    //平台列表
     async get_platformlist() {
       let { data } = await environment_platform_list({
         type: "all",
@@ -216,6 +312,7 @@ export default {
         this.platform_list = data.data.list
       }
     },
+    //标签列表
     async get_taglist() {
       let { data } = await environment_tag_list({
 
@@ -233,7 +330,7 @@ export default {
     async init() {
       let { data } = await environment_index({
         pagesize: 20,
-        page: 0,
+        page: this.pagination.pageNum,
       })
       if (data.code == 200) {
         this.pagination.total = data.data.total;
@@ -247,6 +344,12 @@ export default {
     onSelectChange(selectedRowKeys) {
       console.log('selectedRowKeys changed: ', selectedRowKeys);
       this.selectedRowKeys = selectedRowKeys;
+    },
+
+     //表格 切换页码
+    handleTableChange(pagination) {
+      this.pagination.pageNum = pagination.current-1;
+      this.onSearch();
     },
 
     async onSearch(keywords) {
@@ -271,8 +374,21 @@ export default {
       this.$router.push({ name: 'manage_addenv' })
     },
 
-    go_bind(text, record, index, dataIndex){
-       console.log(text, record, index, dataIndex)
+    format_devicestate(state,record){
+       if(!state){
+        return '未绑定'
+       }else{
+         return record.device_ip +' ' +record.device_area_title+' '+record.device_package_title
+       }
+     },
+
+    go_bind(record){
+       this.show_devicemanage = true
+       this.need_bind_eventname =record.env_name
+       this.need_bind_eventid =record.id
+    },
+    go_open( record){
+       console.log(record)
     },
     go_edit(text, record, index, dataIndex){
        console.log(text, record, index, dataIndex)
@@ -329,8 +445,19 @@ export default {
       .content_envname {
         color: #4c84ff;
       }
+      .title_operate{
+        display: flex;
+          width: 200px;
+        justify-content: space-between;
+      }
       .content_operate{
         display: flex;
+      
+        .cell_blue{
+           padding-left: 20px;
+           color: #4C84FF;
+           cursor: pointer;
+        }
       }
     }
   }
