@@ -5,7 +5,6 @@
       <div class="instruction">暂无设备，给店铺绑定设备，愉快的开始跨境之旅吧~</div>
       <div class="no_eq_btns">
         <a-button type="primary" class="buy_btn">购买设备</a-button>
-        <a-button class="add_btn">添加自有设备</a-button>
       </div>
     </div>
   </div>

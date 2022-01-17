@@ -200,7 +200,7 @@ export default {
 
       table_data: [],
       pagination: {
-        pageNum: 0, //当前页数
+        pageNum: 1, //当前页数
         pageSize: 20, //每页条数
         total: 0,
       },
@@ -348,7 +348,7 @@ export default {
 
      //表格 切换页码
     handleTableChange(pagination) {
-      this.pagination.pageNum = pagination.current-1;
+      this.pagination.pageNum = pagination.current;
       this.onSearch();
     },
 

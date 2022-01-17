@@ -7,3 +7,12 @@ export const getList = (data) => {
     data
   })
 }
+
+
+export const purchase_device_list = (data) => {
+  return request({
+    url: "/client_v1/device/purchase-device-list",
+    method: "POST",
+    data
+  })
+}
