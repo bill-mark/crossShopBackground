@@ -9,6 +9,7 @@
         @search="onSearch"
       />
 
+      <a-spin :spinning="spinning">
       <a-table
         :columns="columns"
         :data-source="table_data"
@@ -17,21 +18,33 @@
         :pagination="pagination"
         @change="handleTableChange"
       >
+        <div slot="operaTitle" class="title_operate">
+          <div class="title_operate_left">操作</div>
+        </div>
+
+        <div
+          slot="cell_operate"
+          slot-scope="text, record"
+          class="content_operate"
+        >
+          <div class="cell_blue" @click="go_bind(record)">确定绑定</div>
+        </div>
       </a-table>
+       </a-spin>
 
       <div class="down_wrap">
-         <a-button type="primary" class="btn_delet" > 确定绑定 </a-button>
+          <div class="down_w_left">共{{ pagination.total }} 条</div>
        </div>
     </a-modal>
   </div>
 </template>
 <script>
-import { client_v1_device} from "@/api/environment.js";
+import { client_v1_device,environment_bind_device } from "@/api/environment.js";
 export default {
   props: {
     isshow: Boolean,
     eventname: String,
-    eventid: String,
+    eventid: Number,
   },
   data() {
     return {
@@ -44,8 +57,12 @@ export default {
           dataIndex: 'device_name',
         },
         {
-          title: '设备信息id',
-          dataIndex: 'device_info_id',
+          title: '设备信息',
+          dataIndex: 'device_ip',
+        },
+         {
+          title: '设备归属地',
+          dataIndex: 'device_area_title',
         },
         {
           title: '设备标签',
@@ -53,23 +70,30 @@ export default {
         },
         {
           title: '已绑定环境',
-          dataIndex: 'env_nametags',
+          dataIndex: 'env_name',
         },
         {
           title: '过期时间',
           dataIndex: 'expired_at',
-        }
+        }, {
+          dataIndex: 'operation',
+          width: 100,
+          slots: { title: 'operaTitle' },
+          scopedSlots: { customRender: "cell_operate" },
+          show: true,
+        },
       ],
       pagination: {
-        pageNum: 0, //当前页数
-        pageSize: 10, //每页条数
+        pageNum: 1, //当前页数
+        pageSize: 5, //每页条数
         total: 0,
       },
+       spinning:false,
     }
   },
   mounted() {
     this.show_state = this.isshow
-    //this.get_list()
+    this.get_list()
   },
   methods: {
     test() {
@@ -80,7 +104,8 @@ export default {
     },
     async get_list() {
       let { data } = await client_v1_device({
-        pagesize: 20,
+        pagesize: 200,
+        status:0,
         page: this.pagination.pageNum,
       })
       if (data.code == 200) {
@@ -88,10 +113,25 @@ export default {
         this.table_data = data.data.list
       }
     },
+     //绑定设备
+    async go_bind(record){
+      this.spinning = true
+      let {data} = await environment_bind_device({
+            id:this.eventid,
+            device_id:record.id
+      })
+      this.spinning = false
+      if(data.code ==200){
+         this.$message.success('绑定成功')
+         this.show_state = false
+          this.$emit('success')
+      }
+    },
     //表格 切换页码
     handleTableChange(pagination) {
+      return
       console.log(pagination);
-      this.pagination.pageNum = pagination.current - 1;
+      this.pagination.pageNum = pagination.current ;
       this.onSearch();
     },
 
@@ -108,8 +148,8 @@ export default {
 }
 
 /deep/ .ant-modal-content {
-  width: 840px;
-  height: 530px;
+  width: 1000px;
+  min-height: 530px;
 }
 
 /deep/ .ant-modal-body {
@@ -127,10 +167,25 @@ export default {
 
 .down_table {
   margin-top: 10px;
+   height: 375px;
+  .cell_blue {
+    cursor: pointer;
+    color: #4c84ff;
+  }
 }
 
-.btn_delet {
+.down_wrap {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  height: 32px;
   margin-top: 10px;
   float: right;
+  .down_w_left {
+    margin-left: 20px;
+    line-height: 32px;
+  }
 }
+
+
 </style>

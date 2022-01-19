@@ -66,3 +66,12 @@ export const delete_environment_tag = (data) => {
 }
 
 
+export const environment_bind_device = (data) => {
+    return request({
+        url: "/client_v1/environment/bind-device",
+        method: "POST",
+        data
+    })
+}
+
+

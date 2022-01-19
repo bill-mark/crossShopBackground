@@ -12,7 +12,7 @@
         <a-menu-item key="2"> 常用环境 </a-menu-item>
         <a-menu-item key="3"> 最近打开 </a-menu-item>
         <a-menu-item key="4"> 急需付费 {{ urgent_renewal_count }} </a-menu-item>
-        <a-menu-item key="5"> 待托管账密 </a-menu-item>
+        <!-- <a-menu-item key="5"> 待托管账密 </a-menu-item> -->
         <a-menu-item key="6"> 待授权 {{ no_auth_environment }}</a-menu-item>
         <a-menu-item key="7"> 待绑定设备 {{ no_bind_count }} </a-menu-item>
 
@@ -43,12 +43,16 @@
             新建环境
           </a-button>
 
-          <a-button class="top_btn" @click="show_tagmanage = true"> 标签管理 </a-button>
-          <a-button class="top_btn" :disabled="selectedRowKeys.length === 0"> 批量操作 </a-button>
+          <a-button class="top_btn" @click="show_tagmanage = true">
+            标签管理
+          </a-button>
+          <a-button class="top_btn" :disabled="selectedRowKeys.length === 0">
+            批量操作
+          </a-button>
           <a-input-search
             placeholder="多个环境名/设备名称/设备信息/环境标签间用逗号隔开搜索"
             class="btn_search"
-            @search="onSearch"
+            @search="handle_search"
           />
         </div>
 
@@ -62,7 +66,7 @@
             <a-select-option value="2"> 环境运营 </a-select-option>
           </a-select>
 
-          <a-button class="top_btn"> 筛选 </a-button>
+          <a-button class="top_btn" @click="open_drawer"> 筛选 </a-button>
         </div>
       </div>
 
@@ -72,84 +76,118 @@
             selectedRowKeys: selectedRowKeys,
             onChange: onSelectChange,
           }"
+          :loading="table_loading"
           :columns="columns"
           :data-source="table_data"
           :row-key="(r, i) => i.toString()"
-          :scroll="{ x: 1200, }"
+          :scroll="{ x: 1200 }"
           :pagination="pagination"
           @change="handleTableChange"
         >
-          
-
-         
           <div slot="cell_envname" slot-scope="text" class="content_envname">
             {{ text }}
           </div>
 
-           <div slot="cell_platform" slot-scope="text,record">
-            {{ text }}{{record.site}}
+          <div slot="cell_platform" slot-scope="text, record">
+            {{ text }}{{ record.site }}
           </div>
 
-          <div slot="cell_tag" slot-scope="text" >
-             <span v-for="item in text" :key="item.id">
-               {{item.tag}}
-             </span>
+          <div slot="cell_tag" slot-scope="text">
+            <span v-for="item in text" :key="item.id">
+              {{ item.tag }}
+            </span>
           </div>
 
-          <div slot="cell_device" slot-scope="text,record">
-            {{ format_devicestate(text,record) }}
+          <div slot="cell_device" slot-scope="text, record">
+            {{ format_devicestate(text, record) }}
           </div>
 
-           <div slot="cell_last" slot-scope="text,record">
-            {{ text }}({{record.business_name}})
+          <div slot="cell_last" slot-scope="text, record">
+            {{ text }}({{ record.business_name }})
           </div>
 
           <div slot="operaTitle" class="title_operate">
-              <div class="title_operate_left">操作</div>
-              <!-- <div class="title_operate_right">
+            <div class="title_operate_left">操作</div>
+            <!-- <div class="title_operate_right">
                  <a-icon type="setting" />
               </div> -->
           </div>
 
-          <div slot="cell_operate" slot-scope="text, record, index, dataIndex" class="content_operate">
-              <div @click="go_bind(record)"
-                  v-if="!record.bind_status"
-                  class="cell_blue"
-              >
-                绑定
-              </div>
+          <div
+            slot="cell_operate"
+            slot-scope="text, record, index, dataIndex"
+            class="content_operate"
+          >
+            <div
+              @click="go_bind(record)"
+              v-if="!record.bind_status"
+              class="cell_blue"
+            >
+              绑定
+            </div>
 
-              <div @click="go_open(record)"
-                  v-if="record.bind_status"
-                  class="cell_blue"
-              >
-                打开
-              </div>
+            <div
+              @click="go_open(record)"
+              v-if="record.bind_status"
+              class="cell_blue"
+            >
+              打开
+            </div>
 
-              <div @click="go_edit( record, index, dataIndex)"
-                class="cell_blue"
-              >
-                编辑
-              </div>
+            <div @click="go_edit(record, index, dataIndex)" class="cell_blue">
+              编辑
+            </div>
 
-              <div 
-                class="cell_blue"
-              >
-                更多
-              </div>
+            <div class="cell_blue">更多</div>
           </div>
-
-
         </a-table>
-         <div class="down_txt">共{{pagination.total}}条数据</div>
+        <div class="down_txt">共{{ pagination.total }}条数据</div>
       </div>
     </div>
 
-    <tag_manage v-if="show_tagmanage" @cancel="cancel_tagmanage" :isshow="show_tagmanage" />
-    
-    <device_manage v-if="show_devicemanage" @cancel="cancel_devicemanage" 
-       :eventname="need_bind_eventname" :eventid="need_bind_eventid"
-      :isshow="show_devicemanage" />
+    <a-drawer
+      title="筛选"
+      placement="right"
+      :closable="false"
+      :width="360"
+      :visible="drawer_visible"
+      @close="drawer_onClose"
+    >
+      <a-input placeholder="环境名称" v-model="standard_config.device_name" />
+
+      <div class="drawer_line">
+        <div class="drawer_l_left">环境标签:</div>
+        <div class="drawer_l_right">
+          <a-select
+            mode="multiple"
+            placeholder=""
+            style="width: 100%"
+            @change="drawer_multselect_handle($event,'tag_id')"
+          >
+            <a-select-option v-for="item in tag_list" :key="item.id">
+              {{ item.tag }}
+            </a-select-option>
+          </a-select>
+        </div>
+      </div>
+
+      <a-button type="primary" @click="get_tabledata"> 确定筛选 </a-button>
+    </a-drawer>
+
+    <tag_manage
+      v-if="show_tagmanage"
+      @cancel="cancel_tagmanage"
+      :isshow="show_tagmanage"
+    />
+
+    <device_manage
+      v-if="show_devicemanage"
+      @cancel="cancel_devicemanage"
+      @success="bind_device_success"
+      :eventname="need_bind_eventname"
+      :eventid="need_bind_eventid"
+      :isshow="show_devicemanage"
+    />
   </div>
 </template>
 <script>
@@ -172,9 +210,9 @@ export default {
       platform_list: [],//环境列表
       tag_list: [],//标签列表
 
-      show_devicemanage:true,
-      need_bind_eventname:'',
-      need_bind_eventid:'',
+      show_devicemanage: false,
+      need_bind_eventname: '',
+      need_bind_eventid: null,
 
       //默认配置
       standard_config: {
@@ -194,11 +232,10 @@ export default {
         no_bind: 'all',
         no_auth_env: 'all',
         member_id: '',
-        pagesize: 20,
-        page: 1,
       },
 
       table_data: [],
+      table_loading: false,
       pagination: {
         pageNum: 1, //当前页数
         pageSize: 20, //每页条数
@@ -208,70 +245,70 @@ export default {
       no_bind_count: '',//待绑定
       urgent_renewal_count: '',//待付费
 
-      selectedRowKeys: [],
-      checked_columns:[],
+      selectedRowKeys: [],//表格 选中单元
+      checked_columns: [],//自定义表格头
       columns: [
         {
           title: '环境',
           dataIndex: 'env_name',
           scopedSlots: { customRender: "cell_envname" },
-          show:true,
+          show: true,
         },
         {
           title: '所属平台',
           dataIndex: 'country',
           scopedSlots: { customRender: "cell_platform" },
-           show:true,
+          show: true,
         },
 
-         {
-          title:'标签',
+        {
+          title: '标签',
           dataIndex: 'tag',
           scopedSlots: { customRender: "cell_tag" },
-          show:false,
+          show: false,
         },
         {
           title: '企业简称',
           dataIndex: 'business_short',
-          show:false,
+          show: false,
         },
         {
           title: '创建者',
           dataIndex: 'username',
-          show:false,
+          show: false,
         },
         {
           title: '创建时间',
           dataIndex: 'created_at',
-          show:false,
+          show: false,
         },
         {
           title: '更新时间',
           dataIndex: 'updated_at',
-          show:false,
+          show: false,
         },
 
         {
           title: '设备名称',
           dataIndex: 'device_name',
-          show:true,
+          show: true,
         },
         {
           title: '设备信息',
           dataIndex: 'bind_status',
           scopedSlots: { customRender: "cell_device" },
-          show:true,
+          show: true,
         },
         {
           title: '最后登陆者',
           dataIndex: 'last_username',
           scopedSlots: { customRender: "cell_last" },
-          show:true,
+          show: true,
         },
         {
           title: '最后登陆时间',
           dataIndex: 'last_login_time',
-          show:true,
+          show: true,
         },
         {
           dataIndex: 'operation',
@@ -279,11 +316,13 @@ export default {
           fixed: "right",
           slots: { title: 'operaTitle' },
           scopedSlots: { customRender: "cell_operate" },
-          show:true,
+          show: true,
         },
-       
-        
+
+
       ],
+
+      drawer_visible: true,
     };
   },
   mounted() {
@@ -293,13 +332,32 @@ export default {
     this.init()
   },
   methods: {
+    //打开drawer
+    open_drawer() {
+      this.drawer_visible = true
+    },
+    //取消drawer
+    drawer_onClose() {
+      this.drawer_visible = false;
+    },
+    drawer_multselect_handle(params,type){
+       console.log(params)
+        console.log(type)
+    },
+
+
+
     //取消标签管理
-    cancel_tagmanage(){
-       this.show_tagmanage = false
+    cancel_tagmanage() {
+      this.show_tagmanage = false
     },
     //取消添加设备
-    cancel_devicemanage(){
-        this.show_devicemanage = false
+    cancel_devicemanage() {
+      this.show_devicemanage = false
+    },
+    bind_device_success() {
+      this.show_devicemanage = false
+      this.init();
     },
     //平台列表
     async get_platformlist() {
@@ -328,10 +386,12 @@ export default {
     },
 
     async init() {
+      this.table_loading = true
       let { data } = await environment_index({
         pagesize: 20,
         page: this.pagination.pageNum,
       })
+      this.table_loading = false
       if (data.code == 200) {
         this.pagination.total = data.data.total;
         this.no_auth_environment = data.data.no_auth_environment
@@ -346,24 +406,35 @@ export default {
       this.selectedRowKeys = selectedRowKeys;
     },
 
-     //表格 切换页码
-    handleTableChange(pagination) {
-      this.pagination.pageNum = pagination.current;
-      this.onSearch();
+    //搜索回调
+    handle_search(keywords) {
+      console.log(keywords)
+      this.standard_config.keywords = keywords
+      this.pagination.pageNum = 1
+      this.get_tabledata();
     },
 
-    async onSearch(keywords) {
-      console.log(keywords);
+    //表格 切换页码
+    handleTableChange(pagination) {
+      this.pagination.pageNum = pagination.current;
+      this.get_tabledata();
+    },
+    async get_tabledata() {
+      console.log(this.standard_config)
+      return
+
       let { data } = await environment_index({
-        keywords: keywords,
-        platform_id: this.platform_id,
-        recent_open: this.recent_open,
-        env_common: this.env_common,
+        ...this.standard_config,
         pagesize: 20,
         page: this.pagination.pageNum,
       });
       if (data.code == 200) {
         this.pagination.total = data.data.total;
+        this.no_auth_environment = data.data.no_auth_environment
+        this.no_bind_count = data.data.no_bind_count
+        this.urgent_renewal_count = data.data.urgent_renewal_count
+
+        this.table_data = data.data.list
       }
     },
     event_change(value) {
@@ -374,24 +445,24 @@ export default {
       this.$router.push({ name: 'manage_addenv' })
     },
 
-    format_devicestate(state,record){
-       if(!state){
+    format_devicestate(state, record) {
+      if (!state) {
         return '未绑定'
-       }else{
-         return record.device_ip +' ' +record.device_area_title+' '+record.device_package_title
-       }
-     },
+      } else {
+        return record.device_ip + ' ' + record.device_area_title + ' ' + record.device_package_title
+      }
+    },
 
-    go_bind(record){
-       this.show_devicemanage = true
-       this.need_bind_eventname =record.env_name
-       this.need_bind_eventid =record.id
+    go_bind(record) {
+      this.show_devicemanage = true
+      this.need_bind_eventname = record.env_name
+      this.need_bind_eventid = record.id
     },
-    go_open( record){
-       console.log(record)
+    go_open(record) {
+      console.log(record)
     },
-    go_edit(text, record, index, dataIndex){
-       console.log(text, record, index, dataIndex)
+    go_edit(text, record, index, dataIndex) {
+      console.log(text, record, index, dataIndex)
     },
 
   },
@@ -445,21 +516,35 @@ export default {
       .content_envname {
         color: #4c84ff;
       }
-      .title_operate{
+      .title_operate {
         display: flex;
-          width: 200px;
+        width: 200px;
         justify-content: space-between;
       }
-      .content_operate{
+      .content_operate {
         display: flex;
-      
-        .cell_blue{
-           padding-left: 20px;
-           color: #4C84FF;
-           cursor: pointer;
+
+        .cell_blue {
+          padding-left: 20px;
+          color: #4c84ff;
+          cursor: pointer;
         }
       }
     }
+  }
+}
+
+.drawer_line {
+  display: flex;
+  height: 32px;
+  margin-top: 18px;
+  .drawer_l_left {
+    width: 75px;
+    flex: none;
+    line-height: 32px;
+  }
+  .drawer_l_right {
+    flex: 1;
   }
 }
 </style>
