@@ -156,22 +156,70 @@
       <a-input placeholder="环境名称" v-model="standard_config.device_name" />
 
       <div class="drawer_line">
+        <div class="drawer_l_left">授权成员:</div>
+        <div class="drawer_l_right">
+          <a-select
+            mode="multiple"
+            placeholder=""
+            style="width: 100%"
+            :filter-option="false"
+            @focus="drawer_mult_select_getfocus('member')"
+            @search="drawer_mult_select_fetchUser($event, 'member')"
+            @change="drawer_multselect_handle($event, 'member_id')"
+          >
+            <a-select-option v-for="item in drawer_memberlist" :key="item.id">
+              {{ item.username }}
+            </a-select-option>
+          </a-select>
+        </div>
+      </div>
+
+      <div class="drawer_line">
         <div class="drawer_l_left">环境标签:</div>
         <div class="drawer_l_right">
           <a-select
             mode="multiple"
             placeholder=""
             style="width: 100%"
-            @change="drawer_multselect_handle($event,'tag_id')"
+            :filter-option="false"
+            @focus="drawer_mult_select_getfocus('tag')"
+            @search="drawer_mult_select_fetchUser($event, 'tag')"
+            @change="drawer_multselect_handle($event, 'tag_id')"
           >
-            <a-select-option v-for="item in tag_list" :key="item.id">
+            <a-select-option v-for="item in drawer_taglist" :key="item.id">
               {{ item.tag }}
             </a-select-option>
           </a-select>
         </div>
       </div>
 
-      <a-button type="primary" @click="get_tabledata"> 确定筛选 </a-button>
+      <div class="drawer_line">
+        <div class="drawer_l_left">所属平台:</div>
+        <div class="drawer_l_right">
+          <a-select
+            mode="multiple"
+            placeholder=""
+            style="width: 100%"
+            :filter-option="false"
+            @change="drawer_multselect_handle($event, 'platform_id')"
+          >
+            <a-select-option v-for="item in drawer_platformlist" :key="item.id">
+              {{ item.site }}
+            </a-select-option>
+          </a-select>
+        </div>
+      </div>
+
+      <div class="drawer_line">
+        <div class="drawer_l_left">创建时间:</div>
+        <div class="drawer_l_right">
+          <a-range-picker format="YYYY-MM-DD" @change="drawer_datepecker" />
+        </div>
+      </div>
+
+      <a-button class="drawer_btn" type="primary" @click="get_tabledata">
+        确定筛选
+      </a-button>
     </a-drawer>
 
     <tag_manage
@@ -193,7 +241,7 @@
 <script>
 import { environment_index } from "@/api/home";
 import { environment_platform_list, environment_tag_list } from "@/api/environment.js";
-
+import { user_member_list } from '@/api/member.js'
 import tag_manage from './components/tag_manage.vue'
 import device_manage from './components/device_manage.vue'
 export default {
@@ -206,9 +254,6 @@ export default {
       current: "1",//选中的目录
       event_guanli: "1",//环境模式
       show_tagmanage: false,//标签管理状态
-
-      platform_list: [],//环境列表
-      tag_list: [],//标签列表
 
       show_devicemanage: false,
       need_bind_eventname: '',
@@ -322,12 +367,20 @@ export default {
 
       ],
 
-      drawer_visible: true,
+      platform_list: [],//平台列表
+      tag_list: [],//标签列表
+      member_list: [],//成员列表
+
+      drawer_visible: false,
+      drawer_taglist: [],
+      drawer_memberlist: [],
+      drawer_platformlist: [],
     };
   },
   mounted() {
     this.get_platformlist();
     this.get_taglist()
+    this.get_member_data()
 
     this.init()
   },
@@ -340,12 +393,63 @@ export default {
     drawer_onClose() {
       this.drawer_visible = false;
     },
-    drawer_multselect_handle(params,type){
-       console.log(params)
-        console.log(type)
+    //drawer 多选 选中回调
+    drawer_multselect_handle(params, type) {
+      //console.log(params)
+      //console.log(type)
+
+      this.standard_config[type] = params.toString()
+      console.log(this.standard_config)
+    },
+    //drawer 多选  获得焦点
+    drawer_mult_select_getfocus(type) {
+      if (type == 'tag') {
+        this.drawer_taglist = this.tag_list
+      }
+      if (type == 'member') {
+        this.drawer_platformlist = this.platform_list
+      }
+
+    },
+    //drawer 多选  搜索
+    async drawer_mult_select_fetchUser(value, type) {
+      if (type == 'tag') {
+        let { data } = await environment_tag_list({
+          tag: value
+        })
+        if (data.code == 200) {
+
+          this.drawer_taglist = data.data.list
+        }
+      }
+
+      if (type == 'member') {
+        let { data } = await user_member_list({
+          keywords: value
+        })
+        if (data.code == 200) {
+
+          this.drawer_memberlist = data.data.list
+        }
+      }
+    },
+    //drawer 日期回调
+    drawer_datepecker(date) {
+      this.standard_config.begin_created_at = date[0].format("YYYY-MM-DD")
+      this.standard_config.end_created_at = date[1].format("YYYY-MM-DD")
     },
 
 
+    //获得成员
+    async get_member_data(keywords) {
+      let { data } = await user_member_list({
+        keywords: keywords,
+      })
+      if (data.code == 200) {
+        this.member_list = data.data.list
+        this.drawer_memberlist = this.member_list
+      }
+    },
 
     //取消标签管理
     cancel_tagmanage() {
@@ -368,6 +472,7 @@ export default {
       });
       if (data.code == 200) {
         this.platform_list = data.data.list
+        this.drawer_platformlist = this.platform_list
       }
     },
     //标签列表
@@ -378,6 +483,7 @@ export default {
       if (data.code == 200) {
 
         this.tag_list = data.data.list
+        this.drawer_taglist = this.tag_list
       }
     },
     menu_handleClick(e) {
@@ -401,6 +507,7 @@ export default {
         this.table_data = data.data.list
       }
     },
+    //表格行选中
     onSelectChange(selectedRowKeys) {
       console.log('selectedRowKeys changed: ', selectedRowKeys);
       this.selectedRowKeys = selectedRowKeys;
@@ -421,7 +528,7 @@ export default {
     },
     async get_tabledata() {
       console.log(this.standard_config)
-      return
+      // return
 
       let { data } = await environment_index({
         ...this.standard_config,
@@ -546,5 +653,10 @@ export default {
   .drawer_l_right {
     flex: 1;
   }
+}
+.drawer_btn {
+  position: absolute;
+  bottom: 20px;
+  left: 140px;
 }
 </style>
