@@ -138,7 +138,15 @@
               编辑
             </div>
 
-            <div class="cell_blue">更多</div>
+             <a-popover trigger="hover" overlayClassName="table-popover">
+                <div slot="content" class="popover-content">
+                  <div>删除环境</div>
+                </div>
+
+                <div class="cell_blue">更多</div>
+              </a-popover>
+
+           
           </div>
         </a-table>
         <div class="down_txt">共{{ pagination.total }}条数据</div>
@@ -487,9 +495,7 @@ export default {
     this.get_platformlist();
     this.get_taglist()
     this.get_member_data()
-
-
-
+    
     this.init()
   },
   methods: {
@@ -745,6 +751,13 @@ export default {
 </script>
 
 <style scoped lang="less">
+.table-popover{
+  .popover-content{
+    width: 70px;
+    text-align: center;
+  }
+}
+
 .environment_wrap {
   min-width: 1845px;
   padding-left: 15px;

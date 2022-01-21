@@ -133,3 +133,12 @@ export const environment_update = (data) => {
         data
     })
 }
+
+//批量删除环境
+export const environment_delete_more = (data) => {
+    return request({
+        url: "/client_v1/environment/delete-more",
+        method: "POST",
+        data
+    })
+}
