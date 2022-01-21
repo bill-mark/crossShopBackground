@@ -200,7 +200,6 @@
             mode="multiple"
             placeholder=""
             style="width: 100%"
-            :filter-option="false"
             @change="drawer_multselect_handle($event, 'platform_id')"
           >
             <a-select-option v-for="item in drawer_platformlist" :key="item.id">
@@ -211,9 +210,101 @@
       </div>
 
       <div class="drawer_line">
+        <div class="drawer_l_left">设备信息:</div>
+        <div class="drawer_l_right">
+          <a-select
+            mode="multiple"
+            placeholder=""
+            style="width: 100%"
+            @change="drawer_multselect_handle($event, 'device_ip')"
+          >
+            <a-select-option
+              v-for="item in drawer_iplist"
+              :key="item.device_ip"
+            >
+              {{ item.device_ip }}
+            </a-select-option>
+          </a-select>
+        </div>
+      </div>
+
+      <div class="drawer_line">
+        <div class="drawer_l_left">设备名称:</div>
+        <div class="drawer_l_right">
+          <a-select
+            mode="multiple"
+            placeholder=""
+            style="width: 100%"
+            @change="drawer_multselect_handle($event, 'device_name')"
+          >
+            <a-select-option
+              v-for="item in drawer_namelist"
+              :key="item.device_name"
+            >
+              {{ item.device_name }}
+            </a-select-option>
+          </a-select>
+        </div>
+      </div>
+
+      <div class="drawer_line">
+        <div class="drawer_l_left">企业简称:</div>
+        <div class="drawer_l_right">
+          <a-select
+            mode="multiple"
+            placeholder=""
+            style="width: 100%"
+            @change="drawer_multselect_handle($event, 'business_short')"
+          >
+            <a-select-option
+              v-for="item in drawer_busshortlist"
+              :key="item.business_short"
+            >
+              {{ item.business_short }}
+            </a-select-option>
+          </a-select>
+        </div>
+      </div>
+
+      <div class="drawer_line">
+        <div class="drawer_l_left">创建者:</div>
+        <div class="drawer_l_right">
+          <a-select
+            mode="multiple"
+            placeholder=""
+            style="width: 100%"
+            @change="drawer_multselect_handle($event, 'username')"
+          >
+            <a-select-option
+              v-for="item in drawer_createrlist"
+              :key="item.username"
+            >
+              {{ item.username }}
+            </a-select-option>
+          </a-select>
+        </div>
+      </div>
+
+      <div class="drawer_line">
         <div class="drawer_l_left">创建时间:</div>
         <div class="drawer_l_right">
           <a-range-picker format="YYYY-MM-DD" @change="drawer_datepecker" />
+        </div>
+      </div>
+
+      <div class="drawer_line">
+        <div class="drawer_l_left">网络类型:</div>
+        <div class="drawer_l_right">
+          <a-select
+            mode="multiple"
+            placeholder=""
+            style="width: 100%"
+            @change="drawer_multselect_handle($event, 'type_id')"
+          >
+            <a-select-option v-for="item in drawer_networklist" :key="item.id">
+              {{ item.type_title }}
+            </a-select-option>
+          </a-select>
         </div>
       </div>
 
@@ -240,7 +331,10 @@
 </template>
 <script>
 import { environment_index } from "@/api/home";
-import { environment_platform_list, environment_tag_list } from "@/api/environment.js";
+import {
+  environment_platform_list, environment_tag_list, environment_device_ip_list, environment_username_list,
+  environment_device_name_list, environment_device_network_type_list, environment_business_short_list
+} from "@/api/environment.js";
 import { user_member_list } from '@/api/member.js'
 import tag_manage from './components/tag_manage.vue'
 import device_manage from './components/device_manage.vue'
@@ -367,14 +461,26 @@ export default {
 
       ],
 
-      platform_list: [],//平台列表
       tag_list: [],//标签列表
       member_list: [],//成员列表
+      platform_list: [],//平台列表
 
-      drawer_visible: false,
+      device_iplist: [],//设备信息列表
+      device_namelist: [],//设备名称列表
+      network_typelist: [],//网络类型列表
+      busine_shortlist: [],//企业简称列表
+      creater_namelist: [],//创建者列表
+
+      drawer_visible: false,//抽屉状态
       drawer_taglist: [],
       drawer_memberlist: [],
       drawer_platformlist: [],
+
+      drawer_iplist: [],
+      drawer_namelist: [],
+      drawer_networklist: [],
+      drawer_busshortlist: [],
+      drawer_createrlist: [],
     };
   },
   mounted() {
@@ -382,11 +488,19 @@ export default {
     this.get_taglist()
     this.get_member_data()
 
+
+
     this.init()
   },
   methods: {
     //打开drawer
     open_drawer() {
+      this.get_device_iplist()
+      this.get_device_namelist()
+      this.get_busine_shortlist()
+      this.get_creater_namelist()
+      this.get_network_typelist()
+
       this.drawer_visible = true
     },
     //取消drawer
@@ -440,7 +554,7 @@ export default {
     },
 
 
-    //获得成员
+    //获得成员列表
     async get_member_data(keywords) {
       let { data } = await user_member_list({
         keywords: keywords,
@@ -486,6 +600,60 @@ export default {
         this.drawer_taglist = this.tag_list
       }
     },
+
+
+    //设备信息列表
+    async get_device_iplist() {
+      let { data } = await environment_device_ip_list({
+
+      });
+      if (data.code == 200) {
+        this.device_iplist = data.data.list
+        this.drawer_iplist = this.device_iplist
+      }
+    },
+    //设备名称列表
+    async get_device_namelist() {
+      let { data } = await environment_device_name_list({
+
+      });
+      if (data.code == 200) {
+        this.device_namelist = data.data.list
+        this.drawer_namelist = this.device_namelist
+      }
+    },
+    //企业简称列表
+    async get_busine_shortlist() {
+      let { data } = await environment_business_short_list({
+
+      });
+      if (data.code == 200) {
+        this.busine_shortlist = data.data.list
+        this.drawer_busshortlist = this.busine_shortlist
+      }
+    },
+    //创建者列表
+    async get_creater_namelist() {
+      let { data } = await environment_username_list({
+
+      });
+      if (data.code == 200) {
+        this.creater_namelist = data.data.list
+        this.drawer_createrlist = this.creater_namelist
+      }
+    },
+    //网络类型列表
+    async get_network_typelist() {
+      let { data } = await environment_device_network_type_list({
+
+      });
+      if (data.code == 200) {
+        this.network_typelist = data.data.list
+        this.drawer_networklist = this.network_typelist
+      }
+    },
+
+
     menu_handleClick(e) {
       console.log("click ", e.keyPath);
       this.current = e.key;
@@ -568,8 +736,8 @@ export default {
     go_open(record) {
       console.log(record)
     },
-    go_edit(text, record, index, dataIndex) {
-      console.log(text, record, index, dataIndex)
+    go_edit(record) {
+      this.$router.push({ path: 'editenv', query: { id: record.id } })
     },
 
   },

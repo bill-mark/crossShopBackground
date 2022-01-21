@@ -4,9 +4,9 @@
       <a-button type="primary" class="top_l_btn" @click="go_back">
         <a-icon type="left" />返回
       </a-button>
-      <div class="top_l_right" @click="test">新建环境</div>
+      <div class="top_l_right" @click="test">编辑环境</div>
     </div>
-
+ <a-spin :spinning="spinning">
     <div class="cell_title">
       <div class="cell_title_left"></div>
       <div class="cell_title_right">环境基本信息</div>
@@ -26,6 +26,7 @@
           :display-render="displayRender"
           expand-trigger="hover"
           placeholder="请选择所属平台"
+          v-model="platform_defaultvalue"
           @change="platform_onChange"
         />
       </div>
@@ -48,11 +49,7 @@
     <div class="cell_line">
       <div class="cell_lefttxt">设备:</div>
       <div class="cell_leftcont">
-        <a-select
-          :allowClear="true"
-          style="width: 380px"
-          @change="device_handleChange"
-        >
+        <a-select :allowClear="true" style="width: 380px" v-model="device_id">
           <a-select-option
             :value="item.id"
             v-for="item in device_list"
@@ -64,11 +61,7 @@
       </div>
       <div class="cell_righttxt">环境标签:</div>
       <div class="cell_rightcont">
-        <a-select
-          mode="multiple"
-          style="width: 380px"
-          @change="tagid_handleChange"
-        >
+        <a-select mode="multiple" style="width: 380px" v-model="check_tagids">
           <a-select-option
             :value="item.id"
             v-for="item in tagIds"
@@ -90,6 +83,7 @@
           :filter-option="false"
           @focus="drawer_mult_select_getfocus('member')"
           @search="drawer_mult_select_fetchUser($event, 'member')"
+          v-model="check_member"
           @change="drawer_multselect_handle"
         >
           <a-select-option v-for="item in drawer_memberlist" :key="item.id">
@@ -111,11 +105,7 @@
     <div class="cell_line">
       <div class="cell_lefttxt">默认浏览器:</div>
       <div class="cell_leftcont">
-        <a-select
-          style="width: 380px"
-          default-value="0"
-          @change="broser_handleChange"
-        >
+        <a-select style="width: 380px" default-value="0" v-model="check_broser">
           <a-select-option
             :value="item.value"
             v-for="item in broser_list"
@@ -127,11 +117,7 @@
       </div>
       <div class="cell_righttxt">语言:</div>
       <div class="cell_rightcont">
-        <a-select
-          style="width: 380px"
-          default-value="0"
-          @change="lanage_handleChange"
-        >
+        <a-select style="width: 380px" default-value="0" v-model="check_lanage">
           <a-select-option
             :value="item.value"
             v-for="item in lanage_list"
@@ -193,26 +179,28 @@
     </div>
 
     <a-button type="primary" class="btn_over" @click="go_finish">
-      完成
+      确定修改
     </a-button>
+    </a-spin>
   </div>
 </template>
 <script>
-import { environment_platform_list, client_v1_device, environment_tag_list, environment_create } from "@/api/environment.js";
+import { environment_platform_list, client_v1_device, environment_tag_list, environment_update, environment_info } from "@/api/environment.js";
 import { user_member_list } from '@/api/member.js'
 export default {
   data() {
     return {
       env_name: "",
       platform_options: [],
+      platform_defaultvalue: [],
       platform_id: "",
       country_id: "",
+       spinning: false,
 
       shop_account: "",
       shop_password: "",
 
-      device_list: [
-      ],
+      device_list: [],
       device_id: '',
       tagIds: [],
       check_tagids: [],
@@ -222,80 +210,125 @@ export default {
       broser_list: [
         {
           name: 'chrome',
-          value: '0',
+          value: 0,
         },
         {
           name: 'Firefox',
-          value: '1',
+          value: 1,
         },
       ],
       check_broser: '0',
       lanage_list: [
         {
           name: '随机',
-          value: '0'
+          value: 0
         },
         {
           name: '英语',
-          value: '1'
+          value: 1
         },
         {
           name: '日语',
-          value: '2'
+          value: 2
         },
         {
           name: '简体中文',
-          value: '3'
+          value: 3
         },
         {
           name: '繁体中文',
-          value: '4'
+          value: 4
         },
       ],
       check_lanage: '0',
       ua_list: [
         {
           name: '系统分配',
-          value: '0'
+          value: 0
         },
         {
           name: '自定义',
-          value: '1'
+          value: 1
         },
       ],
       checked_ua: '0',
       cookie_list: [
         {
           name: '环境同步',
-          value: '0'
+          value: 0
         },
         {
           name: '用户同步',
-          value: '1'
+          value: 1
         },
       ],
       checked_cookie: '0',
       member_list: [],//成员列表
       drawer_memberlist: [],
-      check_member:[],
+      check_member: [],
 
       env_windows: 'Mozilla/5.0 (Windows NT 6.3; Win32; x86) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.34 Safari/537.36',
       env_linux: 'Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4325.0 Safari/537.36',
       env_mac: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.89 Safari/537.36',
       env_android: 'Mozilla/5.0 (Linux; Android 6.0; T3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.42 Mobile Safari/537.36',
 
+      old_config: null,//旧的环境配置
     };
+  },
+  created() {
+    this.get_init()
   },
   mounted() {
     this.get_platformlist();
     this.get_device_list()
     this.get_tag_list()
+
     this.get_member_data()
   },
   methods: {
     test() {
       console.log(this.checked_ua)
     },
+
+    async get_init() {
+        this.spinning = true
+      let { data } = await environment_info({
+        id: this.$route.query.id,
+      });
+      this.spinning = false
+      if (data.code == 200) {
+        this.old_config = data.data
+        this.platform_defaultvalue[0] = data.data.platform_id
+        this.platform_defaultvalue[1] = data.data.country_id
+
+        this.env_name = data.data.env_name
+        this.platform_id = data.data.platform_id
+        this.country_id = data.data.country_id
+        this.shop_account = data.data.shop_account
+        this.shop_password = data.data.shop_password
+        this.device_id = data.data.config.device_id
+
+        let c_1 = data.data.tag.map(item => {
+          return item.id
+        })
+        this.check_tagids = c_1
+
+        this.check_member = data.data.member.map(item => {
+          return item.id
+        })
+
+        this.business_short = data.data.business_short
+        this.check_broser = data.data.config.browser
+        this.check_lanage = data.data.config.lang
+        this.checked_ua = data.data.config.env_ua
+        this.checked_cookie = data.data.config.cookie
+        this.env_windows = data.data.config.windows
+        this.env_linux = data.data.config.linux
+        this.env_mac = data.data.config.mac
+        this.env_android = data.data.config.android
+      }
+    },
+
     //获得成员列表
     async get_member_data(keywords) {
       let { data } = await user_member_list({
@@ -343,7 +376,6 @@ export default {
       console.log(params)
       this.check_member = params
     },
-
 
     go_back() {
       this.$router.push({ name: "manage_environment" });
@@ -410,36 +442,28 @@ export default {
     },
 
     async go_finish() {
-      console.log(this.tagIds)
-      // return
-
-      let c_1 = {
+      let { data } = await environment_update({
+        id: this.$route.query.id,
         env_name: this.env_name,
         platform_id: this.platform_id,
         country_id: this.country_id,
         shop_account: this.shop_account,
         shop_password: this.shop_password,
-        tagIds: this.check_tagids.toString(),
-        business_short: this.business_short,
-        member: this.check_member.toString(),
-      }
-      let c_2 = []
-      c_2[0] = c_1
-      console.log(c_1)
-      let { data } = await environment_create({
-        environment: JSON.stringify(c_2),
-        env_ua: this.checked_ua,
         device_id: this.device_id,
-        lang: this.check_lanage,
-        cookie: this.checked_cookie,
-        browser: this.check_broser,
+        business_short: this.business_short,
+        env_ua: this.checked_ua,
         windows: this.env_windows,
         mac: this.env_mac,
         linux: this.env_linux,
         android: this.env_android,
+        lang: this.check_lanage,
+        cookie: this.checked_cookie,
+        tagIds: this.check_tagids.toString(),
+        member: this.check_member.toString(),
+        browser: this.check_broser,
       })
       if (data.code == 200) {
-        this.$message.success('环境创建成功')
+        this.$message.success('编辑成功')
         this.$router.push({ name: 'manage_environment' })
       }
     }

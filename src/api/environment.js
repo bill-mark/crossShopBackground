@@ -75,3 +75,61 @@ export const environment_bind_device = (data) => {
 }
 
 
+export const environment_device_ip_list = (data) => {
+    return request({
+        url: "/client_v1/environment/device-ip-list",
+        method: "POST",
+        data
+    })
+}
+
+export const environment_device_name_list = (data) => {
+    return request({
+        url: "/client_v1/environment/device-name-list",
+        method: "POST",
+        data
+    })
+}
+
+export const environment_device_network_type_list = (data) => {
+    return request({
+        url: "/client_v1/environment/device-network-type-list",
+        method: "POST",
+        data
+    })
+}
+
+export const environment_business_short_list = (data) => {
+    return request({
+        url: "/client_v1/environment/business-short-list",
+        method: "POST",
+        data
+    })
+}
+
+export const environment_username_list = (data) => {
+    return request({
+        url: "/client_v1/environment/username-list",
+        method: "POST",
+        data
+    })
+}
+
+
+//环境详情
+export const environment_info = (data) => {
+    return request({
+        url: "/client_v1/environment/info",
+        method: "POST",
+        data
+    })
+}
+
+//编辑环境
+export const environment_update = (data) => {
+    return request({
+        url: "/client_v1/environment/update",
+        method: "POST",
+        data
+    })
+}

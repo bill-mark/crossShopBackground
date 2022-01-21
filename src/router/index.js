@@ -60,6 +60,14 @@ const routes = [
         },
         component:()=>import(/* webpackChunkName: "addenv" */ '@/views/manage/add_enviroment.vue')
       },
+      {
+        path:'editenv',
+        name:'manage_editenv',
+        meta: {
+          needLogin: true // 需要登录
+        },
+        component:()=>import(/* webpackChunkName: "addenv" */ '@/views/manage/edit_environment.vue')
+      },
     ]
   },
   {
