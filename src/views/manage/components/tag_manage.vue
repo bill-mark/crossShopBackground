@@ -1,10 +1,17 @@
 <template>
   <div class="tag_wrap">
-    <a-modal v-model="isshow" title="环境标签管理" @cancel="handleCancel">
+    <a-modal
+      v-model="isshow"
+      title="环境标签管理"
+      :width="840"
+      @cancel="handleCancel"
+    >
       <div class="top">
         <div class="top_txt" @click="test">添加标签:</div>
         <a-input class="top_input" v-model="new_tag" placeholder="输入标签名" />
-        <a-button type="primary" class="top_btn" @click="create_tag"> 确认添加 </a-button>
+        <a-button type="primary" class="top_btn" @click="create_tag">
+          确认添加
+        </a-button>
       </div>
 
       <div class="content">
@@ -18,89 +25,98 @@
           />
           <label :for="item.id" class="tag_c_txt">{{ item.tag }}</label>
 
-            <a-popover v-model="item.visible"  trigger="click">
-                <div slot="content" class="popo_content">
-                    <div class="pop_txt">重命名:</div>
-                    <a-input class="pop_input" v-model="item.tag" />
-                    <a-button type="primary" class="pop_btn" @click="update_tag(item)"> 确定 </a-button>
-                </div>
+          <a-popover v-model="item.visible" trigger="click">
+            <div slot="content" class="popo_content">
+              <div class="pop_txt">重命名:</div>
+              <a-input class="pop_input" v-model="item.tag" />
+              <a-button
+                type="primary"
+                class="pop_btn"
+                @click="update_tag(item)"
+              >
+                确定
+              </a-button>
+            </div>
 
-                <div class="tag_c_edit">编辑</div>
-            </a-popover>
-
+            <div class="tag_c_edit">编辑</div>
+          </a-popover>
         </div>
       </div>
 
-      <a-button type="primary" class="btn_delet" @click="delete_tag"> 删除标签 </a-button>
+      <a-button type="primary" class="btn_delet" @click="delete_tag">
+        删除标签
+      </a-button>
     </a-modal>
   </div>
 </template>
 <script>
-import { environment_tag_list,update_environment_tag,create_environment_tag,delete_environment_tag } from '@/api/environment.js'
+import {
+  environment_tag_list,
+  update_environment_tag,
+  create_environment_tag,
+  delete_environment_tag,
+} from "@/api/environment.js";
 export default {
   props: {
     isshow: Boolean,
   },
   data() {
     return {
-      new_tag:'',
-      check_list: [
-      ],
-      checked: []
-    }
+      new_tag: "",
+      check_list: [],
+      checked: [],
+    };
   },
   mounted() {
-    this.get_taglist()
+    this.get_taglist();
   },
   methods: {
     test() {
-      console.log(this.checked.toString())
+      console.log(this.checked.toString());
     },
     async get_taglist() {
-      let { data } = await environment_tag_list({
-
-      })
+      let { data } = await environment_tag_list({});
       if (data.code == 200) {
-          data.data.list.forEach(item=>{
-              item.visible = false
-          })
-        this.check_list = data.data.list
+        data.data.list.forEach((item) => {
+          item.visible = false;
+        });
+        this.check_list = data.data.list;
       }
     },
     handleCancel() {
-      this.$emit('cancel')
+      this.$emit("cancel");
     },
-    async create_tag(){
-      let {data} = await create_environment_tag({
-          tag:this.new_tag,
-      })
-      if(data.code ==200){
-           this.$message.success('添加成功');
-           this.new_tag = ''
-            this.get_taglist()
+    async create_tag() {
+      let { data } = await create_environment_tag({
+        tag: this.new_tag,
+      });
+      if (data.code == 200) {
+        this.$message.success("添加成功");
+        this.new_tag = "";
+        this.get_taglist();
       }
     },
-    async update_tag(item){
-      let {data} = await update_environment_tag({
-          tag:item.tag,
-          id:item.id
-      })
-      if(data.code ==200){
-           this.$message.success('修改成功');
-            this.get_taglist()
+    async update_tag(item) {
+      let { data } = await update_environment_tag({
+        tag: item.tag,
+        id: item.id,
+      });
+      if (data.code == 200) {
+        this.$message.success("修改成功");
+        this.get_taglist();
       }
     },
-     async delete_tag(){
-      let {data} = await delete_environment_tag({
-          id:this.checked.toString()
-      })
-      if(data.code ==200){
-           this.$message.success('修改成功');
-            this.get_taglist()
+    async delete_tag() {
+      let { data } = await delete_environment_tag({
+        id: this.checked.toString(),
+      });
+      if (data.code == 200) {
+        this.$message.success("修改成功");
+        this.get_taglist();
       }
     },
-  }
-}
+  },
+};
 </script>
 <style scoped lang="less">
 /deep/ .ant-modal-footer {
@@ -108,7 +124,6 @@ export default {
 }
 
 /deep/ .ant-modal-content {
-  width: 840px;
   height: 530px;
 }
 
@@ -169,22 +184,22 @@ export default {
   }
 }
 
-.popo_content{
+.popo_content {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 50px;
   width: 280px;
-  .pop_txt{
-      width: 46px;
-      flex: none;
+  .pop_txt {
+    width: 46px;
+    flex: none;
   }
-  .pop_input{
-      width: 100px;
-      margin-left: 10px;
+  .pop_input {
+    width: 100px;
+    margin-left: 10px;
   }
-  .pop_btn{
-      margin-left: 10px;
+  .pop_btn {
+    margin-left: 10px;
   }
 }
 

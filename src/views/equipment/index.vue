@@ -1,7 +1,13 @@
 <template>
   <div class="equipment">
     <div class="menu">
-      <a-menu style="width: 210px" mode="vertical" @click="handleClick">
+      <a-menu
+        style="width: 210px; height: 100%"
+        mode="inline"
+        :default-selected-keys="['1']"
+        :selected-keys="[current]"
+        @click="handleClick"
+      >
         <a-menu-item key="1" class="menu_one">
           <div class="my_equipment"></div>
           <div class="title">我的设备</div>
@@ -21,7 +27,7 @@
         </a-menu-item>
         <a-menu-item key="5" class="menu_one">
           <div class="my_equipment bound"></div>
-          <div class="title">代绑定环境设备 {{ no_bind_env }}</div>
+          <div class="title">待绑定环境设备 {{ no_bind_env }}</div>
         </a-menu-item>
         <a-menu-item key="6" class="menu_one">
           <div class="my_equipment renewal"></div>
@@ -32,14 +38,6 @@
 
     <div class="content" v-if="showEqList">
       <div class="search_panel">
-        <a-radio-group @change="changeEqType">
-          <a-radio-button value="large" class="eq_radio"
-            >平台设备</a-radio-button
-          >
-          <a-radio-button value="small" class="eq_radio"
-            >本地虚拟设备</a-radio-button
-          >
-        </a-radio-group>
         <a-button type="primary" class="eq_buy_btn" @click="buyEq"
           >购买设备</a-button
         >
@@ -75,32 +73,32 @@
           :loading="loading"
           @change="handleTableChange"
           v-show="has_device"
-           :scroll="{ x: 1200 }"
+          :scroll="{ x: 1200 }"
         >
-          <div slot="cell_under" slot-scope="text,record">
-            {{ text }} , {{record.device_package_title}}
+          <div slot="cell_under" slot-scope="text, record">
+            {{ text }} , {{ record.device_package_title }}
           </div>
 
+          <div slot="device_net">静态</div>
+
           <div slot="cell_remote" slot-scope="text">
-             {{formate_remote(text)}}
+            {{ formate_remote(text) }}
           </div>
 
           <div slot="cell_renew" slot-scope="text">
-             {{formate_renew(text)}}
+            {{ formate_renew(text) }}
           </div>
 
           <div slot="cell_status" slot-scope="text">
-             {{formate_status(text)}}
+            {{ formate_status(text) }}
           </div>
 
           <template slot="operation" slot-scope="text, record">
             <a-button type="primary" @click="onRenew(record)">续费</a-button>
-            <a-button @click="view(record)" class="view_btn">详情</a-button>
+            <a-button @click="show_detail(record)" class="view_btn">详情</a-button>
+            <a-button  class="view_btn">更多</a-button>
           </template>
         </a-table>
-
-        
-
       </div>
     </div>
     <tag-list v-else></tag-list>
@@ -120,10 +118,7 @@
         :wrapper-col="wrapperCol"
       >
         <a-form-model-item label="搜索">
-          <a-input
-            v-model="query.device_name"
-            placeholder="搜索设备名称/设备信息"
-          />
+          <a-input v-model="query.keyword" placeholder="搜索" />
         </a-form-model-item>
 
         <a-form-model-item label="设备状态">
@@ -134,10 +129,7 @@
             <a-radio value="3">故障</a-radio>
           </a-radio-group>
         </a-form-model-item>
-        
-       
 
-        
         <a-form-model-item label="设备标签">
           <a-input v-model="query.tags" placeholder="请选择或搜索设备标签" />
         </a-form-model-item>
@@ -183,9 +175,18 @@
           zIndex: 1,
         }"
       >
-        <a-button type="primary" @click="onSearch"> 确定筛选 </a-button>
+        <a-button type="primary" @click="onSearch_btn"> 确定筛选 </a-button>
       </div>
     </a-drawer>
+
+    <device_detail 
+     v-if="detail_modalstatus"
+     :detail_modalstatus="detail_modalstatus"
+    :detaildata="check_device"
+     @cancel="cancel_detailmodal"
+    >
+    </device_detail>
+
   </div>
 </template>
 <script>
@@ -193,6 +194,7 @@ import noEquipment from "./noEquipment.vue";
 import TagList from "./tagList.vue";
 import { getList } from "@/api/equipment";
 
+import device_detail from './compoents/device_detail.vue'
 const columns = [
   {
     title: "设备名称",
@@ -210,29 +212,30 @@ const columns = [
     title: "设备归属",
     dataIndex: "device_area_title",
     scopedSlots: { customRender: "cell_under" },
-    show:true,
+    show: true,
   },
   {
     title: "远程状态",
     dataIndex: "device_remote",
     scopedSlots: { customRender: "cell_remote" },
-    show:true,
+    show: true,
   },
   {
     title: "网络属性",
     dataIndex: "device_net",
+    scopedSlots: { customRender: "device_net" },
   },
   {
     title: "自动续费状态",
     dataIndex: "renew_status",
     scopedSlots: { customRender: "cell_renew" },
-    show:true,
+    show: true,
   },
   {
     title: "设备状态",
     dataIndex: "status",
     scopedSlots: { customRender: "cell_status" },
-    show:true,
+    show: true,
   },
   {
     title: "设备到期时间",
@@ -240,12 +243,28 @@ const columns = [
   },
   {
     title: "操作",
-     width: 250,
-          fixed: "right",
+    width: 250,
+    fixed: "right",
     dataIndex: "operation",
     scopedSlots: { customRender: "operation" },
   },
 ];
+const base_query = {
+  keyword: null, //关键词
+  device_name: null, //设备名称
+  env_name: null, //环境名称
+  device_ip: null, //设备IP
+  country: null, //设备国家
+  tags: null, //标签
+  status: null, //状态 全部 all 0 正常 1 过期 2 待分配 3 故障 4 已删除(设备回收站)
+  expire: null, //过期 全部 all 1 已过期 2 将要过期
+  renew_status: null, //是否自动续费 全部 all 0 未开启 1 开启
+  device_remote: null, //是否可远程 全部 all 0 不可远程 1 可远程
+  no_tag: null, //有无标签设备 全部 all 0 无标签 1 有标签
+  bind_env: null, //绑定环境 全部 all 0 已绑定环境 1 未绑定
+  pagesize: 20,
+  page: null,
+};
 const query = {
   keyword: null, //关键词
   device_name: null, //设备名称
@@ -263,16 +282,18 @@ const query = {
   page: null,
 };
 export default {
-  components: { noEquipment, TagList },
+  components: { noEquipment, TagList,device_detail },
   name: "equipment",
   data() {
     return {
-      // canRenew: true,
+      current: "1", //选中的目录
+
       drawer_visible: false,
       list: [],
       columns,
       selectedRowKeys: [], // Check here to configure the default column
-      query,
+      query: query,
+      base_query: base_query,
       common: {
         version: "1.0.0",
         mask: "dev",
@@ -291,7 +312,9 @@ export default {
       expired: 0,
       no_bind_env: 0,
 
-      has_device:true,
+      has_device: true,
+      check_device:null,//选中的设备
+      detail_modalstatus:true,//设备详情弹窗
     };
   },
   computed: {
@@ -304,63 +327,60 @@ export default {
   },
   methods: {
     //格式化远程
-    formate_remote(data){
-      if(data == 0){
-        return '不可远程'
+    formate_remote(data) {
+      if (data == 0) {
+        return "不可远程";
       }
-      if(data == 1){
-        return '可远程'
+      if (data == 1) {
+        return "可远程";
       }
     },
     //格式化自动续费
-    formate_renew(data){
-      if(data == 0){
-        return '未开启'
+    formate_renew(data) {
+      if (data == 0) {
+        return "未开启";
       }
-      if(data == 1){
-        return '开启'
+      if (data == 1) {
+        return "开启";
       }
     },
     //格式化状态
-    formate_status(data){
-      if(data == 0){
-        return '正常'
+    formate_status(data) {
+      if (data == 0) {
+        return "正常";
       }
-      if(data == 1){
-        return '过期'
+      if (data == 1) {
+        return "过期";
       }
-      if(data == 2){
-        return '待分配'
+      if (data == 2) {
+        return "待分配";
       }
-      if(data == 3){
-        return '故障'
+      if (data == 3) {
+        return "故障";
       }
-      if(data == 4){
-        return '已删除'
+      if (data == 4) {
+        return "已删除";
       }
     },
-    
 
     handleClick: function ({ key }) {
-      if (key === "8") {
-        // console.log('yyyy')
-        this.showEqList = false;
-      } else {
-        this.showEqList = true;
-      }
+      this.current = key;
+      this.query = JSON.parse(JSON.stringify(this.base_query));
 
-      // key 1 query all  2 expire(2) 3 expire(1) 4 status(4) 5 bind_env(1) 6 renew_status(1)
-      if (key === "1") {
-        this.query = query;
-      } else if (key === "2") {
+      
+      if (key === "2") {
         this.query = { ...query, expire: 2 };
-      } else if (key === "3") {
+      }
+      if (key === "3") {
         this.query = { ...query, expire: 1 };
-      } else if (key === "4") {
+      }
+      if (key === "4") {
         this.query = { ...query, status: 4 };
-      } else if (key === "5") {
+      }
+      if (key === "5") {
         this.query = { ...query, bind_env: 1 };
-      } else if (key === "6") {
+      }
+      if (key === "6") {
         this.query = { ...query, renew_status: 1 };
       }
 
@@ -369,7 +389,7 @@ export default {
     // 设备类别改变
     changeEqType: function () {},
 
-    onSearch: function () {
+    onSearch_btn: function () {
       this.fetchList();
     },
     afterVisibleChange(val) {
@@ -386,35 +406,44 @@ export default {
       this.selectedRowKeys = selectedRowKeys;
     },
     onRenew: function () {},
-    view: function () {},
-    
+
+    //显示详情
+    show_detail(record){
+      console.log('show_detail')
+       this.check_device = record
+       this.detail_modalstatus = true
+    },
+    cancel_detailmodal(){
+          this.detail_modalstatus = false
+    },
+
     async fetchList() {
       this.loading = true;
-      const {data} = await getList({
+      const { data } = await getList({
         ...this.query,
         pagesize: 10,
         page: this.pagination.pageNum,
       });
-     
-      if(data.code ==200){
+
+      if (data.code == 200) {
         this.pagination.total = data.data.total;
         this.loading = false;
 
-        this.list =  data.data.list;
+        this.list = data.data.list;
 
-        if(this.list.length == 0){
-          this.has_device = false
-        }else{
-          this.has_device = true
+        if (this.list.length == 0) {
+          this.has_device = false;
+        } else {
+          this.has_device = true;
         }
 
-        this.about_expire =  data.data.about_expire;
-        this.expired =  data.data.expired;
-        this.no_bind_env =  data.data.no_bind_env;
+        this.about_expire = data.data.about_expire;
+        this.expired = data.data.expired;
+        this.no_bind_env = data.data.no_bind_env;
       }
     },
     handleTableChange(pagination) {
-     // console.log(pagination);
+      // console.log(pagination);
       this.pagination.pageNum = pagination.current;
 
       this.fetchList();
@@ -433,13 +462,13 @@ export default {
   },
 };
 </script>
+
 <style scoped lang="less">
 .equipment {
   margin-top: 11px;
   display: flex;
   flex-direction: row;
   .menu {
-    height: 100%;
     width: 210px;
     background-color: #fff;
     padding-top: 38px;
@@ -488,7 +517,7 @@ export default {
   }
   .content {
     flex: 1;
-    margin-left: 11px;
+    //margin-left: 11px;
     height: calc(100vh - 126px);
     background-color: #fff;
     .search_panel {

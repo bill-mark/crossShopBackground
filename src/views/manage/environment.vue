@@ -1,5 +1,5 @@
 <template>
-  <div class="environment_wrap" :style="{heiht:wrap_height + 'px'}">
+  <div class="environment_wrap" :style="{height:wrap_height + 'px'}">
     <div class="content_left">
       <a-menu
         style="width: 256px;height:100%"
@@ -887,7 +887,6 @@ export default {
         this.standard_config.no_bind = 0
       }
 
-      
       this.get_tabledata()
     },
 
