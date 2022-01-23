@@ -134,6 +134,61 @@ export const environment_update = (data) => {
     })
 }
 
+//解绑设备
+export const environment_unbind_device = (data) => {
+    return request({
+        url: "/client_v1/environment/unbind-device",
+        method: "POST",
+        data
+    })
+}
+
+//批量清空授权
+export const environment_clear_auth_more = (data) => {
+    return request({
+        url: "/client_v1/environment/clear-auth-more",
+        method: "POST",
+        data
+    })
+}
+
+//批量清空环境标签
+export const environment_clearenvironmenttagmore = (data) => {
+    return request({
+        url: "/client_v1/environment/clear-environment-tag-more",
+        method: "POST",
+        data
+    })
+}
+
+//批量批量解绑设备
+export const environment_unbinddevicemore = (data) => {
+    return request({
+        url: "/client_v1/environment/unbind-device-more",
+        method: "POST",
+        data
+    })
+}
+
+//批量设为常用环境/取消常用环境
+export const environment_commonmore = (data) => {
+    return request({
+        url: "/client_v1/environment/common-more",
+        method: "POST",
+        data
+    })
+}
+
+//批量删除环境标签
+export const environment_deleteenvironmenttagmore = (data) => {
+    return request({
+        url: "/client_v1/environment/delete-environment-tag-more",
+        method: "POST",
+        data
+    })
+}
+
+
 //批量删除环境
 export const environment_delete_more = (data) => {
     return request({
@@ -142,3 +197,4 @@ export const environment_delete_more = (data) => {
         data
     })
 }
+

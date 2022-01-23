@@ -36,9 +36,6 @@
           <a-radio-button value="large" class="eq_radio"
             >平台设备</a-radio-button
           >
-          <a-radio-button value="default" class="eq_radio"
-            >自有设备</a-radio-button
-          >
           <a-radio-button value="small" class="eq_radio"
             >本地虚拟设备</a-radio-button
           >
@@ -78,6 +75,7 @@
           :loading="loading"
           @change="handleTableChange"
           v-show="has_device"
+           :scroll="{ x: 1200 }"
         >
           <div slot="cell_under" slot-scope="text,record">
             {{ text }} , {{record.device_package_title}}
@@ -242,6 +240,8 @@ const columns = [
   },
   {
     title: "操作",
+     width: 250,
+          fixed: "right",
     dataIndex: "operation",
     scopedSlots: { customRender: "operation" },
   },
@@ -268,7 +268,7 @@ export default {
   data() {
     return {
       // canRenew: true,
-      drawer_visible: true,
+      drawer_visible: false,
       list: [],
       columns,
       selectedRowKeys: [], // Check here to configure the default column
