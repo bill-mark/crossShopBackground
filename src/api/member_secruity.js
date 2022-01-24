@@ -7,3 +7,11 @@ export const getList = (data) => {
     data
   })
 }
+
+export const changeWays = (data) => {
+  return request({
+    url: "/client_v1/security/change-login-more",
+    method: "POST",
+    data
+  })
+}

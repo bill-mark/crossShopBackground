@@ -1,7 +1,7 @@
 <template>
   <div class="security_panel">
     <div class="search_panel">
-      <a-button :disabled="selectedRowKeys.length === 0">批量变更登录控制</a-button>
+      <a-button :disabled="selectedRowKeys.length === 0" @click="changeLogin">批量变更登录控制</a-button>
        <a-input-search
           style="width: 400px"
           placeholder="请输入用户名、姓名"
@@ -61,15 +61,15 @@
             </a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-time-picker use12-hours v-modal="limitForm.begin_time" :value="limitForm.begin_time" v-if="showTime" />
-        <a-time-picker  style="marginLeft: 10px" use12-hours v-modal="limitForm.end_time" :value="limitForm.end_time" v-if="showTime" />
+        <a-time-picker use12-hours v-modal="limitForm.begin_time" v-if="showTime" />
+        <a-time-picker  style="marginLeft: 10px" use12-hours v-modal="limitForm.end_time" v-if="showTime" />
       </a-form-model>
     </a-modal>
   </div>
   
 </template>
 <script>
-import { getList } from "@/api/member_secruity";
+import { getList, changeWays } from "@/api/member_secruity";
 
 const columns = [
   {
@@ -140,6 +140,7 @@ export default {
       },
       show: false,
       showTime: true,
+      record: {}
     }
   },
   mounted() {
@@ -172,9 +173,13 @@ export default {
         }
       }
     },
+    changeLogin: function() {
+      this.show = true;
+    },
     onSelectChange(selectedRowKeys) {
-      console.log("selectedRowKeys changed: ", selectedRowKeys);
+      console.log("selectedRowKeys changed: ", selectedRowKeys.toString());
       this.selectedRowKeys = selectedRowKeys;
+      this.limitForm.id = selectedRowKeys.toString()
     },
     formate_auth: function(text) {
       const authMap = {
@@ -191,8 +196,15 @@ export default {
       };
       return loginMap[text];
     },
-    onChangeLogin: function(record) {
-      this.record = record;
+    onChangeLogin: function({id, auth_method, login_time, begin_time, end_time}) {
+      // this.record = record;
+      this.limitForm = {
+        id,
+        auth_method,
+        login_time,
+        begin_time,
+        end_time
+      }
       this.show = true;
     },
     handleTableChange(pagination) {
@@ -201,16 +213,17 @@ export default {
 
       this.fetchList();
     },
-    handleOk: function() {
-
-    },
-    onTimeRadioChange: function(e) {
-      const value = e.target.value;
-      if (value === '1') {
-        this.showTime = true;
-      } else {
-        this.showTime = false;
+    async handleOk() {
+      console.log('this.limitForm', this.limitForm)
+      const data = await changeWays({...this.limitForm, ...this.common});
+      if (data && data.data) {
+        this.$messgae.success('添加/编辑成功');
       }
+      this.showDialog = false;
+    },
+    onTimeRadioChange: function() {
+      console.log('time', this.limitForm.login_time)
+      this.showTime = (this.limitForm.login_time.toString() === '1');
     }
   }
 }
