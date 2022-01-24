@@ -52,3 +52,48 @@ export const device_devicenetworkregionlist = (data) => {
     data
   })
 }
+
+//取消/开启自动续费
+export const device_cancelrenewstatus = (data) => {
+  return request({
+    url: "/client_v1/device/cancel-renew-status",
+    method: "POST",
+    data
+  })
+}
+
+//编辑设备名称
+export const device_updatedevicename = (data) => {
+  return request({
+    url: "/client_v1/device/update-device-name",
+    method: "POST",
+    data
+  })
+}
+
+//设备绑定环境
+export const device_bindenvironment = (data) => {
+  return request({
+    url: "/client_v1/device/bind-environment",
+    method: "POST",
+    data
+  })
+}
+
+//设备解绑环境
+export const device_unbindenvironment = (data) => {
+  return request({
+    url: "/client_v1/device/unbind-environment",
+    method: "POST",
+    data
+  })
+}
+
+//批量删除设备(软删除)
+export const device_deletedevicemore = (data) => {
+  return request({
+    url: "/client_v1/device/delete-device-more",
+    method: "POST",
+    data
+  })
+}

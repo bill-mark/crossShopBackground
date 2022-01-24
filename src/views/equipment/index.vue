@@ -41,6 +41,12 @@
         <a-button type="primary" class="eq_buy_btn" @click="buyEq"
           >购买设备</a-button
         >
+
+        <a-button type="primary" class="eq_buy_btn"
+          >标签管理</a-button
+        >
+
+
         <a-button
           type="primary"
           class="eq_buy_btn"
@@ -95,54 +101,54 @@
 
           <template slot="operation" slot-scope="text, record">
             <a-button type="primary" @click="onRenew(record)">续费</a-button>
-            <a-button @click="show_detail(record)" class="view_btn">详情</a-button>
+            <a-button @click="show_detail(record)" class="view_btn"
+              >详情</a-button
+            >
 
-
-             <a-popover trigger="hover" overlayClassName="table-popover">
+            <a-popover trigger="hover" overlayClassName="table-popover">
               <div
                 slot="content"
+                v-if="record.renew_status == 0"
                 class="popover_edit-content"
+                @click="change_autopay(record, 1)"
               >
-                <div>设为自动续费</div>
+                <div>开启自动续费</div>
               </div>
               <div
                 slot="content"
-                @click="open_delet(record)"
+                v-if="record.renew_status == 1"
+                @click="change_autopay(record, 0)"
+                class="popover_edit-content"
+              >
+                <div>关闭自动续费</div>
+              </div>
+
+              <div
+                slot="content"
+                @click="show_editname_pop(record)"
+                class="popover_edit-content"
               >
                 <div>编辑设备名称</div>
               </div>
-              <div
-                slot="content"
-                class="popover_edit-content"
-              >
+              <div slot="content" class="popover_edit-content">
                 <div>绑定环境</div>
               </div>
-              <div
-                slot="content"
-                @click="open_delet(record)"
-              >
+              <div slot="content" 
+              @click="open_unbinddevice_pop(record)"
+              class="popover_edit-content">
                 <div>解绑环境</div>
               </div>
-              <div
-                slot="content"
-                class="popover_edit-content"
-              >
+              <div slot="content" class="popover_edit-content">
                 <div>编辑标签</div>
               </div>
-              <div
-                slot="content"
-                @click="open_delet(record)"
+              <div slot="content" class="popover_edit-content"
+              @click="change_deletdevice_pop(record)"
               >
                 <div>删除设备</div>
               </div>
 
-              <a-button  class="view_btn" >更多</a-button>
+              <a-button class="view_btn">更多</a-button>
             </a-popover>
-
-
-
-           
-
           </template>
         </a-table>
       </div>
@@ -225,22 +231,53 @@
       </div>
     </a-drawer>
 
-    <device_detail 
-     v-if="detail_modalstatus"
-     :detail_modalstatus="detail_modalstatus"
-    :detaildata="check_device"
-     @cancel="cancel_detailmodal"
+    <device_detail
+      v-if="detail_modalstatus"
+      :detail_modalstatus="detail_modalstatus"
+      :detaildata="check_device"
+      @cancel="cancel_detailmodal"
     >
     </device_detail>
+
+    <a-modal
+      title="编辑设备名称"
+      :visible="editname_state"
+      @ok="editname_handleOk"
+      @cancel="editname_handleCancel"
+    >
+      <div style="display: flex">
+        <div style="width: 60px; flex: none">新名称:</div>
+        <a-input
+          style="width: 300px"
+          placeholder="输入新名称"
+          v-model="checkdevice_newname"
+        />
+      </div>
+    </a-modal>
+
+    <device_unbind
+      v-if="unbinddevice_modalstatus"
+      :modalstatus="unbinddevice_modalstatus"
+      :modaldata="check_device"
+      @cancel="cancel_unbinddevice"
+      @success="success_unbinddevice"
+    >
+    </device_unbind>
 
   </div>
 </template>
 <script>
 import noEquipment from "./noEquipment.vue";
 import TagList from "./tagList.vue";
-import { getList } from "@/api/equipment";
+import {
+  getList,
+  device_cancelrenewstatus,
+  device_updatedevicename,
+  device_deletedevicemore,
+} from "@/api/equipment";
 
-import device_detail from './compoents/device_detail.vue'
+import device_detail from "./compoents/device_detail.vue";
+import device_unbind from "./compoents/device_unbind.vue";
 const columns = [
   {
     title: "设备名称",
@@ -328,7 +365,7 @@ const query = {
   page: null,
 };
 export default {
-  components: { noEquipment, TagList,device_detail },
+  components: { noEquipment, TagList, device_detail,device_unbind },
   name: "equipment",
   data() {
     return {
@@ -359,8 +396,14 @@ export default {
       no_bind_env: 0,
 
       has_device: true,
-      check_device:null,//选中的设备
-      detail_modalstatus:false,//设备详情弹窗
+      check_device: null, //选中的设备
+      detail_modalstatus: false, //设备详情弹窗
+
+      editname_state: false, //编辑设备名称弹窗
+      checkdevice_newname: "", //选中设备新名称
+
+      unbinddevice_modalstatus:false,//解绑环境弹窗
+      binddevice_modalstatus:false,//绑定环境弹窗
     };
   },
   computed: {
@@ -372,6 +415,110 @@ export default {
     this.fetchList();
   },
   methods: {
+    //编辑名称弹窗
+    show_editname_pop(record) {
+      this.check_device = record;
+      this.checkdevice_newname = record.device_name;
+      this.editname_state = true;
+    },
+    editname_handleCancel() {
+      this.editname_state = false;
+    },
+    //编辑名称
+    async editname_handleOk() {
+      let { data } = await device_updatedevicename({
+        device_id: this.check_device.id,
+        device_name: this.checkdevice_newname,
+      });
+      if (data.code == 200) {
+        this.editname_state = false;
+        this.fetchList();
+        this.$message.success("操作成功");
+      }
+    },
+
+    //解绑环境弹窗
+    open_unbinddevice_pop(record){
+        this.check_device = record;
+         this.unbinddevice_modalstatus =true
+    },
+    cancel_unbinddevice(){
+        this.unbinddevice_modalstatus = false
+    },
+    success_unbinddevice(){
+         this.unbinddevice_modalstatus = false
+          this.fetchList();
+    },
+
+    //自动续费弹窗
+    change_autopay(record, type) {
+      let that = this;
+
+      let c_1 = "";
+      let c_2 = "";
+      if (type == 1) {
+        c_1 = "开启自动续费";
+        c_2 = "确定将已选择设备开启按月自动续费？";
+      }
+      if (type == 0) {
+        c_1 = "关闭自动续费";
+        c_2 = "确定将已选择设备关闭按月自动续费？";
+      }
+
+      this.$confirm({
+        title: c_1,
+        content: "设备名称:" + record.device_name + ", " + c_2,
+        onOk() {
+          that.go_autopay(record.id, type);
+          return false;
+        },
+        onCancel() {},
+      });
+    },
+    //自动续费
+    async go_autopay(id, type) {
+      let { data } = await device_cancelrenewstatus({
+        device_id: id,
+        renew_status: type,
+      });
+      if (data.code == 200) {
+        this.fetchList();
+        this.$message.success("操作成功");
+      }
+    },
+
+
+    //删除设备弹窗
+    change_deletdevice_pop(record) {
+      let that = this;
+
+      this.$confirm({
+        title: '删除设备',
+        content: '确定删除设备 '+ record.device_name+' 吗？提示：若删除的是未过期设备，在设备过期前可在回收站找回。'  ,
+        onOk() {
+          that.go_deletdevice(record.id);
+          return false;
+        },
+        onCancel() {},
+      });
+    },
+    //自动删除设备
+    async go_deletdevice(id) {
+      let { data } = await device_deletedevicemore({
+        device_id: id,
+      });
+      if (data.code == 200) {
+        this.fetchList();
+        this.$message.success("操作成功");
+      }
+    },
+
+
+
+
+
+
+
     //格式化远程
     formate_remote(data) {
       if (data == 0) {
@@ -413,7 +560,6 @@ export default {
       this.current = key;
       this.query = JSON.parse(JSON.stringify(this.base_query));
 
-      
       if (key === "2") {
         this.query = { ...query, expire: 2 };
       }
@@ -454,12 +600,12 @@ export default {
     onRenew: function () {},
 
     //显示详情
-    show_detail(record){
-       this.check_device = record
-       this.detail_modalstatus = true
+    show_detail(record) {
+      this.check_device = record;
+      this.detail_modalstatus = true;
     },
-    cancel_detailmodal(){
-          this.detail_modalstatus = false
+    cancel_detailmodal() {
+      this.detail_modalstatus = false;
     },
 
     async fetchList() {
@@ -511,7 +657,7 @@ export default {
 <style scoped lang="less">
 .table-popover {
   .popover-content {
-    width: 90px;
+    //width: 90px;
     padding-top: 8px;
     cursor: pointer;
   }
@@ -519,9 +665,9 @@ export default {
     color: #4c84ff;
   }
   .popover_edit-content {
-    width: 60px;
+    width: 90px;
     padding-top: 5px;
-    text-align: center;
+    //text-align: center;
     cursor: pointer;
   }
   .popover_edit-content:hover {

@@ -14,7 +14,7 @@
     </div>
     <div class="detail_line">
       <div class="line_cell">网络属性： 静态</div>
-      <div class="line_cell">网络类型：</div>
+      <div class="line_cell">网络类型：{{ this.detaildata.type_title}}</div>
       <div class="line_cell">
         可用天数： {{ this.detaildata.available_day }} ({{
           this.detaildata.expired_at
@@ -59,9 +59,12 @@
       :columns="base_columns"
       :data-source="table_data"
       :row-key="(r, i) => i.toString()"
-      :scroll="{ y: 260 }"
+      :scroll="{ y: 400 }"
       :pagination="pagination"
     >
+      <div slot="cell_logtype" slot-scope="text">
+           {{format_logtype(text)}}
+      </div>
     </a-table>
   </a-modal>
 </template>
@@ -148,11 +151,11 @@ export default {
           },
           {
             title: '最后登录用户',
-            dataIndex: ''
+            dataIndex: 'last_username'
           },
           {
             title: '最后登录时间',
-            dataIndex: ''
+            dataIndex: 'last_login_time'
           },
           {
             title: '所属子公司',
@@ -190,11 +193,11 @@ export default {
           },
           {
             title: '解绑用户',
-            dataIndex: ''
+            dataIndex: 'last_username'
           },
           {
             title: '解绑时间',
-            dataIndex: ''
+            dataIndex: 'last_login_time'
           },
           {
             title: '所属子公司',
@@ -220,7 +223,7 @@ export default {
         this.base_columns = [
           {
             title: '登录成员',
-            dataIndex: 'user_id'
+            dataIndex: 'business_name'
           },
           {
             title: '时间',
@@ -229,7 +232,8 @@ export default {
 
           {
             title: '操作内容',
-            dataIndex: ''
+            dataIndex: 'type',
+             scopedSlots: { customRender: "cell_logtype" },
           },
           {
             title: '所属子公司',
@@ -238,7 +242,23 @@ export default {
         ]
       }
     },
-
+    format_logtype(data){
+       if (data == 0) {
+        return "绑定环境";
+      }
+      if (data == 1) {
+        return "解绑环境";
+      }
+      if (data == 2) {
+        return "替换设备";
+      }
+      if (data == 3) {
+        return "绑定设备";
+      }
+      if (data == 4) {
+        return "解绑设备";
+      }
+    },
 
     format_event_state(data) {
       if (data == 0) {
