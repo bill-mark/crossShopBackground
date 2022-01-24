@@ -64,7 +64,7 @@ export default {
         {
           name: "安全管理",
           value: "4",
-          menuName: 'security'
+          menuName: 'manage_security'
         },
         {
           name: "店铺报表",
