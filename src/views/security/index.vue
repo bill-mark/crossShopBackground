@@ -8,22 +8,36 @@
         :selected-keys="[current]"
         @click="handleClick"
       >
-        <a-menu-item key="1" class="menu_one">
+        <a-menu-item key="member_security" class="menu_one">
           <div class="my_equipment"></div>
           <div class="title">成员登录控制</div>
         </a-menu-item>
-        <a-menu-item key="2" class="menu_one">
-          <div class="my_equipment will_expire"></div>
-          <div class="title">登录请求授权</div>
-        </a-menu-item>
-        <a-menu-item key="3" class="menu_one">
+        <a-menu-item key="terminal_security" class="menu_one">
           <div class="my_equipment expired"></div>
           <div class="title">终端白名单</div>
         </a-menu-item>
       </a-menu>
     </div>
+    <router-view class="info" />
   </div>
 </template>
+<script>
+
+export default {
+  name: "equipment",
+  data() {
+    return {
+      current: "1", //选中的目录
+    }
+  },
+  methods: {
+    handleClick: function ({ key }) {
+      this.current = key;
+      this.$router.push({name: key});
+    }
+  }
+}
+</script>
 <style scoped lang="less">
 .equipment {
   margin-top: 11px;
@@ -41,11 +55,11 @@
         background: linear-gradient(90deg, #f7f9ff 0%, #ebf0fc 100%);
       }
       .my_equipment {
-        margin-top: 14px;
+        margin-top: 15px;
         margin-right: 7px;
         width: 18px;
-        height: 16px;
-        background-image: url("../../assets/img/成员登录控制@2x.png");
+        height: 18px;
+        background-image: url("../../assets/img/member_login.png");
         background-repeat: no-repeat;
       }
       .will_expire {
@@ -65,6 +79,12 @@
         border: 1px solid #374567;
       }
     }
+  }
+  .info {
+    flex: 1;
+    height: calc(100vh - 126px);
+    background-color: #fff;
+    margin-left: 11px;
   }
 }
 </style>

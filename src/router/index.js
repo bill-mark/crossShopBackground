@@ -74,7 +74,25 @@ const routes = [
         meta: {
           needLogin: true // 需要登录
         },
-        component:()=>import(/* webpackChunkName: "equipment" */ '@/views/security/index.vue')
+        component:()=>import(/* webpackChunkName: "equipment" */ '@/views/security/index.vue'),
+        redirect: {name: 'member_security'},
+        children: [
+          {
+            path:'member',
+            name:'member_security',
+            component:()=>import(/* webpackChunkName: "addenv" */ '@/views/security/member.vue'),
+            meta: {
+              needLogin: true // 需要登录
+            }
+          }, {
+            path: 'terminal',
+            name: 'terminal_security',
+            component:()=>import(/* webpackChunkName: "addenv" */ '@/views/security/terminal.vue'),
+            meta: {
+              needLogin: true // 需要登录
+            }
+          }
+        ],
       },
     ]
   },
