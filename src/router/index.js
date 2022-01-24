@@ -68,6 +68,14 @@ const routes = [
         },
         component:()=>import(/* webpackChunkName: "addenv" */ '@/views/manage/edit_environment.vue')
       },
+      {
+        path:'security',
+        name:'manage_security',
+        meta: {
+          needLogin: true // 需要登录
+        },
+        component:()=>import(/* webpackChunkName: "equipment" */ '@/views/security/index.vue')
+      },
     ]
   },
   {
