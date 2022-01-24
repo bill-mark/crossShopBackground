@@ -96,7 +96,53 @@
           <template slot="operation" slot-scope="text, record">
             <a-button type="primary" @click="onRenew(record)">续费</a-button>
             <a-button @click="show_detail(record)" class="view_btn">详情</a-button>
-            <a-button  class="view_btn">更多</a-button>
+
+
+             <a-popover trigger="hover" overlayClassName="table-popover">
+              <div
+                slot="content"
+                class="popover_edit-content"
+              >
+                <div>设为自动续费</div>
+              </div>
+              <div
+                slot="content"
+                @click="open_delet(record)"
+              >
+                <div>编辑设备名称</div>
+              </div>
+              <div
+                slot="content"
+                class="popover_edit-content"
+              >
+                <div>绑定环境</div>
+              </div>
+              <div
+                slot="content"
+                @click="open_delet(record)"
+              >
+                <div>解绑环境</div>
+              </div>
+              <div
+                slot="content"
+                class="popover_edit-content"
+              >
+                <div>编辑标签</div>
+              </div>
+              <div
+                slot="content"
+                @click="open_delet(record)"
+              >
+                <div>删除设备</div>
+              </div>
+
+              <a-button  class="view_btn" >更多</a-button>
+            </a-popover>
+
+
+
+           
+
           </template>
         </a-table>
       </div>
@@ -314,7 +360,7 @@ export default {
 
       has_device: true,
       check_device:null,//选中的设备
-      detail_modalstatus:true,//设备详情弹窗
+      detail_modalstatus:false,//设备详情弹窗
     };
   },
   computed: {
@@ -409,7 +455,6 @@ export default {
 
     //显示详情
     show_detail(record){
-      console.log('show_detail')
        this.check_device = record
        this.detail_modalstatus = true
     },
@@ -464,6 +509,26 @@ export default {
 </script>
 
 <style scoped lang="less">
+.table-popover {
+  .popover-content {
+    width: 90px;
+    padding-top: 8px;
+    cursor: pointer;
+  }
+  .popover-content:hover {
+    color: #4c84ff;
+  }
+  .popover_edit-content {
+    width: 60px;
+    padding-top: 5px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .popover_edit-content:hover {
+    color: #4c84ff;
+  }
+}
+
 .equipment {
   margin-top: 11px;
   display: flex;
