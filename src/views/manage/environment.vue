@@ -166,7 +166,7 @@
             <div
               @click="go_bind(record)"
               v-if="!record.bind_status"
-              class="cell_blue"
+              class="cell_leftblue"
             >
               绑定
             </div>
@@ -174,7 +174,7 @@
             <div
               @click="go_open(record)"
               v-if="record.bind_status"
-              class="cell_blue"
+              class="cell_leftblue"
             >
               打开
             </div>
@@ -1062,6 +1062,10 @@ export default {
 
         .cell_blue {
           padding-left: 20px;
+          color: #4c84ff;
+          cursor: pointer;
+        }
+        .cell_leftblue {
           color: #4c84ff;
           cursor: pointer;
         }

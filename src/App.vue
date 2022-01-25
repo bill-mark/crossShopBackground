@@ -7,7 +7,7 @@
             管理
           </div>
            <div class="nav_content nav_2">
-            店铺
+            环境
           </div>
           <div class="nav_content nav_3">
             插件

@@ -8,35 +8,30 @@
         :selected-keys="[current]"
         @click="menu_handleClick"
       >
-        <a-menu-item key="1" class="menu_one">
+        <a-menu-item key="0" class="menu_one">
           <div class="my_equipment menu_txt_right_1"></div>
           <div class="title">所有成员</div>
         </a-menu-item>
-         <a-menu-item key="2" class="menu_one">
-          <div class="my_equipment"></div>
+        <a-menu-item key="status" class="menu_one">
+          <div class="my_equipment menu_txt_right_2"></div>
           <div class="title">已禁用</div>
         </a-menu-item>
-         <a-menu-item key="3" class="menu_one">
-          <div class="my_equipment"></div>
+        <a-menu-item key="recent" class="menu_one">
+          <div class="my_equipment menu_txt_right_3"></div>
           <div class="title">近七天成员</div>
         </a-menu-item>
 
         <a-sub-menu key="platform">
-          <span slot="title">
-            <span>所有角色</span>
-          </span>
-          <a-menu-item v-for="item in platform_list" :key="item.id">
-            {{ item.site }}
-          </a-menu-item>
-        </a-sub-menu>
+          <div class="menu_one" slot="title">
+            <div class="my_equipment menu_txt_right_1"></div>
+            <div class="title">所有角色</div>
+          </div>
+          <a-menu-item key="boss"> 老板 </a-menu-item>
+          <a-menu-item key="jiucai"> 员工 </a-menu-item>
 
-        <a-sub-menu key="tag">
-          <span slot="title">
-            <span>申请人列表</span>
-          </span>
-          <a-menu-item v-for="item in tag_list" :key="item.id">
-            {{ item.tag }}
-          </a-menu-item>
+          <!-- <a-menu-item v-for="item in role_list" :key="item.id">
+            {{item.title}}
+          </a-menu-item> -->
         </a-sub-menu>
       </a-menu>
     </div>
@@ -44,13 +39,11 @@
     <div class="content_right">
       <div class="top_line">
         <div class="top_l_left">
-          <a-button type="primary" class="top_btn" @click="go_addenv">
-            新建环境
+          <a-button type="primary" class="top_btn" @click="open_addmember_pop">
+            添加成员
           </a-button>
 
-          <a-button class="top_btn" @click="show_tagmanage = true">
-            标签管理
-          </a-button>
+          <a-button class="top_btn"> 部门管理 </a-button>
 
           <a-popover
             trigger="click"
@@ -62,46 +55,7 @@
               class="popover-content"
               @click="batch_open('清空授权')"
             >
-              <div>清空授权</div>
-            </div>
-
-            <div
-              slot="content"
-              class="popover-content"
-              @click="batch_open('清空环境标签')"
-            >
-              <div>清空环境标签</div>
-            </div>
-
-            <div
-              slot="content"
-              class="popover-content"
-              @click="batch_open('解绑设备')"
-            >
-              <div>解绑设备</div>
-            </div>
-
-            <div
-              slot="content"
-              class="popover-content"
-              @click="batch_open('设为常用环境')"
-            >
-              <div>设为常用环境</div>
-            </div>
-            <div
-              slot="content"
-              class="popover-content"
-              @click="batch_open('取消常用环境')"
-            >
-              <div>取消常用环境</div>
-            </div>
-
-            <div
-              slot="content"
-              class="popover-content"
-              @click="batch_open('删除环境标签')"
-            >
-              <div>删除环境标签</div>
+              <div>环境授权</div>
             </div>
 
             <div
@@ -118,7 +72,7 @@
           </a-popover>
 
           <a-input-search
-            placeholder="成员名"
+            placeholder="多个用户名"
             class="btn_search"
             @search="handle_search"
           />
@@ -143,26 +97,12 @@
           :pagination="pagination"
           @change="handleTableChange"
         >
-          <div slot="cell_envname" slot-scope="text" class="content_envname">
-            {{ text }}
+          <div slot="cell_auth" slot-scope="text">
+            {{ table_formate_auth(text) }}
           </div>
 
-          <div slot="cell_platform" slot-scope="text, record">
-            {{ text }}{{ record.site }}
-          </div>
-
-          <div slot="cell_tag" slot-scope="text">
-            <span v-for="item in text" :key="item.id">
-              {{ item.tag }}
-            </span>
-          </div>
-
-          <div slot="cell_device" slot-scope="text, record">
-            {{ format_devicestate(text, record) }}
-          </div>
-
-          <div slot="cell_last" slot-scope="text, record">
-            {{ text }}({{ record.business_name }})
+          <div slot="cell_status" slot-scope="text">
+            {{ table_formate_status(text) }}
           </div>
 
           <div slot="operaTitle" class="title_operate">
@@ -177,23 +117,9 @@
             slot-scope="text, record"
             class="content_operate"
           >
-            <div
-              @click="go_bind(record)"
-              v-if="!record.bind_status"
-              class="cell_blue"
-            >
-              绑定
-            </div>
+            <div @click="go_edit(record)" class="cell_leftblue">编辑</div>
 
-            <div
-              @click="go_open(record)"
-              v-if="record.bind_status"
-              class="cell_blue"
-            >
-              打开
-            </div>
-
-            <div @click="go_edit(record)" class="cell_blue">编辑</div>
+            <div class="cell_blue">授权</div>
 
             <a-popover trigger="hover" overlayClassName="table-popover">
               <div
@@ -218,62 +144,36 @@
         <div class="down_txt">共{{ pagination.total }}条数据</div>
       </div>
     </div>
+
+    <add_member
+      v-if="addmember_modalstatus"
+      :modalstatus="addmember_modalstatus"
+      @cancel="cancel_addmember"
+      @success="success_addmember"
+    >
+    </add_member>
+
   </div>
 </template>
 <script>
-import { environment_index } from "@/api/home";
-import {
-  environment_platform_list,
-  environment_tag_list,
-  environment_device_ip_list,
-  environment_username_list,
-  environment_delete_more,
-  environment_device_name_list,
-  environment_device_network_type_list,
-  environment_business_short_list,
-  environment_unbind_device,
-  environment_clear_auth_more,
-  environment_clearenvironmenttagmore,
-  environment_unbinddevicemore,
-  environment_commonmore,
-  environment_deleteenvironmenttagmore,
-} from "@/api/environment.js";
-import { user_member_list } from "@/api/member.js";
+import { environment_clear_auth_more } from "@/api/environment.js";
+
+import { user_member_list, user_rolelist } from "@/api/member.js";
+import add_member from './components/add_member.vue'
 export default {
-  components: {
-  },
+  components: {add_member},
   data() {
     return {
-      wrap_height: null,//wrap高度
-
+      wrap_height: null, //wrap高度
       current: "1", //选中的目录
-      event_guanli: "1", //环境模式
-      show_tagmanage: false, //标签管理状态
       batch_visibal: false, //批量气泡状态
-
-      show_devicemanage: false,
-      need_bind_eventname: "",
-      need_bind_eventid: null,
-
       //默认配置
       standard_config: {
-        status: 0,
         keywords: "",
-        platform_id: "",
-        tag_id: "",
-        device_ip: "",
-        device_name: "",
-        business_short: "",
-        begin_created_at: "",
-        end_created_at: "",
-        urgent_renewal: "all",
-        recent_open: "all",
-        no_tag: "all",
-        env_common: "all",
-        env_top: "all",
-        no_bind: "all",
-        no_auth_env: "all",
-        member_id: "",
+        role_id: null,
+        status: "all",
+        department_id: null,
+        recent: "all",
       },
 
       table_data: [],
@@ -283,74 +183,53 @@ export default {
         pageSize: 20, //每页条数
         total: 0,
       },
-      no_auth_environment: "", //待授权
-      no_bind_count: "", //待绑定
-      urgent_renewal_count: "", //待付费
 
       selectedRowKeys: [], //表格 选中单元
       checked_columns: [], //自定义表格头
       columns: [
         {
-          title: "环境",
-          dataIndex: "env_name",
-          scopedSlots: { customRender: "cell_envname" },
-          show: true,
-        },
-        {
-          title: "所属平台",
-          dataIndex: "country",
-          scopedSlots: { customRender: "cell_platform" },
-          show: true,
-        },
-        {
-          title: "标签",
-          dataIndex: "tag",
-          scopedSlots: { customRender: "cell_tag" },
-          show: false,
-        },
-        {
-          title: "企业简称",
-          dataIndex: "business_short",
-          show: false,
-        },
-        {
-          title: "创建者",
+          title: "用户名",
           dataIndex: "username",
-          show: false,
+          show: true,
         },
         {
-          title: "创建时间",
-          dataIndex: "created_at",
-          show: false,
+          title: "姓名",
+          dataIndex: "real_name",
+          show: true,
         },
         {
-          title: "更新时间",
-          dataIndex: "updated_at",
-          show: false,
+          title: "所在部门",
+          dataIndex: "depart_title",
+          show: true,
+        },
+        {
+          title: "授权环境",
+          dataIndex: "auth_method",
+          scopedSlots: { customRender: "cell_auth" },
+          show: true,
+        },
+        {
+          title: "角色",
+          dataIndex: "role_title",
+          show: true,
+        },
+        {
+          title: "状态",
+          dataIndex: "status",
+          scopedSlots: { customRender: "cell_status" },
+          show: true,
+        },
+        {
+          title: "绑定登录手机号",
+          dataIndex: "business_phone",
+          show: true,
+        },
+        {
+          title: "联系方式",
+          dataIndex: "contact",
+          show: true,
         },
 
-        {
-          title: "设备名称",
-          dataIndex: "device_name",
-          show: true,
-        },
-        {
-          title: "设备信息",
-          dataIndex: "bind_status",
-          scopedSlots: { customRender: "cell_device" },
-          show: true,
-        },
-        {
-          title: "最后登陆者",
-          dataIndex: "last_username",
-          scopedSlots: { customRender: "cell_last" },
-          show: true,
-        },
-        {
-          title: "最后登陆时间",
-          dataIndex: "last_login_time",
-          show: true,
-        },
         {
           dataIndex: "operation",
           width: 250,
@@ -361,25 +240,96 @@ export default {
         },
       ],
 
-      tag_list: [], //标签列表
       member_list: [], //成员列表
-      platform_list: [], //平台列表
+      role_list: [], //角色列表
+      check_data:null,//选中成员
 
+      addmember_modalstatus:false,
     };
   },
   mounted() {
-
-    this.init();
-
-    this.set_wrap_height()
+    this.get_rolelist();
+    this.set_wrap_height();
+    this.get_tabledata();
   },
   methods: {
     //高度绑定为页面高度
     set_wrap_height() {
-      this.wrap_height = document.body.clientHeight - 82
-      console.log(this.wrap_height)
+      this.wrap_height = document.body.clientHeight - 82;
+      console.log(this.wrap_height);
     },
+    //获得角色列表
+    async get_rolelist() {
+      let { data } = await user_rolelist({});
+      if (data.code == 200) {
+        this.role_list = data.data.list;
+      }
+    },
+    //获得表格数据
+    async get_tabledata() {
+      this.table_loading = true;
+      this.selectedRowKeys = [];
+      let { data } = await user_member_list({
+        ...this.standard_config,
+        pagesize: 20,
+        page: this.pagination.pageNum,
+      });
+      this.table_loading = false;
+      if (data.code == 200) {
+        this.pagination.total = data.data.total;
 
+        this.table_data = data.data.list;
+      }
+    },
+    //菜单点击
+    menu_handleClick(e) {
+      console.log("click ", e.key);
+      //return
+
+      this.current = e.key;
+
+      Object.assign(this.$data, this.$options.data());
+      this.current = e.key;
+
+      if (e.key == "status") {
+        this.standard_config.status = 1;
+      }
+      if (e.key == "recent") {
+        this.standard_config.recent = 1;
+      }
+      if (e.key == "boss") {
+        this.standard_config.role_id = 1;
+      }
+      if (e.key == "jiucai") {
+        this.standard_config.role_id = 2;
+      }
+
+      this.get_tabledata();
+    },
+    //格式化授权
+    table_formate_auth(data) {
+      if (data == 0) {
+        return "全部终端";
+      }
+      if (data == 1) {
+        return "后端";
+      }
+      if (data == 2) {
+        return "新终端";
+      }
+    },
+    //格式化状态
+    table_formate_status(data) {
+      if (data == 0) {
+        return "启用";
+      }
+      if (data == 1) {
+        return "禁用";
+      }
+      if (data == 2) {
+        return "删除";
+      }
+    },
 
     //selectedRowKeys
     //批量操作确认弹窗
@@ -392,7 +342,6 @@ export default {
       });
       console.log(c_1);
 
-
       let that = this;
       this.$confirm({
         title: title,
@@ -401,7 +350,7 @@ export default {
           that.go_clear_auth(c_1, title);
           return false;
         },
-        onCancel() { },
+        onCancel() {},
       });
     },
     //批量操作ajax
@@ -417,71 +366,7 @@ export default {
           this.$message.success("清空授权 操作成功");
         }
       }
-      if (type == "清空环境标签") {
-        let { data } = await environment_clearenvironmenttagmore({
-          id: idarr.toString(),
-        });
-        if (data.code == 200) {
-          this.get_tabledata();
-          this.$message.success("清空环境标签 操作成功");
-        }
-      }
-
-      if (type == "解绑设备") {
-        let { data } = await environment_unbinddevicemore({
-          id: idarr.toString(),
-        });
-        if (data.code == 200) {
-          this.get_tabledata();
-          this.$message.success("解绑设备 操作成功");
-        }
-      }
-
-      if (type == "设为常用环境") {
-        let { data } = await environment_commonmore({
-          dev_common: 1,
-          id: idarr.toString(),
-        });
-        if (data.code == 200) {
-          this.get_tabledata();
-          this.$message.success("设为常用环境 操作成功");
-        }
-      }
-
-      if (type == "取消常用环境") {
-        let { data } = await environment_commonmore({
-          dev_common: 0,
-          id: idarr.toString(),
-        });
-        if (data.code == 200) {
-          this.get_tabledata();
-          this.$message.success("取消常用环境 操作成功");
-        }
-      }
-
-      if (type == "删除环境标签") {
-        let { data } = await environment_deleteenvironmenttagmore({
-          id: idarr.toString(),
-        });
-        if (data.code == 200) {
-          this.get_tabledata();
-          this.$message.success("删除环境标签 操作成功");
-        }
-      }
-
-      if (type == "删除环境") {
-        let { data } = await environment_delete_more({
-          id: idarr.toString(),
-        });
-        if (data.code == 200) {
-          this.get_tabledata();
-          this.$message.success("删除环境 操作成功");
-        }
-      }
-
     },
-
-
 
     //获得成员列表
     async get_member_data(keywords) {
@@ -494,53 +379,6 @@ export default {
       }
     },
 
-
-
-
-    //菜单点击
-    menu_handleClick(e) {
-      console.log("click ", e.keyPath, e.key);
-      this.current = e.key;
-
-      Object.assign(this.$data, this.$options.data())
-      this.current = e.key;
-
-      if (e.key == 2) {
-        this.standard_config.env_common = 1
-      }
-      if (e.key == 3) {
-        this.standard_config.recent_open = 1
-      }
-      if (e.key == 4) {
-        this.standard_config.urgent_renewal = 1
-      }
-      if (e.key == 6) {
-        this.standard_config.no_auth_env = 0
-      }
-      if (e.key == 7) {
-        this.standard_config.no_bind = 0
-      }
-
-      this.get_tabledata()
-    },
-
-    async init() {
-      this.table_loading = true;
-      let { data } = await environment_index({
-        status: 0,
-        pagesize: 20,
-        page: this.pagination.pageNum,
-      });
-      this.table_loading = false;
-      if (data.code == 200) {
-        this.pagination.total = data.data.total;
-        this.no_auth_environment = data.data.no_auth_environment;
-        this.no_bind_count = data.data.no_bind_count;
-        this.urgent_renewal_count = data.data.urgent_renewal_count;
-
-        this.table_data = data.data.list;
-      }
-    },
     //表格行选中
     onSelectChange(selectedRowKeys) {
       console.log("selectedRowKeys changed: ", selectedRowKeys);
@@ -560,55 +398,19 @@ export default {
       this.pagination.pageNum = pagination.current;
       this.get_tabledata();
     },
-    //获得表格数据
-    async get_tabledata() {
-      // console.log(this.standard_config);
-      // return
 
-      this.table_loading = true;
-      this.selectedRowKeys = []
-      let { data } = await environment_index({
-        ...this.standard_config,
-        pagesize: 20,
-        page: this.pagination.pageNum,
-      });
-      this.table_loading = false;
-      if (data.code == 200) {
-        this.pagination.total = data.data.total;
-        this.no_auth_environment = data.data.no_auth_environment;
-        this.no_bind_count = data.data.no_bind_count;
-        this.urgent_renewal_count = data.data.urgent_renewal_count;
-
-        this.table_data = data.data.list;
-      }
+    //添加成员弹窗
+    open_addmember_pop() {
+      this.addmember_modalstatus = true
     },
-    event_change(value) {
-      console.log(value);
-      this.event_guanli = value;
+    cancel_addmember() {
+      this.addmember_modalstatus = false
     },
-    go_addenv() {
-      this.$router.push({ name: "manage_addenv" });
+    success_addmember() {
+      this.addmember_modalstatus = false
+     this.get_tabledata();
     },
 
-    format_devicestate(state, record) {
-      if (!state) {
-        return "未绑定";
-      } else {
-        return (
-          record.device_ip +
-          " " +
-          record.device_area_title +
-          " " +
-          record.device_package_title
-        );
-      }
-    },
-
-    go_bind(record) {
-      this.show_devicemanage = true;
-      this.need_bind_eventname = record.env_name;
-      this.need_bind_eventid = record.id;
-    },
     go_open(record) {
       console.log(record);
     },
@@ -664,18 +466,18 @@ export default {
         margin-right: 7px;
         width: 18px;
         height: 16px;
-         background-position: center;
+        background-position: center;
         background-size: 100%;
         background-repeat: no-repeat;
       }
-      .menu_txt_right_1{
-          background-image: url("../../assets/img/member/成员@2x.png");
+      .menu_txt_right_1 {
+        background-image: url("../../assets/img/member/成员@2x.png");
       }
-       .menu_txt_right_2{
-          background-image: url("../../assets/img/member/已禁用@2x.png");
+      .menu_txt_right_2 {
+        background-image: url("../../assets/img/member/已禁用@2x.png");
       }
-       .menu_txt_right_3{
-          background-image: url("../../assets/img/member/成员审核@2x.png");
+      .menu_txt_right_3 {
+        background-image: url("../../assets/img/member/成员审核@2x.png");
       }
 
       .title {
@@ -733,6 +535,10 @@ export default {
 
         .cell_blue {
           padding-left: 20px;
+          color: #4c84ff;
+          cursor: pointer;
+        }
+        .cell_leftblue {
           color: #4c84ff;
           cursor: pointer;
         }

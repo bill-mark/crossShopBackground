@@ -67,11 +67,6 @@ export default {
           menuName: 'manage_security'
         },
         {
-          name: "店铺报表",
-          value: "5",
-          menuName: 'shop'
-        },
-        {
           name: "企业配置",
           value: "6",
           menuName: 'enterprise'
