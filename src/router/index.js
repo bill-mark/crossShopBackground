@@ -53,6 +53,14 @@ const routes = [
         component:()=>import(/* webpackChunkName: "equipment" */ '@/views/equipment/index.vue')
       },
       {
+        path:'member',
+        name:'manage_member',
+        meta: {
+          needLogin: true // 需要登录
+        },
+        component:()=>import(/* webpackChunkName: "manage_member" */ '@/views/member/index.vue')
+      },
+      {
         path:'addenv',
         name:'manage_addenv',
         meta: {

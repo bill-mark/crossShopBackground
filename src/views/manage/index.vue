@@ -59,7 +59,7 @@ export default {
         {
           name: "成员管理",
           value: "3",
-          menuName: 'member'
+          menuName: 'manage_member'
         },
         {
           name: "安全管理",
