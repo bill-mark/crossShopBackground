@@ -2,7 +2,7 @@
   <div class="tag_wrap">
     <a-modal
       v-model="isshow"
-      title="环境标签管理"
+      title="设备标签管理"
       :width="840"
       @cancel="handleCancel"
     >
@@ -51,11 +51,12 @@
 </template>
 <script>
 import {
-  environment_tag_list,
-  update_environment_tag,
-  create_environment_tag,
-  delete_environment_tag,
-} from "@/api/environment.js";
+  device_devicetaglist,
+  device_updatedevicetag,
+  device_createdevicetag,
+  device_deletedevicetagmore,
+} from "@/api/equipment.js";
+
 export default {
   props: {
     isshow: Boolean,
@@ -75,7 +76,7 @@ export default {
       console.log(this.checked.toString());
     },
     async get_taglist() {
-      let { data } = await environment_tag_list({});
+      let { data } = await device_devicetaglist({});
       if (data.code == 200) {
         data.data.list.forEach((item) => {
           item.visible = false;
@@ -87,7 +88,7 @@ export default {
       this.$emit("cancel");
     },
     async create_tag() {
-      let { data } = await create_environment_tag({
+      let { data } = await device_createdevicetag({
         tag: this.new_tag,
       });
       if (data.code == 200) {
@@ -97,7 +98,7 @@ export default {
       }
     },
     async update_tag(item) {
-      let { data } = await update_environment_tag({
+      let { data } = await device_updatedevicetag({
         tag: item.tag,
         id: item.id,
       });
@@ -107,7 +108,7 @@ export default {
       }
     },
     async delete_tag() {
-      let { data } = await delete_environment_tag({
+      let { data } = await device_deletedevicetagmore({
         id: this.checked.toString(),
       });
       if (data.code == 200) {

@@ -97,3 +97,58 @@ export const device_deletedevicemore = (data) => {
     data
   })
 }
+
+//设备未绑定环境列表
+export const device_bindnoenvironmentlist = (data) => {
+  return request({
+    url: "/client_v1/device/bind-no-environment-list",
+    method: "POST",
+    data
+  })
+}
+
+
+//设备标签列表
+export const device_devicetaglist = (data) => {
+  return request({
+    url: "/client_v1/device/device-tag-list",
+    method: "POST",
+    data
+  })
+}
+
+//添加设备标签
+export const device_createdevicetag = (data) => {
+  return request({
+    url: "/client_v1/device/create-device-tag",
+    method: "POST",
+    data
+  })
+}
+
+//批量删除设备标签
+export const device_deletedevicetagmore = (data) => {
+  return request({
+    url: "/client_v1/device/delete-device-tag-more",
+    method: "POST",
+    data
+  })
+}
+
+//编辑设备标签
+export const device_updatedevicetag = (data) => {
+  return request({
+    url: "/client_v1/device/update-device-tag",
+    method: "POST",
+    data
+  })
+}
+
+//编辑设备绑定标签
+export const device_devicebindtag = (data) => {
+  return request({
+    url: "/client_v1/device/device-bind-tag",
+    method: "POST",
+    data
+  })
+}

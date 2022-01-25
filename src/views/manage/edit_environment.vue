@@ -426,20 +426,6 @@ export default {
         this.tagIds = data.data.list
       }
     },
-    tagid_handleChange(value) {
-
-      this.check_tagids = value
-      console.log(this.check_tagids)
-    },
-
-    broser_handleChange(value) {
-      console.log(value)
-      this.check_broser = value
-    },
-    lanage_handleChange(value) {
-      console.log(value)
-      this.check_lanage = value
-    },
 
     async go_finish() {
       let { data } = await environment_update({

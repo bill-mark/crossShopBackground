@@ -36,16 +36,18 @@
       </a-menu>
     </div>
 
-    <div class="content" v-if="showEqList">
+    <div class="content" >
       <div class="search_panel">
         <a-button type="primary" class="eq_buy_btn" @click="buyEq"
           >购买设备</a-button
         >
 
-        <a-button type="primary" class="eq_buy_btn"
+        <a-button
+          type="primary"
+          class="eq_buy_btn"
+          @click="show_tagmanage = true"
           >标签管理</a-button
         >
-
 
         <a-button
           type="primary"
@@ -83,6 +85,10 @@
         >
           <div slot="cell_under" slot-scope="text, record">
             {{ text }} , {{ record.device_package_title }}
+          </div>
+
+          <div slot="cell_name" slot-scope="text, record">
+            {{ format_name(record) }}
           </div>
 
           <div slot="device_net">静态</div>
@@ -130,19 +136,29 @@
               >
                 <div>编辑设备名称</div>
               </div>
-              <div slot="content" class="popover_edit-content">
+              <div
+                slot="content"
+                @click="open_binddevice_pop(record)"
+                class="popover_edit-content"
+              >
                 <div>绑定环境</div>
               </div>
-              <div slot="content" 
-              @click="open_unbinddevice_pop(record)"
-              class="popover_edit-content">
+              <div
+                slot="content"
+                @click="open_unbinddevice_pop(record)"
+                class="popover_edit-content"
+              >
                 <div>解绑环境</div>
               </div>
-              <div slot="content" class="popover_edit-content">
+              <div slot="content" class="popover_edit-content"
+              @click="open_edit_devicetag_pop(record)"
+              >
                 <div>编辑标签</div>
               </div>
-              <div slot="content" class="popover_edit-content"
-              @click="change_deletdevice_pop(record)"
+              <div
+                slot="content"
+                class="popover_edit-content"
+                @click="change_deletdevice_pop(record)"
               >
                 <div>删除设备</div>
               </div>
@@ -153,7 +169,6 @@
         </a-table>
       </div>
     </div>
-    <tag-list v-else></tag-list>
 
     <a-drawer
       title="筛选"
@@ -264,6 +279,29 @@
     >
     </device_unbind>
 
+    <device_bind
+      v-if="binddevice_modalstatus"
+      :modalstatus="binddevice_modalstatus"
+      :modaldata="check_device"
+      @cancel="cancel_binddevice"
+      @success="success_binddevice"
+    >
+    </device_bind>
+
+    <edit_devicetag
+      v-if="edit_devicetag_modalstatus"
+      :modalstatus="edit_devicetag_modalstatus"
+      :modaldata="check_device"
+      @cancel="cancel_edit_devicetag"
+      @success="success_edit_devicetag"
+    >
+    </edit_devicetag>
+
+    <tag_device
+      v-if="show_tagmanage"
+      @cancel="cancel_tagmanage"
+      :isshow="show_tagmanage"
+    />
   </div>
 </template>
 <script>
@@ -278,6 +316,10 @@ import {
 
 import device_detail from "./compoents/device_detail.vue";
 import device_unbind from "./compoents/device_unbind.vue";
+import device_bind from "./compoents/device_bind.vue";
+import tag_device from './compoents/tag_device.vue'
+import edit_devicetag from './compoents/edit_devicetag.vue'
+
 const columns = [
   {
     title: "设备名称",
@@ -290,6 +332,7 @@ const columns = [
   {
     title: "绑定环境",
     dataIndex: "env_name",
+    scopedSlots: { customRender: "cell_name" },
   },
   {
     title: "设备归属",
@@ -365,11 +408,12 @@ const query = {
   page: null,
 };
 export default {
-  components: { noEquipment, TagList, device_detail,device_unbind },
+  components: { noEquipment, TagList, device_detail, device_unbind, device_bind, tag_device,edit_devicetag },
   name: "equipment",
   data() {
     return {
       current: "1", //选中的目录
+      show_tagmanage: false, //标签管理状态
 
       drawer_visible: false,
       list: [],
@@ -384,7 +428,6 @@ export default {
       },
       labelCol: { span: 4 },
       wrapperCol: { span: 24 },
-      showEqList: true,
       pagination: {
         pageNum: 1, //当前页数
         pageSize: 10, //每页条数
@@ -402,8 +445,9 @@ export default {
       editname_state: false, //编辑设备名称弹窗
       checkdevice_newname: "", //选中设备新名称
 
-      unbinddevice_modalstatus:false,//解绑环境弹窗
-      binddevice_modalstatus:false,//绑定环境弹窗
+      unbinddevice_modalstatus: false,//解绑环境弹窗
+      binddevice_modalstatus: false,//绑定环境弹窗
+      edit_devicetag_modalstatus:false,//编辑绑定设备
     };
   },
   computed: {
@@ -415,6 +459,11 @@ export default {
     this.fetchList();
   },
   methods: {
+    //取消标签管理
+    cancel_tagmanage() {
+      this.show_tagmanage = false;
+    },
+
     //编辑名称弹窗
     show_editname_pop(record) {
       this.check_device = record;
@@ -438,17 +487,47 @@ export default {
     },
 
     //解绑环境弹窗
-    open_unbinddevice_pop(record){
-        this.check_device = record;
-         this.unbinddevice_modalstatus =true
+    open_unbinddevice_pop(record) {
+      this.check_device = record;
+      this.unbinddevice_modalstatus = true
     },
-    cancel_unbinddevice(){
-        this.unbinddevice_modalstatus = false
+    cancel_unbinddevice() {
+      this.unbinddevice_modalstatus = false
     },
-    success_unbinddevice(){
-         this.unbinddevice_modalstatus = false
-          this.fetchList();
+    success_unbinddevice() {
+      this.unbinddevice_modalstatus = false
+      this.fetchList();
     },
+
+
+    //绑定环境弹窗
+    open_binddevice_pop(record) {
+      this.check_device = record;
+      this.binddevice_modalstatus = true
+    },
+    cancel_binddevice() {
+      this.binddevice_modalstatus = false
+    },
+    success_binddevice() {
+      this.binddevice_modalstatus = false
+      this.fetchList();
+    },
+
+    //编辑绑定设备弹窗
+    open_edit_devicetag_pop(record) {
+      this.check_device = record;
+      this.edit_devicetag_modalstatus = true
+    },
+    cancel_edit_devicetag() {
+      this.edit_devicetag_modalstatus = false
+    },
+    success_edit_devicetag() {
+      this.edit_devicetag_modalstatus = false
+      this.fetchList();
+    },
+
+
+
 
     //自动续费弹窗
     change_autopay(record, type) {
@@ -472,7 +551,7 @@ export default {
           that.go_autopay(record.id, type);
           return false;
         },
-        onCancel() {},
+        onCancel() { },
       });
     },
     //自动续费
@@ -494,12 +573,12 @@ export default {
 
       this.$confirm({
         title: '删除设备',
-        content: '确定删除设备 '+ record.device_name+' 吗？提示：若删除的是未过期设备，在设备过期前可在回收站找回。'  ,
+        content: '确定删除设备 ' + record.device_name + ' 吗？提示：若删除的是未过期设备，在设备过期前可在回收站找回。',
         onOk() {
           that.go_deletdevice(record.id);
           return false;
         },
-        onCancel() {},
+        onCancel() { },
       });
     },
     //自动删除设备
@@ -516,7 +595,16 @@ export default {
 
 
 
-
+    //格式化环境名称
+    format_name(data) {
+      //console.log(data)
+      let c_1 = []
+      data.env_name.forEach(item => {
+        c_1.push(item.env_name)
+      })
+     // console.log(c_1)
+      return c_1.toString()
+    },
 
 
     //格式化远程
@@ -579,7 +667,7 @@ export default {
       this.fetchList();
     },
     // 设备类别改变
-    changeEqType: function () {},
+    changeEqType: function () { },
 
     onSearch_btn: function () {
       this.fetchList();
@@ -597,7 +685,7 @@ export default {
       console.log("selectedRowKeys changed: ", selectedRowKeys);
       this.selectedRowKeys = selectedRowKeys;
     },
-    onRenew: function () {},
+    onRenew: function () { },
 
     //显示详情
     show_detail(record) {
@@ -645,7 +733,7 @@ export default {
       this.fetchList();
     },
     // 购买设备
-    buyEq: function () {},
+    buyEq: function () { },
     // 续费设备
     renewalEq: function () {
       console.log("this.selectedRowKeys", this.selectedRowKeys);

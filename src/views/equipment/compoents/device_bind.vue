@@ -2,9 +2,9 @@
   <a-modal
     v-model="isshow"
     :width="925"
-    title="解绑环境"
+    title="绑定环境"
     @cancel="handleCancel"
-    @ok="go_bind"
+    @ok="go_unbind"
   >
     <div class="top_wrap">
       <div>{{ modaldata.created_at }}</div>
@@ -19,6 +19,9 @@
       &nbsp | &nbsp
       <div>已绑定 {{ modaldata.env_name.length }}个平台</div>
     </div>
+
+     <a-input-search placeholder="搜索环境" style="width: 200px;margin-bottom:20px"
+      @search="go_onSearch" />
 
     <a-table
       :row-selection="{
@@ -37,8 +40,8 @@
 </template>
 <script>
 import {
-  device_bind_environment_list,
-  device_unbindenvironment,
+  device_bindnoenvironmentlist,
+  device_bindenvironment,
 } from "@/api/equipment";
 export default {
   props: {
@@ -71,12 +74,16 @@ export default {
       this.isshow = false;
       this.$emit("cancel");
     },
-    //已绑定环境
-    async get_has_bindlist() {
+    go_onSearch(value){
+       this.get_has_bindlist(value)
+    },
+    //未绑定环境列表
+    async get_has_bindlist(env_name = null) {
       this.table_loading = true;
-      let { data } = await device_bind_environment_list({
+      let { data } = await device_bindnoenvironmentlist({
         pagesize: 300,
         page: 1,
+        env_name:env_name,
         device_id: this.modaldata.id,
       });
       this.table_loading = false;
@@ -95,8 +102,8 @@ export default {
             dataIndex: "site",
           },
           {
-            title: "最后登陆者",
-            dataIndex: "last_username",
+            title: "企业简称",
+            dataIndex: "business_short",
           },
         ];
       }
@@ -105,18 +112,18 @@ export default {
     onSelectChange(selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys;
     },
-    async go_bind() {
+    async go_unbind() {
       let c_1 = [];
       this.selectedRowKeys.forEach((item) => {
-        c_1.push(this.table_data[item].environment_id);
+        c_1.push(this.table_data[item].id);
       });
 
-      let { data } = await device_unbindenvironment({
+      let { data } = await device_bindenvironment({
         environment_id: c_1.toString(),
         device_id: this.modaldata.id,
       });
       if (data.code == 200) {
-        this.$message.success("解绑成功");
+        this.$message.success("绑定成功");
         this.isshow = false;
          this.$emit("success");
       }
