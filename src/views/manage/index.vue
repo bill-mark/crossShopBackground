@@ -80,7 +80,7 @@ export default {
         {
           name: "费用管理",
           value: "7",
-          menuName: 'fee'
+          menuName: 'manage_fee'
         },
       ],
       check_nav: 0,

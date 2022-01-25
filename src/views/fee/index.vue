@@ -4,17 +4,21 @@
       <a-menu
         style="width: 210px; height: 100%"
         mode="inline"
-        :default-selected-keys="['1']"
+        :default-selected-keys="['charge_fee']"
         :selected-keys="[current]"
         @click="handleClick"
       >
-        <a-menu-item key="member_security" class="menu_one">
+        <a-menu-item key="charge_fee" class="menu_one">
           <div class="my_equipment"></div>
-          <div class="title">成员登录控制</div>
+          <div class="title">账户充值</div>
         </a-menu-item>
-        <a-menu-item key="terminal_security" class="menu_one">
+        <a-menu-item key="balance_fee" class="menu_one">
+          <div class="my_equipment will_expire"></div>
+          <div class="title">余额明细</div>
+        </a-menu-item>
+        <a-menu-item key="order_fee" class="menu_one">
           <div class="my_equipment expired"></div>
-          <div class="title">终端白名单</div>
+          <div class="title">订单管理</div>
         </a-menu-item>
       </a-menu>
     </div>
@@ -59,15 +63,15 @@ export default {
         margin-right: 7px;
         width: 18px;
         height: 18px;
-        background-image: url("../../assets/img/member_login.png");
+        background-image: url("../../assets/img/charge@2x.png");
         background-repeat: no-repeat;
-        background-size: 100% 100%
+        background-size: 100% 100%;
       }
       .will_expire {
-        background-image: url("../../assets/img/登录请求授权@2x.png");
+        background-image: url("../../assets/img/balance@2x.png");
       }
       .expired {
-        background-image: url("../../assets/img/终端@2x.png");
+        background-image: url("../../assets/img/order@2x.png");
       }
       .title {
         font-size: 14px;

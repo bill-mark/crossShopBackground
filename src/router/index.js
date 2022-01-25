@@ -82,26 +82,56 @@ const routes = [
         meta: {
           needLogin: true // 需要登录
         },
-        component:()=>import(/* webpackChunkName: "equipment" */ '@/views/security/index.vue'),
+        component:()=>import(/* webpackChunkName: "security" */ '@/views/security/index.vue'),
         redirect: {name: 'member_security'},
         children: [
           {
             path:'member',
             name:'member_security',
-            component:()=>import(/* webpackChunkName: "addenv" */ '@/views/security/member.vue'),
+            component:()=>import(/* webpackChunkName: "member" */ '@/views/security/member.vue'),
             meta: {
               needLogin: true // 需要登录
             }
           }, {
             path: 'terminal',
             name: 'terminal_security',
-            component:()=>import(/* webpackChunkName: "addenv" */ '@/views/security/terminal.vue'),
+            component:()=>import(/* webpackChunkName: "terminal" */ '@/views/security/terminal.vue'),
             meta: {
               needLogin: true // 需要登录
             }
           }
         ],
-      },
+      }, {
+        path:'fee',
+        name:'manage_fee',
+        meta: {
+          needLogin: true // 需要登录
+        },
+        component:()=>import(/* webpackChunkName: "fee" */ '@/views/fee/index.vue'),
+        redirect: {name: 'charge_fee'},
+        children:[{
+          path:'charge',
+          name:'charge_fee',
+          component:()=>import(/* webpackChunkName: "charge_fee" */ '@/views/fee/charge_fee.vue'),
+          meta: {
+            needLogin: true // 需要登录
+          }
+        },{
+          path:'order',
+          name:'order_fee',
+          component:()=>import(/* webpackChunkName: "order_fee" */ '@/views/fee/order_fee.vue'),
+          meta: {
+            needLogin: true // 需要登录
+          }
+        }, {
+          path:'balance',
+          name:'balance_fee',
+          component:()=>import(/* webpackChunkName: "balance_fee" */ '@/views/fee/balance_fee.vue'),
+          meta: {
+            needLogin: true // 需要登录
+          }
+        }]
+      }
     ]
   },
   {
