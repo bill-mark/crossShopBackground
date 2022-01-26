@@ -26,3 +26,12 @@ export const user_listdepartment = (data) => {
         data
     })
 }
+
+//创建成员
+export const user_createmember = (data) => {
+    return request({
+        url: "/client_v1/user/create-member",
+        method: "POST",
+        data
+    })
+}

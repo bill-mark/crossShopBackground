@@ -1,8 +1,8 @@
 <template>
-  <div class="environment_wrap" :style="{height:wrap_height + 'px'}">
+  <div class="environment_wrap" :style="{ height: wrap_height + 'px' }">
     <div class="content_left">
       <a-menu
-        style="width: 256px;height:100%"
+        style="width: 256px; height: 100%"
         :default-selected-keys="['1']"
         mode="inline"
         :selected-keys="[current]"
@@ -60,32 +60,50 @@
               <div>清空授权</div>
             </div>
 
-            <div slot="content" class="popover-content"
-             @click="batch_open('清空环境标签')">
+            <div
+              slot="content"
+              class="popover-content"
+              @click="batch_open('清空环境标签')"
+            >
               <div>清空环境标签</div>
             </div>
 
-            <div slot="content" class="popover-content"
-             @click="batch_open('解绑设备')">
+            <div
+              slot="content"
+              class="popover-content"
+              @click="batch_open('解绑设备')"
+            >
               <div>解绑设备</div>
             </div>
 
-            <div slot="content" class="popover-content"
-            @click="batch_open('设为常用环境')">
+            <div
+              slot="content"
+              class="popover-content"
+              @click="batch_open('设为常用环境')"
+            >
               <div>设为常用环境</div>
             </div>
-            <div slot="content" class="popover-content"
-            @click="batch_open('取消常用环境')">
+            <div
+              slot="content"
+              class="popover-content"
+              @click="batch_open('取消常用环境')"
+            >
               <div>取消常用环境</div>
             </div>
 
-            <div slot="content" class="popover-content"
-            @click="batch_open('删除环境标签')">
+            <div
+              slot="content"
+              class="popover-content"
+              @click="batch_open('删除环境标签')"
+            >
               <div>删除环境标签</div>
             </div>
 
-            <div slot="content" class="popover-content"
-            @click="batch_open('删除环境')">
+            <div
+              slot="content"
+              class="popover-content"
+              @click="batch_open('删除环境')"
+            >
               <div>删除环境</div>
             </div>
 
@@ -417,7 +435,7 @@ export default {
   },
   data() {
     return {
-      wrap_height:null,//wrap高度
+      wrap_height: null,//wrap高度
 
       current: "1", //选中的目录
       event_guanli: "1", //环境模式
@@ -461,7 +479,7 @@ export default {
       urgent_renewal_count: "", //待付费
 
       selectedRowKeys: [], //表格 选中单元
-      checked_columns: [], //自定义表格头
+      show_columns: [], //自定义表格头
       columns: [
         {
           title: "环境",
@@ -554,6 +572,10 @@ export default {
       drawer_networklist: [],
       drawer_busshortlist: [],
       drawer_createrlist: [],
+
+      websocketObj: null,
+      websocket_port: 42536,
+      check_record:null,//选中的表格行
     };
   },
   mounted() {
@@ -564,13 +586,114 @@ export default {
     this.init();
 
     this.set_wrap_height()
+
+    
   },
   methods: {
     //高度绑定为页面高度
-    set_wrap_height(){
-       this.wrap_height = document.body.clientHeight - 82
-       console.log(this.wrap_height)
+    set_wrap_height() {
+      this.wrap_height = document.body.clientHeight - 82
+      console.log(this.wrap_height)
     },
+
+    go_open(record) {
+      console.log(record);
+      this.check_record = record
+      this.initWebsocket();
+    },
+    initWebsocket() {
+      console.log('initWebsocket', this.websocket_port)
+      this.webSocketObj = new WebSocket(
+        "ws://" + '127.0.0.1:' + this.websocket_port
+      );
+      this.webSocketObj.onmessage = this.onMessage
+      this.webSocketObj.onopen = this.onOpen
+      this.webSocketObj.onerror = this.onError
+      this.webSocketObj.onclose = this.onClose
+
+    },
+    //接收到消息的回调方法
+    onMessage(evt) {
+      console.log('onMessage')
+      console.log(JSON.parse(evt.data))
+    },
+    //连接成功建立的回调方法
+    onOpen() {
+      console.log('onOpen ', this.webSocketObj.readyState)
+      if (this.webSocketObj.readyState === 1) {
+        this.websocket_open_client()
+      }
+
+    },
+    //连接发生错误
+    onError() {
+      console.log('onError')
+
+      if (this.websocket_port <= 42540) {
+        setTimeout(() => {
+          this.onClose();
+          this.websocket_port += 1;
+          this.initWebsocket();
+
+        }, 1000);
+      } else {
+        this.$message.error('打开失败,websocket通信异常');
+        this.onClose();
+      }
+    },
+    //连接关闭的回调方法
+    onClose() {
+      console.log('onClose')
+      this.webSocketObj && this.webSocketObj.close && this.webSocketObj.close();
+    },
+    websocket_open_client() {
+      let c_1 = {
+        "message": "/connection/proxy",
+        "serverIp":this.check_record.device_ip,
+        "环境名":this.check_record.id
+      }
+      c_1 = JSON.stringify(c_1)
+      this.webSocketObj.send(c_1);
+
+    }, 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     //解绑设备弹出
     open_unbuind(record) {
       //console.log(record)
@@ -582,7 +705,7 @@ export default {
           that.go_unbinddevice(record.id);
           return false;
         },
-        onCancel() {},
+        onCancel() { },
       });
     },
     //解绑设备
@@ -608,7 +731,7 @@ export default {
           that.go_deletenviroment(c_1);
           return false;
         },
-        onCancel() {},
+        onCancel() { },
       });
     },
     //批量删除环境
@@ -632,7 +755,7 @@ export default {
         c_1.push(this.table_data[item].id);
       });
       console.log(c_1);
-      
+
 
       let that = this;
       this.$confirm({
@@ -642,7 +765,7 @@ export default {
           that.go_clear_auth(c_1, title);
           return false;
         },
-        onCancel() {},
+        onCancel() { },
       });
     },
     //批量操作jaax
@@ -658,7 +781,7 @@ export default {
           this.$message.success("清空授权 操作成功");
         }
       }
-       if (type == "清空环境标签") {
+      if (type == "清空环境标签") {
         let { data } = await environment_clearenvironmenttagmore({
           id: idarr.toString(),
         });
@@ -668,7 +791,7 @@ export default {
         }
       }
 
-       if (type == "解绑设备") {
+      if (type == "解绑设备") {
         let { data } = await environment_unbinddevicemore({
           id: idarr.toString(),
         });
@@ -678,9 +801,9 @@ export default {
         }
       }
 
-       if (type == "设为常用环境") {
+      if (type == "设为常用环境") {
         let { data } = await environment_commonmore({
-          dev_common:1,
+          dev_common: 1,
           id: idarr.toString(),
         });
         if (data.code == 200) {
@@ -691,7 +814,7 @@ export default {
 
       if (type == "取消常用环境") {
         let { data } = await environment_commonmore({
-          dev_common:0,
+          dev_common: 0,
           id: idarr.toString(),
         });
         if (data.code == 200) {
@@ -865,25 +988,25 @@ export default {
     },
 
     menu_handleClick(e) {
-      console.log("click ", e.keyPath,e.key);
+      console.log("click ", e.keyPath, e.key);
       this.current = e.key;
 
       Object.assign(this.$data, this.$options.data())
       this.current = e.key;
 
-      if(e.key == 2){
+      if (e.key == 2) {
         this.standard_config.env_common = 1
       }
-      if(e.key == 3){
+      if (e.key == 3) {
         this.standard_config.recent_open = 1
       }
-      if(e.key == 4){
+      if (e.key == 4) {
         this.standard_config.urgent_renewal = 1
       }
-       if(e.key == 6){
+      if (e.key == 6) {
         this.standard_config.no_auth_env = 0
       }
-       if(e.key == 7){
+      if (e.key == 7) {
         this.standard_config.no_bind = 0
       }
 
@@ -928,7 +1051,7 @@ export default {
     },
     //获得表格数据
     async get_tabledata() {
-     // console.log(this.standard_config);
+      // console.log(this.standard_config);
       // return
 
       this.table_loading = true;
@@ -938,7 +1061,7 @@ export default {
         pagesize: 20,
         page: this.pagination.pageNum,
       });
-       this.table_loading = false;
+      this.table_loading = false;
       if (data.code == 200) {
         this.pagination.total = data.data.total;
         this.no_auth_environment = data.data.no_auth_environment;
@@ -975,9 +1098,7 @@ export default {
       this.need_bind_eventname = record.env_name;
       this.need_bind_eventid = record.id;
     },
-    go_open(record) {
-      console.log(record);
-    },
+   
     go_edit(record) {
       this.$router.push({ path: "editenv", query: { id: record.id } });
     },

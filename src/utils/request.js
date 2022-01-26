@@ -12,26 +12,36 @@ const request = axios.create({
   timeout: 40000,
 });
 
+// version: " 1.0.0",
+// mask: "desk",
+// platform: "1",
+
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
     //判断请求的类型：如果是post请求就把默认参数拼到data里面；如果是get请求就拼到params里面
     if (config.method === "post") {
       config.data = {
+        // version:  localStorage.version,
+        // mask:  localStorage.mask,
+        // platform: localStorage.platform,
         version: " 1.0.0",
         mask: "desk",
         platform: "1",
         app: null,
-        token:localStorage.token,
+        token: localStorage.token,
         ...config.data,
       };
     } else if (config.method === "get") {
       config.params = {
+        // version:  localStorage.version,
+        // mask:  localStorage.mask,
+        // platform: localStorage.platform,
         version: " 1.0.0",
         mask: "desk",
         platform: "1",
         app: null,
-        token:localStorage.token,
+        token: localStorage.token,
         ...config.params,
       };
     }
@@ -45,9 +55,8 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
-    //console.log(response)
     if (response.data.code != 200 && response.request.responseType != "arraybuffer") {
-      let c_1 = response.data.message||response.data.msg
+      let c_1 = response.data.message || response.data.msg;
       Vue.prototype.$message.error("接口报错:" + c_1);
       return response;
     }
@@ -62,8 +71,8 @@ request.interceptors.response.use(
     }
 
     Vue.prototype.$message.error("接口报错:" + error.response.data.message);
-
-    return Promise.reject(error);
+ 
+    return error
   }
 );
 

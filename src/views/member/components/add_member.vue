@@ -53,21 +53,24 @@
       </div>
     </div>
 
-
-     <div class="line_wrap">
+    <div class="line_wrap">
       <div class="line_left red_title">登录时间:</div>
       <div class="line_right">
         <a-radio-group name="radioGroup" v-model="login_time">
           <a-radio :value="0" :style="radioStyle"> 24小时可登录 </a-radio>
-          <a-radio :value="1" :style="radioStyle"> 
-              每日允许访问时间:
-              <a-time-picker  format="HH:mm" 
+          <a-radio :value="1" :style="radioStyle">
+            每日允许访问时间:
+            <a-time-picker
+              format="HH:mm"
               placeholder="访问开始时间"
-              v-model="begin_time"/>
-              -
-              <a-time-picker  format="HH:mm"
-               placeholder="访问结束时间"
-               v-model="end_time"/>
+              v-model="begin_time"
+            />
+            -
+            <a-time-picker
+              format="HH:mm"
+              placeholder="访问结束时间"
+              v-model="end_time"
+            />
           </a-radio>
         </a-radio-group>
       </div>
@@ -77,27 +80,41 @@
       <div class="line_left red_title">修改个人信息权限:</div>
       <div class="line_right">
         <a-radio-group name="radioGroup" v-model="edit_info">
-          <a-radio :value="0" :style="radioStyle"> 允许  </a-radio>
+          <a-radio :value="0" :style="radioStyle"> 允许 </a-radio>
           <a-radio :value="1" :style="radioStyle"> 禁止 </a-radio>
         </a-radio-group>
       </div>
     </div>
 
-
     <div class="line_wrap" style="margin-top: 0px">
       <div class="line_left red_title">部门:</div>
       <div class="line_right">
-        <a-input placeholder="请输入用户名" v-model="username" />
+        <!-- <a-tree
+          v-model="department_id"
+          checkable
+          :selected-keys="selectedKeys"
+          :replaceFields="replaceFields"
+          :tree-data="treeData"
+        /> -->
+          <a-tree-select
+          v-model="department_id"
+          style="width: 100%"
+          :tree-data="treeData"
+          :replaceFields="replaceFields"
+          tree-checkable
+          :show-checked-strategy="SHOW_PARENT"
+        />
       </div>
     </div>
-
 
 
   </a-modal>
 </template>
 <script>
 import moment from 'moment';
-import { user_listdepartment } from "@/api/member.js";
+import { user_listdepartment ,user_createmember} from "@/api/member.js";
+import { TreeSelect } from 'ant-design-vue';
+const SHOW_PARENT = TreeSelect.SHOW_PARENT;
 export default {
   props: {
     modalstatus: Boolean,
@@ -112,20 +129,35 @@ export default {
       business_phone: null,
       business_pwd: "",
       role_id: 2,
-      auth_method:0,
-      login_time:0,
-      begin_time:null,
-      end_time:null,
-      edit_info:null,
-      department_id:null,
+      auth_method: 0,
+      login_time: 0,
+      begin_time: null,
+      end_time: null,
+      edit_info: 0,
+      department_id: [],
 
       radioStyle: {
         display: 'block',
         height: '30px',
         lineHeight: '30px',
       },
-      depart_list:[],
+
+      replaceFields: {
+        children: "children",
+        title: "title",
+        value: "id",
+        key: "id",
+      },
+      depart_list: [],
+      selectedKeys: [],
+      treeData: [],
+      SHOW_PARENT,
     };
+  },
+  watch:{
+     checkedKeys(){
+       console.log(this.checkedKeys)
+     }
   },
   mounted() {
     this.isshow = this.modalstatus;
@@ -133,29 +165,40 @@ export default {
   },
   methods: {
     moment,
+
+
     handleCancel() {
       this.isshow = false;
       this.$emit("cancel");
     },
-    async get_departlist(){
-         let { data } = await user_listdepartment({
+    async get_departlist() {
+      let { data } = await user_listdepartment({
       });
       if (data.code == 200) {
         this.depart_list = data.data.list
+
+        this.treeData = this.depart_list
       }
     },
     async ok_handle() {
-      let c_1 = [];
-      this.selectedRowKeys.forEach((item) => {
-        c_1.push(this.table_data[item].environment_id);
-      });
-
-      let { data } = await device_unbindenvironment({
-        environment_id: c_1.toString(),
-        device_id: this.modaldata.id,
+      
+      let { data } = await user_createmember({
+        username:this.username,
+        real_name:this.real_name,
+        contact:this.contact,
+        code:this.code,
+        business_phone:this.business_phone,
+        business_pwd:this.business_pwd,
+        role_id:this.role_id,
+        auth_method:this.auth_method,
+        login_time:this.login_time,
+        begin_time:this.begin_time,
+        end_time:this.end_time,
+        edit_info:this.edit_info,
+        department_id:this.department_id.toString(),
       });
       if (data.code == 200) {
-        this.$message.success("解绑成功");
+        this.$message.success("创建成功");
         this.isshow = false;
         this.$emit("success");
       }

@@ -85,10 +85,7 @@
 
       <div class="down_table">
         <a-table
-          :row-selection="{
-            selectedRowKeys: selectedRowKeys,
-            onChange: onSelectChange,
-          }"
+          :row-selection="rowSelection"
           :loading="table_loading"
           :columns="columns"
           :data-source="table_data"
@@ -184,7 +181,8 @@ export default {
         total: 0,
       },
 
-      selectedRowKeys: [], //表格 选中单元
+      selectedRowKeys: [], //表格 选中单元序号
+      selectedRows:[],//表格 选中单元行数组
       checked_columns: [], //自定义表格头
       columns: [
         {
@@ -252,11 +250,28 @@ export default {
     this.set_wrap_height();
     this.get_tabledata();
   },
+   computed: {
+    rowSelection() {
+      return {
+        selectedRowKeys:this.selectedRowKeys,
+        onChange: (selectedRowKeys, selectedRows) => {
+          this.selectedRows = selectedRows
+          this.selectedRowKeys = selectedRowKeys
+        },
+        getCheckboxProps: record => ({
+          props: {
+            disabled: record.role_id === 1,
+            name: record.username,
+          },
+        }),
+      };
+    },
+  },
   methods: {
     //高度绑定为页面高度
     set_wrap_height() {
       this.wrap_height = document.body.clientHeight - 82;
-      console.log(this.wrap_height);
+     // console.log(this.wrap_height);
     },
     //获得角色列表
     async get_rolelist() {
@@ -379,15 +394,10 @@ export default {
       }
     },
 
-    //表格行选中
-    onSelectChange(selectedRowKeys) {
-      console.log("selectedRowKeys changed: ", selectedRowKeys);
-      this.selectedRowKeys = selectedRowKeys;
-    },
+    
 
     //搜索回调
     handle_search(keywords) {
-      console.log(keywords);
       this.standard_config.keywords = keywords;
       this.pagination.pageNum = 1;
       this.get_tabledata();
