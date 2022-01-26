@@ -35,3 +35,12 @@ export const user_createmember = (data) => {
         data
     })
 }
+
+//添加部门
+export const user_createdepartment = (data) => {
+    return request({
+        url: "/client_v1/user/create-department",
+        method: "POST",
+        data
+    })
+}

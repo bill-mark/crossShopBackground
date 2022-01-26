@@ -20,6 +20,10 @@
           <div class="my_equipment expired"></div>
           <div class="title">订单管理</div>
         </a-menu-item>
+        <a-menu-item key="invite_fee" class="menu_one">
+          <div class="my_equipment expired"></div>
+          <div class="title">邀请有礼</div>
+        </a-menu-item>
       </a-menu>
     </div>
     <router-view class="info" />
