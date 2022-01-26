@@ -148,7 +148,6 @@ export default {
         value: "id",
         key: "id",
       },
-      depart_list: [],
       selectedKeys: [],
       treeData: [],
       SHOW_PARENT,
@@ -175,9 +174,8 @@ export default {
       let { data } = await user_listdepartment({
       });
       if (data.code == 200) {
-        this.depart_list = data.data.list
 
-        this.treeData = this.depart_list
+        this.treeData = data.data.list
       }
     },
     async ok_handle() {

@@ -43,7 +43,9 @@
             添加成员
           </a-button>
 
-          <a-button class="top_btn"> 部门管理 </a-button>
+          <a-button class="top_btn" @click="open_editdepartment_pop">
+            部门管理
+          </a-button>
 
           <a-popover
             trigger="click"
@@ -150,6 +152,13 @@
     >
     </add_member>
 
+    <edit_department
+      v-if="editdepartment_modalstatus"
+      :modalstatus="editdepartment_modalstatus"
+      @cancel="cancel_editdepartment"
+      @success="success_editdepartment"
+    >
+    </edit_department>
   </div>
 </template>
 <script>
@@ -157,8 +166,9 @@ import { environment_clear_auth_more } from "@/api/environment.js";
 
 import { user_member_list, user_rolelist } from "@/api/member.js";
 import add_member from './components/add_member.vue'
+import edit_department from './components/edit_department.vue'
 export default {
-  components: {add_member},
+  components: { add_member, edit_department },
   data() {
     return {
       wrap_height: null, //wrap高度
@@ -182,7 +192,7 @@ export default {
       },
 
       selectedRowKeys: [], //表格 选中单元序号
-      selectedRows:[],//表格 选中单元行数组
+      selectedRows: [],//表格 选中单元行数组
       checked_columns: [], //自定义表格头
       columns: [
         {
@@ -240,9 +250,10 @@ export default {
 
       member_list: [], //成员列表
       role_list: [], //角色列表
-      check_data:null,//选中成员
+      check_data: null,//选中成员
 
-      addmember_modalstatus:false,
+      addmember_modalstatus: false,
+      editdepartment_modalstatus: true,
     };
   },
   mounted() {
@@ -250,10 +261,10 @@ export default {
     this.set_wrap_height();
     this.get_tabledata();
   },
-   computed: {
+  computed: {
     rowSelection() {
       return {
-        selectedRowKeys:this.selectedRowKeys,
+        selectedRowKeys: this.selectedRowKeys,
         onChange: (selectedRowKeys, selectedRows) => {
           this.selectedRows = selectedRows
           this.selectedRowKeys = selectedRowKeys
@@ -271,7 +282,7 @@ export default {
     //高度绑定为页面高度
     set_wrap_height() {
       this.wrap_height = document.body.clientHeight - 82;
-     // console.log(this.wrap_height);
+      // console.log(this.wrap_height);
     },
     //获得角色列表
     async get_rolelist() {
@@ -365,7 +376,7 @@ export default {
           that.go_clear_auth(c_1, title);
           return false;
         },
-        onCancel() {},
+        onCancel() { },
       });
     },
     //批量操作ajax
@@ -394,7 +405,7 @@ export default {
       }
     },
 
-    
+
 
     //搜索回调
     handle_search(keywords) {
@@ -418,7 +429,19 @@ export default {
     },
     success_addmember() {
       this.addmember_modalstatus = false
-     this.get_tabledata();
+      this.get_tabledata();
+    },
+
+    //部门管理弹窗
+    open_editdepartment_pop() {
+      this.editdepartment_modalstatus = true
+    },
+    cancel_editdepartment() {
+      this.editdepartment_modalstatus = false
+    },
+    success_editdepartment() {
+      this.editdepartment_modalstatus = false
+      this.get_tabledata();
     },
 
     go_open(record) {
