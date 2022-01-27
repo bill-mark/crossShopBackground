@@ -104,43 +104,38 @@
             {{ table_formate_status(text) }}
           </div>
 
+          <div slot="cell_depart" slot-scope="text">
+            {{ table_formate_depart(text) }}
+          </div>
+
           <div slot="operaTitle" class="title_operate">
             <div class="title_operate_left">操作</div>
-            <!-- <div class="title_operate_right">
-                 <a-icon type="setting" />
-              </div> -->
           </div>
 
           <div
             slot="cell_operate"
             slot-scope="text, record"
             class="content_operate"
+            v-if="record.role_id != 1"
           >
-            <div @click="go_edit(record)" class="cell_leftblue">编辑</div>
+            <div @click="open_editmember_pop(record)" class="cell_leftblue">
+              编辑
+            </div>
 
-            <div class="cell_blue">授权</div>
+            <div class="cell_blue" @click="open_auth_pop(record)">授权</div>
 
             <a-popover trigger="hover" overlayClassName="table-popover">
-              <div
-                slot="content"
-                class="popover_edit-content"
-                @click="open_unbuind(record)"
-              >
-                <div>解绑设备</div>
+              <div slot="content" class="popover_edit-content">
+                <div>查看成员</div>
               </div>
-              <div
-                slot="content"
-                @click="open_delet(record)"
-                class="popover_edit-content"
-              >
-                <div>删除环境</div>
+              <div slot="content" class="popover_edit-content">
+                <div>交接环境</div>
               </div>
 
               <div class="cell_blue">更多</div>
             </a-popover>
           </div>
         </a-table>
-        <div class="down_txt">共{{ pagination.total }}条数据</div>
       </div>
     </div>
 
@@ -159,6 +154,26 @@
       @success="success_editdepartment"
     >
     </edit_department>
+
+    <edit_member
+      v-if="editmember_modalstatus"
+      :modaldata="check_data"
+      :modalstatus="editmember_modalstatus"
+      @cancel="cancel_editmember"
+      @success="success_editmember"
+    >
+    </edit_member>
+
+    <auth_environment
+      v-if="auth_modalstatus"
+      :modaldata="check_data"
+      :modalstatus="auth_modalstatus"
+      @cancel="cancel_auth"
+      @success="success_auth"
+    >
+    </auth_environment>
+
+
   </div>
 </template>
 <script>
@@ -167,8 +182,10 @@ import { environment_clear_auth_more } from "@/api/environment.js";
 import { user_member_list, user_rolelist } from "@/api/member.js";
 import add_member from './components/add_member.vue'
 import edit_department from './components/edit_department.vue'
+import edit_member from './components/edit_member.vue'
+import auth_environment from './components/auth_environment.vue'
 export default {
-  components: { add_member, edit_department },
+  components: { add_member, edit_department, edit_member,auth_environment },
   data() {
     return {
       wrap_height: null, //wrap高度
@@ -189,6 +206,7 @@ export default {
         pageNum: 1, //当前页数
         pageSize: 20, //每页条数
         total: 0,
+        showTotal: (total) => `共 ${total} 条`, // 显示总数
       },
 
       selectedRowKeys: [], //表格 选中单元序号
@@ -207,7 +225,8 @@ export default {
         },
         {
           title: "所在部门",
-          dataIndex: "depart_title",
+          dataIndex: "depart",
+          scopedSlots: { customRender: "cell_depart" },
           show: true,
         },
         {
@@ -253,7 +272,9 @@ export default {
       check_data: null,//选中成员
 
       addmember_modalstatus: false,
-      editdepartment_modalstatus: true,
+      editdepartment_modalstatus: false,
+      editmember_modalstatus: false,
+      auth_modalstatus:false,
     };
   },
   mounted() {
@@ -344,6 +365,17 @@ export default {
         return "新终端";
       }
     },
+    //格式化部门
+    table_formate_depart(data) {
+      let c_1 = []
+      if (data.length == 0) {
+        return
+      }
+      data.forEach(item => {
+        c_1.push(item.title)
+      })
+      return c_1.toString()
+    },
     //格式化状态
     table_formate_status(data) {
       if (data == 0) {
@@ -432,6 +464,35 @@ export default {
       this.get_tabledata();
     },
 
+    //编辑成员弹窗
+    open_editmember_pop(record) {
+      this.editmember_modalstatus = true
+      this.check_data = record
+    },
+    cancel_editmember() {
+      this.editmember_modalstatus = false
+    },
+    success_editmember() {
+      this.editmember_modalstatus = false
+      this.get_tabledata();
+    },
+
+    //授权弹窗
+    open_auth_pop(record) {
+      this.auth_modalstatus = true
+      this.check_data = record
+    },
+    cancel_auth() {
+      this.auth_modalstatus = false
+    },
+    success_auth() {
+      this.auth_modalstatus = false
+      this.get_tabledata();
+    },
+
+
+
+
     //部门管理弹窗
     open_editdepartment_pop() {
       this.editdepartment_modalstatus = true
@@ -444,12 +505,6 @@ export default {
       this.get_tabledata();
     },
 
-    go_open(record) {
-      console.log(record);
-    },
-    go_edit(record) {
-      this.$router.push({ path: "editenv", query: { id: record.id } });
-    },
   },
 };
 </script>

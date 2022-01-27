@@ -44,3 +44,57 @@ export const user_createdepartment = (data) => {
         data
     })
 }
+
+//编辑部门
+export const user_updatedepartment = (data) => {
+    return request({
+        url: "/client_v1/user/update-department",
+        method: "POST",
+        data
+    })
+}
+
+//转移成员
+export const user_usermove = (data) => {
+    return request({
+        url: "/client_v1/user/user-move",
+        method: "POST",
+        data
+    })
+}
+
+//删除部门(递归删除)
+export const user_deletedepartment = (data) => {
+    return request({
+        url: "/client_v1/user/delete-department",
+        method: "POST",
+        data
+    })
+}
+
+//编辑成员
+export const user_updatemember = (data) => {
+    return request({
+        url: "/client_v1/user/update-member",
+        method: "POST",
+        data
+    })
+}
+
+//成员授权环境列表
+export const user_authenvironmentlist = (data) => {
+    return request({
+        url: "/client_v1/user/auth-environment-list",
+        method: "POST",
+        data
+    })
+}
+
+//成员授权环境
+export const user_authenvironment = (data) => {
+    return request({
+        url: "/client_v1/user/auth-environment",
+        method: "POST",
+        data
+    })
+}
