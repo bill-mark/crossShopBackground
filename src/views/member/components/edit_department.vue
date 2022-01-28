@@ -37,20 +37,30 @@
 
       <div
         slot="cell_operate"
-        slot-scope="text,record"
+        slot-scope="text, record"
         class="content_operate"
       >
-        <div @click="open_edit(record)"  v-if="record.pid != 0" 
-        class="cell_leftblue">
+        <div
+          @click="open_edit(record)"
+          v-if="record.pid != 0"
+          class="cell_leftblue"
+        >
           编辑
         </div>
 
-        <div class="cell_blue" @click="open_move(record)" v-if="record.pid != 0">转移成员</div>
-        <div class="cell_blue"  
-        @click="open_delet(record)"
-        v-if="record.pid != 0"
+        <div
+          class="cell_blue"
+          @click="open_move(record)"
+          v-if="record.pid != 0"
         >
-        删除
+          转移成员
+        </div>
+        <div
+          class="cell_blue"
+          @click="open_delet(record)"
+          v-if="record.pid != 0"
+        >
+          删除
         </div>
       </div>
     </a-table>
@@ -119,7 +129,7 @@
       </div>
     </a-modal>
 
-     <a-modal v-model="move_isshow" :width="730" title="转移成员">
+    <a-modal v-model="move_isshow" :width="730" title="转移成员">
       <div class="addnew_line_wrap">
         <div class="line_left red_title">目标部门:</div>
         <div class="line_right">
@@ -143,14 +153,15 @@
         </a-button>
       </div>
     </a-modal>
-
   </a-modal>
 </template>
 
 <script>
-import { user_listdepartment, user_createdepartment,user_updatedepartment,
-user_deletedepartment,
-user_usermove} from "@/api/member.js";
+import {
+  user_listdepartment, user_createdepartment, user_updatedepartment,
+  user_deletedepartment,
+  user_usermove
+} from "@/api/member.js";
 export default {
   props: {
     modalstatus: Boolean,
@@ -162,7 +173,7 @@ export default {
       selectedRowKeys: [], //表格 选中单元序号
       selectedRows: [],//表格 选中单元行数组
       expandedRowKeys: [],
-      checked_depart:null,
+      checked_depart: null,
 
       add_isshow: false,
       new_departname: '',
@@ -174,12 +185,12 @@ export default {
         key: "id",
       },
 
-      edit_isshow:false,
-      edit_departname:'',
-      edit_depart_pid:null,//编辑部门上级部门
+      edit_isshow: false,
+      edit_departname: '',
+      edit_depart_pid: null,//编辑部门上级部门
 
-      move_isshow:false,
-      move_depart_pid:null,
+      move_isshow: false,
+      move_depart_pid: null,
 
       columns: [
         {
@@ -259,8 +270,8 @@ export default {
     },
     async add_new() {
       //console.log(this.new_depart_pid)
-      if(!this.new_depart_pid){
-         this.$message.warning("部门必选!");
+      if (!this.new_depart_pid) {
+        this.$message.warning("部门必选!");
         return
       }
       let { data } = await user_createdepartment({
@@ -271,13 +282,13 @@ export default {
       if (data.code == 200) {
         this.$message.success("添加部门成功");
         this.add_isshow = false
-         this.get_tabledata()
+        this.get_tabledata()
       }
     },
 
     open_edit(record) {
       this.checked_depart = record
-      this.edit_departname =record.title
+      this.edit_departname = record.title
       this.edit_depart_pid = record.pid
       this.edit_isshow = true
     },
@@ -286,8 +297,8 @@ export default {
     },
     async edit_depart() {
       //console.log(this.new_depart_pid)
-      if(!this.edit_depart_pid){
-         this.$message.warning("部门必选!");
+      if (!this.edit_depart_pid) {
+        this.$message.warning("部门必选!");
         return
       }
       let { data } = await user_updatedepartment({
@@ -299,7 +310,7 @@ export default {
       if (data.code == 200) {
         this.$message.success("编辑成功");
         this.edit_isshow = false
-         this.get_tabledata()
+        this.get_tabledata()
       }
     },
 
@@ -312,8 +323,8 @@ export default {
       this.move_isshow = false
     },
     async move_depart() {
-      if(!this.move_depart_pid){
-         this.$message.warning("部门必选!");
+      if (!this.move_depart_pid) {
+        this.$message.warning("部门必选!");
         return
       }
       let { data } = await user_usermove({
@@ -324,18 +335,18 @@ export default {
       if (data.code == 200) {
         this.$message.success("转移成功");
         this.move_isshow = false
-         this.get_tabledata()
+        this.get_tabledata()
       }
     },
 
-    open_delet(record){
+    open_delet(record) {
       console.log(record)
-      if(record.member_count > 0){
+      if (record.member_count > 0) {
         this.$message.error('部门内有成员,请先转移成员')
         return
       }
 
-        let that = this;
+      let that = this;
       this.$confirm({
         title: '删除部门',
         content: "部门:" + record.title + " ,确定删除吗",
@@ -347,14 +358,14 @@ export default {
       });
 
     },
-    async go_delet(id){
-       let { data } = await user_deletedepartment({
-          id: id
-        });
-        if (data.code == 200) {
-          this.$message.success("删除成功");
-          this.get_tabledata()
-        }
+    async go_delet(id) {
+      let { data } = await user_deletedepartment({
+        id: id
+      });
+      if (data.code == 200) {
+        this.$message.success("删除成功");
+        this.get_tabledata()
+      }
     }
 
 

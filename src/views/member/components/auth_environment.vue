@@ -20,10 +20,7 @@
       @search="go_onSearch" />
 
     <a-table
-      :row-selection="{
-        selectedRowKeys: selectedRowKeys,
-        onChange: onSelectChange,
-      }"
+      :row-selection="rowSelection"
       :loading="table_loading"
       :columns="base_columns"
       :data-source="table_data"
@@ -37,7 +34,7 @@
 <script>
 import {
   user_authenvironmentlist,
-  user_authenvironment,
+  user_authenvironmentmore,
 } from "@/api/member";
 export default {
   props: {
@@ -47,7 +44,6 @@ export default {
   data() {
     return {
       isshow: false,
-      selectedRowKeys: [], //表格选中单元序号
       selectedRows:[],//表格选中单元
       pagination: {
         pageNum: 1, //当前页数
@@ -66,7 +62,32 @@ export default {
     this.isshow = this.modalstatus;
     this.get_list();
   },
+  computed: {
+    rowSelection() {
+      return {
+        onChange: (selectedRowKeys, selectedRows) => {
+          this.selectedRows = selectedRows
+        },
+        getCheckboxProps: record => ({
+          props: {
+            defaultChecked:this.check_have(record),
+            name: record.username,
+          },
+        }),
+      };
+    },
+  },
   methods: {
+    check_have(record){
+      let c_1 = this.modaldata.auth_environment.findIndex(item => item.id ==record.id)
+      
+      if(c_1 >-1){
+          this.selectedRows.push( this.table_data[c_1] )
+          return true
+      }else{
+          return false
+      }
+    },
     handleCancel() {
       this.isshow = false;
       this.$emit("cancel");
@@ -105,20 +126,18 @@ export default {
         ];
       }
     },
-    //表格行选中
-    onSelectChange(selectedRowKeys,selectedRows) {
-      this.selectedRows = selectedRows
-      this.selectedRowKeys = selectedRowKeys;
-    },
     async ok_handle() {
+        // console.log( this.selectedRows)
+        // return
+
       let c_1 = [];
-      this.selectedRowKeys.forEach((item) => {
-        c_1.push(this.table_data[item].id);
+      this.selectedRows.forEach((item) => {
+       c_1.push(item.id)
       });
 
-      let { data } = await user_authenvironment({
-        environment_id: c_1.toString(),
-        device_id: this.modaldata.id,
+      let { data } = await user_authenvironmentmore({
+        env_id: c_1.toString(),
+        id: this.modaldata.id,
       });
       if (data.code == 200) {
         this.$message.success("授权成功");
@@ -127,24 +146,7 @@ export default {
       }
     },
 
-    //格式化状态
-    formate_status(data) {
-      if (data == 0) {
-        return "正常";
-      }
-      if (data == 1) {
-        return "过期";
-      }
-      if (data == 2) {
-        return "待分配";
-      }
-      if (data == 3) {
-        return "故障";
-      }
-      if (data == 4) {
-        return "已删除";
-      }
-    },
+    
   },
 };
 </script>
@@ -163,4 +165,16 @@ export default {
   display: flex;
   margin-bottom: 10px;
 }
+
+/deep/ .tab_envment_wrap{
+  display: flex;
+  height: 58px;
+  width: 100%;
+  .tab_envment_line{
+     padding: 10px;
+     width: 100px;
+ }
+}
+
+
 </style>

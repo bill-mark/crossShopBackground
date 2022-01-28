@@ -52,20 +52,22 @@
             v-model="batch_visibal"
             overlayClassName="table-popover"
           >
-            <div
-              slot="content"
-              class="popover-content"
-              @click="batch_open('清空授权')"
+            <div slot="content" class="popover-content"
+            @click="batch_enable"
             >
-              <div>环境授权</div>
+              <div>批量启用成员</div>
             </div>
 
-            <div
-              slot="content"
-              class="popover-content"
-              @click="batch_open('删除环境')"
+            <div slot="content" class="popover-content"
+            @click="batch_ban"
             >
-              <div>删除环境</div>
+              <div>批量禁用成员</div>
+            </div>
+
+            <div slot="content" class="popover-content"
+            @click="batch_opendelet"
+            >
+              <div>批量删除成员</div>
             </div>
 
             <a-button class="top_btn" :disabled="selectedRowKeys.length === 0">
@@ -125,11 +127,38 @@
             <div class="cell_blue" @click="open_auth_pop(record)">授权</div>
 
             <a-popover trigger="hover" overlayClassName="table-popover">
-              <div slot="content" class="popover_edit-content">
+              <div
+                slot="content"
+                class="popover_edit-content"
+                @click="open_view_pop(record)"
+              >
                 <div>查看成员</div>
               </div>
-              <div slot="content" class="popover_edit-content">
-                <div>交接环境</div>
+
+              <div
+                slot="content"
+                class="popover_edit-content"
+                v-if="record.status == 0"
+                @click="open_ban(record)"
+              >
+                <div>禁用成员</div>
+              </div>
+
+              <div
+                slot="content"
+                class="popover_edit-content"
+                v-if="record.status == 1"
+                @click="open_enable(record)"
+              >
+                <div>启用成员</div>
+              </div>
+
+              <div
+                slot="content"
+                class="popover_edit-content"
+                @click="open_delet(record)"
+              >
+                <div>删除成员</div>
               </div>
 
               <div class="cell_blue">更多</div>
@@ -173,19 +202,34 @@
     >
     </auth_environment>
 
-
+    <view_member
+      v-if="view_modalstatus"
+      :modaldata="check_data"
+      :modalstatus="view_modalstatus"
+      @cancel="cancel_view"
+      @success="success_view"
+    >
+    </view_member>
   </div>
 </template>
 <script>
 import { environment_clear_auth_more } from "@/api/environment.js";
 
-import { user_member_list, user_rolelist } from "@/api/member.js";
+import {
+  user_member_list, user_rolelist, user_deletemembermore, user_banmembermore,
+  user_enablemembermore,
+} from "@/api/member.js";
 import add_member from './components/add_member.vue'
 import edit_department from './components/edit_department.vue'
 import edit_member from './components/edit_member.vue'
 import auth_environment from './components/auth_environment.vue'
+
+import view_member from './components/view_member.vue'
 export default {
-  components: { add_member, edit_department, edit_member,auth_environment },
+  components: {
+    add_member, edit_department, edit_member, auth_environment,
+    view_member,
+  },
   data() {
     return {
       wrap_height: null, //wrap高度
@@ -274,7 +318,9 @@ export default {
       addmember_modalstatus: false,
       editdepartment_modalstatus: false,
       editmember_modalstatus: false,
-      auth_modalstatus:false,
+      auth_modalstatus: false,
+
+      view_modalstatus: false,
     };
   },
   mounted() {
@@ -305,6 +351,129 @@ export default {
       this.wrap_height = document.body.clientHeight - 82;
       // console.log(this.wrap_height);
     },
+
+    open_delet(record) {
+      let that = this;
+      this.$confirm({
+        title: '删除成员',
+        content: "成员:" + record.username + " ,确定删除吗",
+        onOk() {
+          that.go_delet(record.id)
+          return false;
+        },
+        onCancel() { },
+      });
+    },
+    batch_opendelet() {
+      let c_1 = []
+      this.selectedRows.forEach(item=>{
+        c_1.push(item.id)
+      })
+
+      let that = this;
+      this.$confirm({
+        title: '批量删除成员',
+        content: "确定批量删除所选成员吗",
+        onOk() {
+          that.go_delet( c_1.toString() )
+          return false;
+        },
+        onCancel() { },
+      });
+    },
+    async go_delet(id) {
+      let { data } = await user_deletemembermore({
+        id: id
+      });
+      if (data.code == 200) {
+        this.$message.success("删除成功");
+        this.get_tabledata()
+      }
+    },
+
+    open_ban(record) {
+      let that = this;
+      this.$confirm({
+        title: '禁用成员',
+        content: "成员:" + record.username + " ,确定禁用吗",
+        onOk() {
+          that.go_ban(record.id)
+          return false;
+        },
+        onCancel() { },
+      });
+    },
+      batch_ban() {
+      let c_1 = []
+      this.selectedRows.forEach(item=>{
+        c_1.push(item.id)
+      })
+
+      let that = this;
+      this.$confirm({
+        title: '批量禁用成员',
+        content: "确定批量禁用所选成员吗",
+        onOk() {
+          that.go_ban( c_1.toString() )
+          return false;
+        },
+        onCancel() { },
+      });
+    },
+    async go_ban(id) {
+      let { data } = await user_banmembermore({
+        id: id
+      });
+      if (data.code == 200) {
+        this.$message.success("禁用成功");
+        this.get_tabledata()
+      }
+    },
+
+    //启用
+    open_enable(record) {
+      let that = this;
+      this.$confirm({
+        title: '启用成员',
+        content: "成员:" + record.username + " ,确定启用吗",
+        onOk() {
+          that.go_enable(record.id)
+          return false;
+        },
+        onCancel() { },
+      });
+    },
+     batch_enable() {
+      let c_1 = []
+      this.selectedRows.forEach(item=>{
+        c_1.push(item.id)
+      })
+
+      let that = this;
+      this.$confirm({
+        title: '批量启用成员',
+        content: "确定批量启用所选成员吗",
+        onOk() {
+          that.go_enable( c_1.toString() )
+          return false;
+        },
+        onCancel() { },
+      });
+    },
+    async go_enable(id) {
+      let { data } = await user_enablemembermore({
+        id: id
+      });
+      if (data.code == 200) {
+        this.$message.success("启用成功");
+        this.get_tabledata()
+      }
+    },
+
+
+
+
+
     //获得角色列表
     async get_rolelist() {
       let { data } = await user_rolelist({});
@@ -491,6 +660,18 @@ export default {
     },
 
 
+    //查看用户弹窗
+    open_view_pop(record) {
+      this.view_modalstatus = true
+      this.check_data = record
+    },
+    cancel_view() {
+      this.view_modalstatus = false
+    },
+    success_view() {
+      this.view_modalstatus = false
+      this.get_tabledata();
+    },
 
 
     //部门管理弹窗
