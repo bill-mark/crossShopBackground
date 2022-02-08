@@ -2,9 +2,11 @@
   <a-config-provider :locale="locale">
     <div id="app">
       <div class="left_nav">
-        <div class="nav_content nav_1">管理</div>
-        <div class="nav_content nav_2">环境</div>
-        <div class="nav_content nav_3">插件</div>
+        <div class="nav_content nav_1"
+           @click="nav_click('manage_home')"
+        >管理</div>
+        <!-- <div class="nav_content nav_2">环境</div>
+        <div class="nav_content nav_3">插件</div> -->
       </div>
 
       <router-view />
@@ -26,6 +28,13 @@ export default {
     this.initWebsocket();
   },
   methods: {
+    nav_click(menuName) {
+      return
+      this.$router.push({ name: menuName })
+
+    },
+
+
     initWebsocket() {
      // console.log('appvue initWebsocket', this.websocket_port)
       this.webSocketObj = new WebSocket(
@@ -92,6 +101,7 @@ export default {
   width: 40px;
   background-color: white;
   position: fixed;
+  top: 0px;
   left: 0px;
   height: 100%;
   border-right: 1px solid #dedfe2;

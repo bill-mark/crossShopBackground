@@ -76,6 +76,14 @@ const routes = [
         component: () => import(/* webpackChunkName: "addenv" */ "@/views/manage/edit_environment.vue"),
       },
       {
+        path: "edituser",
+        name: "manage_edituser",
+        meta: {
+          needLogin: true, // 需要登录
+        },
+        component: () => import(/* webpackChunkName: "edituser" */ "@/views/manage/edit_user.vue"),
+      },
+      {
         path: "security",
         name: "manage_security",
         meta: {
@@ -163,6 +171,14 @@ const routes = [
           needLogin: false, // 不需要登录
         },
         component: () => import(/* webpackChunkName: "login_login" */ "@/views/login/login.vue"),
+      },
+      {
+        path: "register",
+        name: "login_register",
+        meta: {
+          needLogin: false, // 不需要登录
+        },
+        component: () => import(/* webpackChunkName: "login_register" */ "@/views/login/register.vue"),
       },
       {
         path: "company",

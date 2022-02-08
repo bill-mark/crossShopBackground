@@ -51,6 +51,8 @@ export default {
   margin-top: 11px;
   display: flex;
   flex-direction: row;
+  margin-left: 15px;
+  margin-right: 15px;
   .menu {
     width: 210px;
     background-color: #fff;

@@ -104,7 +104,7 @@ export default {
   },
   methods: {
     test(){
-          console.log('test 18210190263 1')
+          console.log('test 18210190263 1' + '17888889999' )
           console.log(this.phone)
     },
     go_company_login(){

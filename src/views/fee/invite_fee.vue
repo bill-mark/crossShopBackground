@@ -43,19 +43,19 @@
 <script>
 const columns = [{ 
     title: "注册时间",
-    dataIndex: "trade_no"
+    dataIndex: "trade_no1"
   },{ 
     title: "注册公司名",
-    dataIndex: "trade_no"
+    dataIndex: "trade_no2"
   },{ 
     title: "第一次下单时间",
-    dataIndex: "trade_no"
+    dataIndex: "trade_no3"
   },{ 
     title: "礼金券",
-    dataIndex: "trade_no"
+    dataIndex: "trade_no4"
   },{ 
     title: "时间",
-    dataIndex: "trade_no"
+    dataIndex: "trade_no5"
   }
 ]
 import { copy } from 'iclipboard';
@@ -63,10 +63,15 @@ export default {
   name: 'invite_fee',
   data() {
     return {
-      link: 'www.baidu.com',
+      link: 'http://119.23.136.12:8801/?invite=',
       columns,
       data: []
     }
+  },
+  mounted(){
+     let c_1 = JSON.parse(localStorage.member)
+     this.link = this.link +c_1.invite
+     console.log(c_1)
   },
   methods: {
     copyClick: function() {
