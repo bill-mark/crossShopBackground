@@ -54,15 +54,6 @@
           <div class="wechat"></div>
           <div class="paypal"></div>
         </div>
-        <div :class="['way', 'expand', way.isPal ? 'way_act' : '']" @click="changePayWay('isPal')">
-          <div class="alipay">
-            <div class="ali_left pay_left"></div>
-            <div class="ali_right">
-              <div class="ali_title">贝宝支付</div>
-              <div class="ali_info">PayPal</div>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="btns">
         <div class="pay_btn">
