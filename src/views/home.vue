@@ -21,7 +21,7 @@ export default{
             this.$router.push({name:'login_login'})
         },
         go_register(){
-
+           this.$router.push({name:'login_register'})
         }
     }
 }

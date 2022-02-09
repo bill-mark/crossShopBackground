@@ -63,7 +63,7 @@ export default {
   name: 'invite_fee',
   data() {
     return {
-      link: 'http://119.23.136.12:8801/?invite=',
+      link: 'http://119.23.136.12:8801/#/login/register?invite=',
       columns,
       data: []
     }

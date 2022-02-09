@@ -19,10 +19,10 @@
       <div class="middle_line">
         <div class="middle_p_left">手机号：</div>
         <a-input-group compact>
-          <!-- <a-select default-value="+86">
+          <a-select default-value="+86" v-model="register_code">
             <a-select-option value="+86"> 中国(+86) </a-select-option>
             <a-select-option value="+1"> 美国(+1) </a-select-option>
-          </a-select> -->
+          </a-select>
           <a-input
             style="width: 200px"
             placeholder="输入手机号"
@@ -94,6 +94,8 @@ export default {
       messagecode: null,
       get_messagecode_state: false,
       checked: true, //是否记住密码
+
+      register_code:'+86',
     };
   },
   mounted(){
@@ -142,6 +144,7 @@ export default {
             type:this.type,
             verify_code:this.messagecode,
             password:this.password,
+            register_code:this.register_code,
         })
         console.log(data)
         if(data.code ==200){

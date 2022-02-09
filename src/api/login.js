@@ -43,3 +43,11 @@ export const user_edit_password = (data) => {
         data
     })
 }
+
+export const user_register = (data) => {
+    return request({
+        url: "/client_v1/user/register",
+        method: "POST",
+        data
+    })
+}
