@@ -5,13 +5,15 @@
       <div class="link_title">专属邀请链接</div>
       <div class="link_clip">
         <a-input class="clip_input" :value="link" />
-        <a-button type="link" class="clip_icon" @click="copyClick">复制</a-button>
+        <a-button type="link" class="clip_icon" @click="copyClick"
+          >复制</a-button
+        >
       </div>
       <div class="link_line"></div>
       <div class="link_info">
-        1.通过你的邀请链接注册紫鸟浏览器专业版的好友，好友下单后可获得1张18元无门槛优惠券。<br/>
-        2.在你的好友第一次下单后，你的企业将获得2张18元优惠券。<br/>
-        3.无门槛优惠券的使用有效期及使用规则以券面标示为准。<br/>
+        1.通过你的邀请链接注册紫鸟浏览器专业版的好友，好友下单后可获得1张18元无门槛优惠券。<br />
+        2.在你的好友第一次下单后，你的企业将获得2张18元优惠券。<br />
+        3.无门槛优惠券的使用有效期及使用规则以券面标示为准。<br />
         4.本活动最终解释权归洋淘跨境浏览器所有。
       </div>
     </div>
@@ -20,43 +22,43 @@
         <div class="r_count">
           <div class="count_back"></div>
           <div class="count_info">
-            <div class="co">0</div>
+            <div class="co">{{ total }}</div>
             <div class="co_title">累计邀请好友 (人)</div>
           </div>
         </div>
         <div class="r_count q_count">
           <div class="count_back"></div>
           <div class="count_info">
-            <div class="co">0</div>
+            <div class="co">{{ count }}</div>
             <div class="co_title">获得礼金券 (元)</div>
           </div>
         </div>
       </div>
       <div class="invite_list">
-        <a-table :columns="columns" :data-source="data">
-        </a-table>
+        <a-table :columns="columns" :data-source="table_data"> </a-table>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-const columns = [{ 
-    title: "注册时间",
-    dataIndex: "trade_no1"
-  },{ 
-    title: "注册公司名",
-    dataIndex: "trade_no2"
-  },{ 
-    title: "第一次下单时间",
-    dataIndex: "trade_no3"
-  },{ 
-    title: "礼金券",
-    dataIndex: "trade_no4"
-  },{ 
-    title: "时间",
-    dataIndex: "trade_no5"
-  }
+import { coupon_invite } from "@/api/const_manage";
+const columns = [{
+  title: "注册时间",
+  dataIndex: "trade_no1"
+}, {
+  title: "注册公司名",
+  dataIndex: "trade_no2"
+}, {
+  title: "第一次下单时间",
+  dataIndex: "trade_no3"
+}, {
+  title: "礼金券",
+  dataIndex: "trade_no4"
+}, {
+  title: "时间",
+  dataIndex: "trade_no5"
+}
 ]
 import { copy } from 'iclipboard';
 export default {
@@ -65,22 +67,35 @@ export default {
     return {
       link: 'http://119.23.136.12:8801/#/login/register?invite=',
       columns,
-      data: []
+      table_data: [],
+      count: null,
+      total: null,
     }
   },
-  mounted(){
-     let c_1 = JSON.parse(localStorage.member)
-     this.link = this.link +c_1.invite
-     console.log(c_1)
+  mounted() {
+    let c_1 = JSON.parse(localStorage.member)
+    this.link = this.link + c_1.invite
+
+    this.get_data()
   },
   methods: {
-    copyClick: function() {
-      if(copy(this.link)) {
+    copyClick: function () {
+      if (copy(this.link)) {
         this.$message.success('复制成功');
       } else {
         this.$message.error('复制失败');
       }
-    }
+    },
+
+    async get_data() {
+      let { data } =await coupon_invite({
+
+      })
+      if (data.code == 200) {
+        this.count = data.data.count
+        this.total = data.data.total
+      }
+    },
   }
 }
 </script>
@@ -92,18 +107,18 @@ export default {
   .banner {
     width: 100%;
     height: 269px;
-   background: url('../../assets/img/fee/邀请banner@2x.png');
+    background: url("../../assets/img/fee/邀请banner@2x.png");
     background-repeat: no-repeat;
     background-size: 100% 100%;
   }
   .invite_link {
     display: flex;
-    flex-direction: column;;
+    flex-direction: column;
     margin-top: -107px;
     margin-left: 200px;
     width: 1200px;
     height: 294px;
-    background: #FFFFFF;
+    background: #ffffff;
 
     box-shadow: 0px 0px 9px 1px rgba(185, 185, 185, 0.27);
     border-radius: 10px;
@@ -115,7 +130,6 @@ export default {
       font-family: SourceHanSansSC;
       font-weight: 500;
       color: #374567;
-
     }
     .link_clip {
       display: flex;
@@ -125,9 +139,9 @@ export default {
       .clip_input {
         width: 613px;
         height: 46px;
-        background: #FFFFFF;
+        background: #ffffff;
 
-        border: 1px solid #4C84FF;
+        border: 1px solid #4c84ff;
 
         border-radius: 23px;
       }
@@ -141,8 +155,7 @@ export default {
       margin-left: 62px;
       width: 1074px;
       height: 1px;
-      background: #E5E5E5;
-
+      background: #e5e5e5;
     }
     .link_info {
       margin-top: 23px;
@@ -156,60 +169,58 @@ export default {
     }
   }
   .invite_info {
+    display: flex;
+    flex-direction: row;
+    margin-top: 21px;
+    margin-left: 200px;
+    .invite_count {
       display: flex;
-      flex-direction: row;
-      margin-top: 21px;
-      margin-left: 200px;
-      .invite_count {
+      flex-direction: column;
+      .r_count {
         display: flex;
-        flex-direction: column;
-        .r_count {
-          display: flex;
-          flex-direction: row;;
-          width: 324px;
-          height: 102px;
-          background: #FFFFFF;
+        flex-direction: row;
+        width: 324px;
+        height: 102px;
+        background: #ffffff;
 
-          box-shadow: 0px 0px 9px 1px rgba(185, 185, 185, 0.27);
-          border-radius: 10px;
-          .count_back {
-            margin: 10px 49px 8px 30px;
-            width: 84px;
-            height: 84px;
-           background: url('../../assets/img/fee/组 11@2x(1).png');
-            background-repeat: no-repeat;
-            background-size: 100% 100%;
-          }
-          .count_info {
-            display: flex;
-            flex-direction: column;
-            margin-top: 10px;
-            .co {
-              margin-left: 42px;
-              font-size: 30px;
-              font-family: Source Han Sans CN;
-              font-weight: 500;
-              color: #425070;
-
-            }
-            .co_title {
-              font-size: 14px;
-              font-family: Source Han Sans CN;
-              font-weight: 400;
-              color: #425070;
-
-            }
-          }
+        box-shadow: 0px 0px 9px 1px rgba(185, 185, 185, 0.27);
+        border-radius: 10px;
+        .count_back {
+          margin: 10px 49px 8px 30px;
+          width: 84px;
+          height: 84px;
+          background: url("../../assets/img/fee/组 11@2x(1).png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
         }
-        .q_count {
-          margin-top: 23px;
-          .count_back {
-           background: url('../../assets/img/fee/组 11@2x.png');
-            background-repeat: no-repeat;
-            background-size: 100% 100%;
+        .count_info {
+          display: flex;
+          flex-direction: column;
+          margin-top: 10px;
+          .co {
+            margin-left: 42px;
+            font-size: 30px;
+            font-family: Source Han Sans CN;
+            font-weight: 500;
+            color: #425070;
+          }
+          .co_title {
+            font-size: 14px;
+            font-family: Source Han Sans CN;
+            font-weight: 400;
+            color: #425070;
           }
         }
       }
+      .q_count {
+        margin-top: 23px;
+        .count_back {
+          background: url("../../assets/img/fee/组 11@2x.png");
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+        }
+      }
+    }
   }
   .invite_list {
     margin-left: 22px;

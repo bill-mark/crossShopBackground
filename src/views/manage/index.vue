@@ -16,10 +16,10 @@
       </div>
 
       <div class="nav_w_right">
-        <div class="rightcell_1">APP下载</div>
+        <!-- <div class="rightcell_1">APP下载</div>
         <div class="rightcell_line"></div>
         <div class="rightcell_2">帮助中心</div>
-        <div class="rightcell_line"></div>
+        <div class="rightcell_line"></div> -->
 
         <a-popover trigger="click" overlayClassName="manage-popover">
           <div slot="content" class="pop_wrap">

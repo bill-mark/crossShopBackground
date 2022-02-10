@@ -13,7 +13,7 @@
   </div>
 </template>
 <script>
-import { getList } from "@/api/balance_fee";
+import { order_balance_log_list } from "@/api/const_manage";
 
 const columns = [
   {
@@ -59,7 +59,7 @@ export default {
   methods: {
     async fetchList() {
       this.loading = true;
-      const { data } = await getList({
+      const { data } = await order_balance_log_list({
         pagesize: 10,
         page: this.pagination.pageNum,
       });

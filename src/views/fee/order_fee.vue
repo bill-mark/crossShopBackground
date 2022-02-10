@@ -29,8 +29,7 @@
   </div>
 </template>
 <script>
-import { getList } from "@/api/order_fee";
-
+import { order_index } from "@/api/const_manage";
 const columns = [
   {
     title: "订单号",
@@ -86,7 +85,7 @@ export default {
   methods: {
     async fetchList() {
       this.loading = true;
-      const { data } = await getList({
+      const { data } = await order_index({
         pagesize: 10,
         page: this.pagination.pageNum,
       });

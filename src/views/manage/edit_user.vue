@@ -145,7 +145,7 @@ export default {
     let c_1 = JSON.parse(localStorage.member)
     this.user_role = c_1.user_role
 
-
+    
 
     this.get_info()
   },
