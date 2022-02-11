@@ -43,3 +43,12 @@ export const coupon_list = (data) => {
     data
   })
 }
+
+//支付方式
+export const device_pay_channel = (data) => {
+  return request({
+    url: "/client_v1/device/pay-channel",
+    method: "POST",
+    data
+  })
+}

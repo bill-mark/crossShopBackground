@@ -106,7 +106,7 @@ export default {
         {
           name: "企业配置",
           value: "6",
-          menuName: 'enterprise'
+          menuName: 'companydevice'
 
         },
         {

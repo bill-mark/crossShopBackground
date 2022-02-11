@@ -733,7 +733,10 @@ export default {
       this.fetchList();
     },
     // 购买设备
-    buyEq: function () { },
+    buyEq: function () { 
+      console.log('buyEq')
+      this.$router.push({name:'manage_buyequipment'})
+    },
     // 续费设备
     renewalEq: function () {
       console.log("this.selectedRowKeys", this.selectedRowKeys);

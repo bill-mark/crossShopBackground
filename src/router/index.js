@@ -52,6 +52,14 @@ const routes = [
         component: () => import(/* webpackChunkName: "equipment" */ "@/views/equipment/index.vue"),
       },
       {
+        path: "buyequipment",
+        name: "manage_buyequipment",
+        meta: {
+          needLogin: true, // 需要登录
+        },
+        component: () => import(/* webpackChunkName: "buyequipment" */ "@/views/equipment/buy_equipment.vue"),
+      },
+      {
         path: "member",
         name: "manage_member",
         meta: {
@@ -82,6 +90,25 @@ const routes = [
           needLogin: true, // 需要登录
         },
         component: () => import(/* webpackChunkName: "edituser" */ "@/views/manage/edit_user.vue"),
+      },
+      {
+        path: "/companydevice",
+        name: "companydevice",
+        component: () => import("@/views/companydevice/index.vue"),
+        redirect: { name: "company_setting" },
+        meta: {
+          needLogin: true, // 需要登录
+        },
+        children:[
+          {
+            path: "setting",
+            name: "company_setting",
+            meta: {
+              needLogin: true, // 需要登录
+            },
+            component: () => import(/* webpackChunkName: "company_setting" */ "@/views/companydevice/company_seting.vue"),
+          },
+        ]
       },
       {
         path: "security",
@@ -155,6 +182,7 @@ const routes = [
       },
     ],
   },
+  
   {
     path: "/login",
     name: "login",

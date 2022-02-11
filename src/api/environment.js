@@ -198,3 +198,29 @@ export const environment_delete_more = (data) => {
     })
 }
 
+//购买设备列表
+export const device_purchase_device_list = (data) => {
+    return request({
+        url: "/client_v1/device/purchase-device-list",
+        method: "POST",
+        data
+    })
+}
+
+// 购买时长列表
+export const device_purchase_duration_list = (data) => {
+    return request({
+        url: "/client_v1/device/purchase-duration-list",
+        method: "POST",
+        data
+    })
+}
+
+//购买设备下单接口
+export const order_place = (data) => {
+    return request({
+        url: "/client_v1/order/place",
+        method: "POST",
+        data
+    })
+}
