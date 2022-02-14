@@ -45,15 +45,12 @@
         />
 
         <a-checkbox v-model="is_agreen" class="agreen_line">
-          我已阅读并同意洋淘浏览器<span
-            class="content_link"
-            @click="go_out('http://119.23.136.12:8801/client_v1/article/user-agreement')"
-            ><<用户协议>></span
-          >和<span
-            @click="go_out('http://119.23.136.12:8801/client_v1/article/privacy')"
-            class="content_link"
-            ><<隐私政策>></span
-          >
+          我已阅读并同意洋淘浏览器
+          <a href="/client_v1/article/user-agreement" target="view_window"><<用户协议>></a> 
+          和
+           <a href="/client_v1/article/privacy" target="view_window"><<隐私政策>></a> 
+         
+          
         </a-checkbox>
 
         <a-button type="primary" class="down_btn" @click="go_register">

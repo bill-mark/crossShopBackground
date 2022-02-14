@@ -36,6 +36,7 @@ export const order_recharge = (data) => {
   })
 }
 
+//优惠券列表
 export const coupon_list = (data) => {
   return request({
     url: "/client_v1/coupon/list",
@@ -48,6 +49,33 @@ export const coupon_list = (data) => {
 export const device_pay_channel = (data) => {
   return request({
     url: "/client_v1/device/pay-channel",
+    method: "POST",
+    data
+  })
+}
+
+//key换微信支付宝支付接口
+export const client_v1_pay = (data) => {
+  return request({
+    url: "/client_v1/pay",
+    method: "POST",
+    data
+  })
+}
+
+//key换余额支付
+export const client_v1_pay_balance = (data) => {
+  return request({
+    url: "/client_v1/pay/balance",
+    method: "POST",
+    data
+  })
+}
+
+//订单状态
+export const order_info = (data) => {
+  return request({
+    url: "/client_v1/order/order-info",
     method: "POST",
     data
   })

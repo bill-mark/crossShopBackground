@@ -152,3 +152,4 @@ export const device_devicebindtag = (data) => {
     data
   })
 }
+

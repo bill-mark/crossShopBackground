@@ -151,7 +151,7 @@ export default {
 
     async get_couponlist(){
         let { data } = await coupon_list({
-        money: this.money_num,
+           pagesize:200,
       })
       if (data.code == 200) {
 

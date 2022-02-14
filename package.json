@@ -12,8 +12,10 @@
     "axios": "^0.24.0",
     "core-js": "^3.6.5",
     "iclipboard": "^1.0.1",
+    "mathjs": "^10.1.1",
     "moment": "^2.29.1",
     "normalize.css": "^8.0.1",
+    "qrcode2": "^1.2.3",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0"
   },

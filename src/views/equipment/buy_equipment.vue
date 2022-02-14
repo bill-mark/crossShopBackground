@@ -231,48 +231,141 @@
           </div>
 
           <div class="cell_wrap">
-            <div class="pay_cell" 
+            <div
+              class="pay_cell"
+              :class="[check_paywayindex == 0 ? 'pay_active_cell' : '']"
               @click="check_payway(0)"
-              >
+            >
+              <div class="pay_active_ico" v-show="check_paywayindex == 0"></div>
+
               <div class="cell_left"></div>
-              <div class="cell_right" >
-                <div class="cell_r_top">{{payway_list[0].title}}</div>
-                <div class="cell_r_down">{{payway_list[0].desc}}</div>
+              <div class="cell_right">
+                <div class="cell_r_top">{{ payway_list[0].title }}</div>
+                <div class="cell_r_down">{{ payway_list[0].desc }}</div>
               </div>
             </div>
 
-             <div class="pay_cell" 
+            <div
+              class="pay_cell"
+              :class="[check_paywayindex == 1 ? 'pay_active_cell' : '']"
               @click="check_payway(1)"
-              >
+            >
+              <div class="pay_active_ico" v-show="check_paywayindex == 1"></div>
               <div class="cell_left left_ali"></div>
-              <div class="cell_right" >
-                <div class="cell_r_top">{{payway_list[1].title}}</div>
-                <div class="cell_r_down">{{payway_list[1].desc}}</div>
+              <div class="cell_right">
+                <div class="cell_r_top">{{ payway_list[1].title }}</div>
+                <div class="cell_r_down">{{ payway_list[1].desc }}</div>
               </div>
             </div>
 
-             <div class="pay_cell" 
+            <div
+              class="pay_cell"
+              :class="[check_paywayindex == 2 ? 'pay_active_cell' : '']"
               @click="check_payway(2)"
-              >
+            >
+              <div class="pay_active_ico" v-show="check_paywayindex == 2"></div>
               <div class="cell_left left_wechat"></div>
-              <div class="cell_right" >
-                <div class="cell_r_top">{{payway_list[2].title}}</div>
-                <div class="cell_r_down">{{payway_list[2].desc}}</div>
+              <div class="cell_right">
+                <div class="cell_r_top">{{ payway_list[2].title }}</div>
+                <div class="cell_r_down">{{ payway_list[2].desc }}</div>
               </div>
             </div>
+          </div>
+
+          <div class="cell_title">
+            <div class="cell_t_left"></div>
+            <div class="cell_t_right">优惠劵</div>
+          </div>
+
+          <a-select 
+          @change="handle_coupon" 
+          class="coupon_select">
+            <a-select-option
+              v-for="item in coupon_list"
+              :key="item.id"
+              :money="item.money"
+              :value="item.id"
+            >
+              标题: {{ item.title }} ,优惠金额: {{ item.money }}
+            </a-select-option>
+          </a-select>
+
+          <div class="payway_down">
+            <a-checkbox v-model="auto_renew"> 到期自动续费 </a-checkbox>
+            <div class="payway_d_right"></div>
           </div>
         </div>
       </div>
 
-      <div class="content_right"></div>
+      <div class="content_right">
+        <div class="right_top">确认购买清单：</div>
+        <div class="right_content">
+          <div class="right_c_cell">设备信息: {{ text_1() }}</div>
+          <div class="right_c_cell">配置: {{ text_2() }}</div>
+          <div class="right_c_cell">类型: {{ text_3() }}</div>
+          <div class="right_c_cell">地域: {{ text_4() }}</div>
+          <div class="right_c_cell">地区: {{ text_5() }}</div>
+          <div class="right_c_cell">套餐: {{ text_6() }}</div>
+          <div class="right_c_cell">购买时长: {{ text_7() }}</div>
+          <div class="right_c_cell">购买数量: {{ text_8() }}</div>
+          <div class="right_c_cell">自动续费: {{ text_9() }}</div>
+          <div class="rignt_c_ico"></div>
+        </div>
+
+        <div class="right_down">
+          <div class="right_d_txt">优惠立减</div>
+          <div class="right_d_right">-¥{{ coupon_money }}</div>
+        </div>
+        <div class="right_down">
+          <div class="right_d_txt">应付金额</div>
+          <div class="right_d_right">¥{{ need_pay }}</div>
+        </div>
+
+        <div class="right_btn" @click="go_order">立即购买</div>
+
+        <a-checkbox v-model="aggreen_doc" class="right_downtxt">
+          我已并阅读并同意洋淘<a
+            href="/client_v1/article/service"
+            target="view_window"
+            ><<服务条款>></a
+          >
+        </a-checkbox>
+      </div>
     </div>
+
+    <a-modal
+      title="请用微信扫一扫支付"
+      v-model="wechat_modal"
+      @ok="wechat_pop_handle"
+    >
+      <div class="modal_chart" id="buy_equ_qrcode" ref="buy_equ_qrcode"></div>
+    </a-modal>
+
+    <!-- <a-modal
+      title="请用支付宝扫一扫支付"
+      v-model="ali_modal"
+      @ok="ali_pop_handle"
+    >
+      <iframe :srcdoc="alipay_tem"
+              frameborder="no"
+              border="0"
+              marginwidth="0"
+              marginheight="0"
+              scrolling="no"
+              width="300"
+              height="300"
+              style="overflow:hidden;">
+      </iframe>
+    </a-modal> -->
+
   </div>
 </template>
 <script>
-import { device_purchase_device_list, device_purchase_duration_list } from '@/api/environment'
-import { device_pay_channel } from '@/api/const_manage'
+import { device_purchase_device_list, device_purchase_duration_list, order_place } from '@/api/environment'
+import { device_pay_channel, coupon_list, client_v1_pay, client_v1_pay_balance,order_info} from '@/api/const_manage'
 import { user_info } from '@/api/login'
-
+import * as math from "mathjs"
+import QRCode from 'qrcode2'
 export default {
   data() {
     return {
@@ -298,25 +391,243 @@ export default {
       buy_num: 1,
 
       payway_list: [],
-      check_paywayindex:0,
+      check_paywayindex: 0,
+
+      coupon_list: [],
+      check_coupon_id: '',
+      coupon_money: 0,
+
+      auto_renew: false,//自动续费
+
+      aggreen_doc: false,//同意条款
+
+      order_id:'',//订单id
+      wechat_modal: false,//微信二维码弹窗
+
+      alipay_tem:null,//支付宝支付表单
+      ali_modal:false,//支付宝二维码弹窗
     };
   },
   created() {
     this.get_init_data()
     this.get_duration_data()
     this.get_payway()
+    this.get_couponlist()
 
-    
+  },
+  computed: {
+    need_pay: function () {
+      if (this.network_package.length == 0 || this.duration_list.length == 0) {
+        return
+      }
+
+      let c_1 = parseFloat(this.network_package[this.check_packageindex].package_amount)
+      let c_2 = this.duration_list[this.check_durationindex].duration
+     
+
+     let d_1 = math.evaluate( c_1 * c_2 * this.buy_num - this.coupon_money)  
+     console.log(d_1)
+
+      return 10
+      let c_3 = c_1 * c_2 * this.buy_num - this.coupon_money
+      if (c_3 < 0) {
+        return 0
+      } else {
+        return c_3
+      }
+    }
   },
   methods: {
-     async get_userinfo() {
+    
+    //下单
+    async go_order() {
+      if (!this.aggreen_doc) {
+        this.$message.warning('需要同意服务协议,才能购买')
+        return
+      }
+
+      let c_1 = 0
+      if (this.auto_renew) {
+        c_1 = 1
+      } else {
+        c_1 = 0
+      }
+      let { data } = await order_place({
+        device_info_id: this.device_info[this.check_deviceindex].id,
+        device_network_type_id: this.network_type[this.check_networkindex].id,
+        device_network_region_id: this.network_region[this.check_regionindex].id,
+        device_network_area_id: this.network_area[this.check_areaindex].id,
+        device_network_package_id: this.network_package[this.check_packageindex].id,
+        device_purchase_duration_id: this.duration_list[this.check_durationindex].id,
+        pay_channel_id: this.payway_list[this.check_paywayindex].id,
+        coupon_id: this.check_coupon_id,
+        count: this.buy_num,
+        auto_renew: c_1,
+      })
+      if (data.code == 200) {
+        this.order_id = data.data.id
+        if (this.payway_list[this.check_paywayindex].id == 1) {
+          this.balance_handle_pay(data.data.key)
+        }
+        if (this.payway_list[this.check_paywayindex].id == 2 || this.payway_list[this.check_paywayindex].id == 3) {
+          this.ali_handle_pay(data.data.key, this.payway_list[this.check_paywayindex].id)
+        }
+
+      }
+    },
+    //调用支付宝 微信
+    async ali_handle_pay(key, type) {
+      let { data } = await client_v1_pay({
+        key: key,
+      })
+      if (data.code == 200) {
+        //微信
+        if (type == 3) {
+          this.wechat_modal = true
+          this.$nextTick(function(){
+              this.creatQrCode(data.data.code_url)
+          })
+        }
+
+        //支付宝
+        if (type == 2) {
+         // this.ali_modal = true
+          this.alipay_tem = data.data.template
+
+          const div = document.createElement('div')
+      /* 下面的data.content就是后台返回接收到的数据 */
+      div.innerHTML = data.data.template
+ 
+      document.body.appendChild(div)
+ 
+      document.forms[0].submit()
+
+        }
+
+      }
+    },
+    creatQrCode(urldata) {
+      //console.log(urldata)
+      this.$refs.buy_equ_qrcode.innerHTML = '';
+      new QRCode(this.$refs.buy_equ_qrcode, {
+        text: urldata, //页面地址 ,如果页面需要参数传递请注意哈希模式#
+        width: 160,
+        height: 160,
+      })
+    },
+    wechat_pop_handle() {
+      this.wechat_modal = false
+      this.get_orderinfo()
+    },
+    //订单状态
+    async get_orderinfo(){
+       let { data } = await order_info({
+        id: this.order_id,
+      })
+      if (data.code == 200) {
+        if(data.data.status == 1){
+          this.$message.success('支付成功!')
+          this.$router.push({name:'manage_equipment'})
+        }
+
+      }
+    },
+    ali_pop_handle(){
+         this.ali_modal = false
+         this.get_orderinfo()
+    },
+    //调用余额
+    async balance_handle_pay(key) {
+      let { data } = await client_v1_pay_balance({
+        key: key,
+      })
+      if (data.code == 200) {
+
+
+      }
+    },
+
+
+    text_1() {
+      if (this.device_info.length == 0) {
+        return
+      }
+      return this.device_info[this.check_deviceindex].device_title
+    },
+    text_2() {
+      if (this.device_info.length == 0) {
+        return
+      }
+      return this.format_devicetype(this.device_info[this.check_deviceindex].device_type)
+    },
+    text_3() {
+      if (this.network_type.length == 0) {
+        return
+      }
+      return this.network_type[this.check_networkindex].type_title
+    },
+    text_4() {
+      if (this.network_region.length == 0) {
+        return
+      }
+      return this.network_region[this.check_regionindex].region_title
+    },
+    text_5() {
+      if (this.network_area.length == 0) {
+        return
+      }
+      return this.network_area[this.check_areaindex].area_title
+    },
+    text_6() {
+      if (this.network_package.length == 0) {
+        return
+      }
+      return this.network_package[this.check_packageindex].package_title
+    },
+    text_7() {
+      if (this.duration_list.length == 0) {
+        return
+      }
+      let c_1 = this.duration_list[this.check_durationindex].duration
+      let c_2 = this.duration_list[this.check_durationindex].duration_unit
+      return c_1 + '个' + c_2
+    },
+    text_8() {
+      return this.buy_num
+    },
+    text_9() {
+      if (this.auto_renew) {
+        return '是'
+      } else {
+        return '否'
+      }
+    },
+
+    handle_coupon(value,opti) {
+      //  console.log(item,opti)
+      //  console.log(opti.data.attrs.money)
+      //   return
+      this.check_coupon_id = value
+      this.coupon_money = parseFloat( opti.data.attrs.money )
+    },
+
+
+    async get_userinfo() {
       let { data } = await user_info({
         user_role: JSON.parse(localStorage.member).user_role
       })
       if (data.code == 200) {
-       localStorage.member = JSON.stringify(data.data.member)
-       this.payway_list[0].desc = '可用余额:'+data.data.member.balance+'元'
-      
+        localStorage.member = JSON.stringify(data.data.member)
+        this.payway_list[0].desc = '可用余额:' + data.data.member.balance + '元'
+
+      }
+    },
+    async get_couponlist() {
+      let { data } = await coupon_list({
+        pagesize: 200,
+      })
+      if (data.code == 200) {
+        this.coupon_list = data.data
       }
     },
     async get_payway() {
@@ -351,6 +662,9 @@ export default {
         return '节能型'
       }
     },
+
+
+
     check_device(index) {
       this.check_deviceindex = index
     },
@@ -371,7 +685,7 @@ export default {
       this.check_durationindex = index
     },
     check_payway(index) {
-      this.check_durationindex = index
+      this.check_paywayindex = index
     },
 
     async get_init_data() {
@@ -401,6 +715,13 @@ export default {
 };
 </script>
 <style scoped lang="less">
+.modal_chart {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto;
+ // border: 1px solid red;
+}
+
 .buyequ_wrap {
   min-width: 1200px;
   background: white;
@@ -466,7 +787,7 @@ export default {
     width: 1200px;
 
     margin: 0 auto;
-    border: 1px solid green;
+    //border: 1px solid green;
     .content_left {
       width: 850px;
       flex: none;
@@ -773,6 +1094,7 @@ export default {
           margin-top: 20px;
           margin-left: 21px;
           .pay_cell {
+            position: relative;
             display: flex;
             width: 160px;
             margin-right: 30px;
@@ -791,14 +1113,14 @@ export default {
               background-size: 100%;
               background-image: url("../../assets/img/equipment/账户余额@2x.png");
             }
-            .left_ali{
-               background-image: url("../../assets/img/equipment/ali-lite@2x.png");
+            .left_ali {
+              background-image: url("../../assets/img/equipment/ali-lite@2x.png");
             }
-            .left_wechat{
-               background-image: url("../../assets/img/equipment/wx-lite@2x.png");
+            .left_wechat {
+              background-image: url("../../assets/img/equipment/wx-lite@2x.png");
             }
-            .cell_right{
-              .cell_r_top{
+            .cell_right {
+              .cell_r_top {
                 height: 15px;
                 margin-left: 15px;
                 margin-top: 15px;
@@ -808,19 +1130,136 @@ export default {
                 color: #374567;
                 line-height: 15px;
               }
-              .cell_r_down{
+              .cell_r_down {
                 height: 12px;
-                 margin-left: 15px;
+                margin-left: 15px;
                 margin-top: 7px;
                 font-size: 12px;
                 font-family: Source Han Sans CN;
                 font-weight: 400;
-                color: #ABB4C3;
+                color: #abb4c3;
                 line-height: 12px;
               }
             }
           }
+          .pay_active_cell {
+            border: 1px solid #739afe;
+            .pay_active_ico {
+              position: absolute;
+              width: 20px;
+              height: 20px;
+              top: -10px;
+              left: 148px;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 100%;
+              background-image: url("../../assets/img/equipment/勾选@2x.png");
+            }
+          }
         }
+
+        .coupon_select {
+          margin-top: 20px;
+          margin-left: 21px;
+          width: 300px;
+        }
+        .payway_down {
+          margin-top: 20px;
+          margin-left: 21px;
+          display: flex;
+          .payway_d_right {
+            width: 16px;
+            height: 16px;
+            margin-top: 3px;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100%;
+            background-image: url("../../assets/img/equipment/组件_注释@2x.png");
+          }
+        }
+      }
+    }
+    .content_right {
+      position: sticky;
+      top: 0px;
+      width: 330px;
+      margin-left: 19px;
+      height: 612px;
+      background: #ffffff;
+      box-shadow: 0px 0px 12px 1px rgba(193, 199, 203, 0.3);
+      .right_top {
+        height: 45px;
+        width: 100%;
+        font-size: 16px;
+        padding-left: 29px;
+        font-family: Source Han Sans CN;
+        font-weight: 500;
+        color: #374567;
+        line-height: 45px;
+        border: 1px solid #e7ebf1;
+      }
+      .right_content {
+        height: 360px;
+        width: 100%;
+        position: relative;
+        border: 1px solid #e7ebf1;
+        .right_c_cell {
+          font-size: 14px;
+          margin-left: 28px;
+          color: #425070;
+          margin-top: 20px;
+          height: 14px;
+          line-height: 14px;
+        }
+        .rignt_c_ico {
+          position: absolute;
+          right: 0px;
+          bottom: 0px;
+          width: 114px;
+          height: 125px;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: 100%;
+          background-image: url("../../assets/img/equipment/装饰icon@2x.png");
+        }
+      }
+      .right_down {
+        display: flex;
+        margin-top: 19px;
+        height: 16px;
+        .right_d_txt {
+          margin-left: 29px;
+          color: #374567;
+          font-size: 16px;
+          line-height: 16px;
+        }
+        .right_d_right {
+          width: 200px;
+          text-align: right;
+          color: #ea5529;
+          font-size: 16px;
+          line-height: 16px;
+        }
+      }
+
+      .right_btn {
+        width: 288px;
+        height: 44px;
+        margin: 0 auto;
+        margin-top: 26px;
+        cursor: pointer;
+        text-align: center;
+        line-height: 44px;
+        background: linear-gradient(90deg, #eeb732 0%, #ee9a32 100%);
+        border-radius: 2px;
+
+        font-size: 14px;
+        font-weight: 400;
+        color: #ffffff;
+      }
+      .right_downtxt {
+        margin-left: 21px;
+        margin-top: 19px;
       }
     }
   }
