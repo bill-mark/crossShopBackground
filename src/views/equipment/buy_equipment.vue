@@ -421,19 +421,28 @@ export default {
         return
       }
 
-      let c_1 = parseFloat(this.network_package[this.check_packageindex].package_amount)
+      //let c_1 = parseFloat(this.network_package[this.check_packageindex].package_amount)
+      let c_1 = this.network_package[this.check_packageindex].package_amount
       let c_2 = this.duration_list[this.check_durationindex].duration
      
+     // console.log(c_1)
+     let d_1 = math.evaluate( c_1 * c_2 * this.buy_num)  
+    // console.log(d_1)
 
-     let d_1 = math.evaluate( c_1 * c_2 * this.buy_num - this.coupon_money)  
-     console.log(d_1)
+    d_1=  (Math.floor(d_1 * 100) / 100).toFixed(2)
+    this.coupon_money=  (Math.floor(this.coupon_money * 100) / 100).toFixed(2)
+   //  console.log(d_1,this.coupon_money)
 
-      return 10
-      let c_3 = c_1 * c_2 * this.buy_num - this.coupon_money
-      if (c_3 < 0) {
+    // let d_2 = math.add( d_1 ,-this.coupon_money)  
+      let d_2  =( (d_1*100 - this.coupon_money*100)/100).toFixed(2)
+      console.log(d_2)
+
+    
+    //  let c_3 = c_1 * c_2 * this.buy_num - this.coupon_money
+      if (d_2 < 0) {
         return 0
       } else {
-        return c_3
+        return d_2
       }
     }
   },
@@ -494,13 +503,19 @@ export default {
          // this.ali_modal = true
           this.alipay_tem = data.data.template
 
-          const div = document.createElement('div')
-      /* 下面的data.content就是后台返回接收到的数据 */
-      div.innerHTML = data.data.template
- 
-      document.body.appendChild(div)
- 
-      document.forms[0].submit()
+          // const div = document.createElement('div')
+          // div.innerHTML = data.data.template
+          // document.body.appendChild(div)
+          // document.forms[0].submit()
+
+          let dwSafari
+dwSafari=window.open();
+dwSafari.document.open();
+let dataObj=data.data.template
+let html=  dataObj.replace(/[^\u0000-\u00FF]/g,function($0){return escape($0).replace(/(%u)(\w{4})/gi,"&#x$2;")}); 
+dwSafari.document.write("<html><head><title></title><meta charset='utf-8'><body>"+dataObj+"</body></html>")
+dwSafari.document.forms[0].submit()
+dwSafari.document.close()
 
         }
 
