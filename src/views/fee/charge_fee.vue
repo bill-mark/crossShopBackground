@@ -11,16 +11,6 @@
         </div>
         <div class="right"></div>
       </div>
-      <div class="overage coupon" @click="show_discount">
-        <div class="left">
-          <div class="title">优惠券</div>
-          <div class="count">
-            <span class="info">{{ coupon_count }}</span
-            >张
-          </div>
-        </div>
-        <div class="right"></div>
-      </div>
     </div>
     <div class="charge_content">
       <div class="title">
@@ -59,18 +49,20 @@
         >
           10000元
         </div>
-        <a-input
+        <a-input-number
           class="fee_input"
           v-model="money_num"
+          :min="1"
           placeholder="自定义金额"
           @change="input_moneyChange"
-        /><span class="yuan">元</span>
+        />
+        <span class="yuan">元</span>
       </div>
       <div class="overage ways">
         <div class="overage_title">支付方式:</div>
         <div
-          :class="['way', payway_index == 0 ? 'way_act' : '']"
-          @click="changePayWay(0)"
+          :class="['way', check_payway_id == 2 ? 'way_act' : '']"
+          @click="changePayWay(2)"
         >
           <div class="alipay">
             <div class="ali_left"></div>
@@ -83,8 +75,8 @@
           <div class="paypal"></div>
         </div>
         <div
-          :class="['way', 'expand', payway_index == 1 ? 'way_act' : '']"
-          @click="changePayWay(1)"
+          :class="['way', 'expand', check_payway_id == 3 ? 'way_act' : '']"
+          @click="changePayWay(3)"
         >
           <div class="alipay">
             <div class="ali_left wechat_left"></div>
@@ -99,7 +91,14 @@
       </div>
       <div class="btns">
         <div class="pay_btn">
-          <a-button type="primary" class="charge_btn">充值</a-button>
+          <a-button
+            type="primary"
+            class="charge_btn"
+            :loading="order_paystate"
+            @click="go_pay"
+          >
+            充值</a-button
+          >
         </div>
         <div class="pay_infos">
           *充值金额不支持退款，请理性充值。企业内所有成员购买/续费设备时可共享账户余额。
@@ -107,36 +106,96 @@
       </div>
     </div>
 
-    <a-modal v-model="discount_pop" :width="500" title="优惠券列表">
-      dddd
+    <a-modal
+      title="请用微信扫一扫支付"
+      v-model="wechat_modal"
+      @ok="wechat_pop_handle"
+    >
+      <template slot="footer">
+        <a-button key="back" @click="wechat_modal = false"> 取消 </a-button>
+        <a-button key="submit" type="primary" @click="wechat_pop_handle">
+          我已付款
+        </a-button>
+      </template>
+
+      <div
+        class="modal_chart"
+        id="chargefee_qrcode"
+        ref="chargefee_qrcode"
+      ></div>
+    </a-modal>
+
+    <a-modal title="付款结果" v-model="pay_result" @ok="ali_pop_handle">
+      <template slot="footer">
+        <a-button key="back" @click="pay_result = false"> 放弃付款 </a-button>
+        <a-button key="submit" type="primary" @click="get_orderinfo">
+          我已付款
+        </a-button>
+      </template>
+
+      <dir>是否已经付款?</dir>
     </a-modal>
   </div>
 </template>
 <script>
-import { order_recharge, coupon_list } from '@/api/const_manage'
+import {
+  order_recharge, device_pay_channel,
+  client_v1_pay, order_info
+} from '@/api/const_manage'
+import { user_info } from '@/api/login'
+import QRCode from 'qrcode2'
 export default {
   name: 'charge_fee',
   data() {
     return {
       pay_num_index: 0,
       money_num: 500,
-      payway_index: 0,
 
-      discount_pop: true,
-      coupon_count: null,//优惠劵
+
       balance: null,//余额
+      order_paystate: false,//下单接口状态
+
+      payway_list: [],
+      check_payway_id: 2,
+
+      order_id: '',//订单id
+      order_paystate: false,//下单接口状态
+      wechat_modal: false,//微信二维码弹窗
+
+      alipay_tem: null,//支付宝支付表单
+      ali_modal: false,//支付宝二维码弹窗
+
+      pay_result: false,//付款状态弹窗
     }
   },
   mounted() {
-    let c_1 = JSON.parse(localStorage.member)
-    this.coupon_count = c_1.coupon_count
-    this.balance = c_1.balance
+    this.get_userinfo()
+    this.get_payway()
   },
   methods: {
-    show_discount() {
-      this.discount_pop = true
-      this.get_couponlist()
+    async get_userinfo() {
+      let { data } = await user_info({
+        user_role: JSON.parse(localStorage.member).user_role
+      })
+      if (data.code == 200) {
+        localStorage.member = JSON.stringify(data.data.member)
+        this.balance = data.data.member.balance
+
+      }
     },
+    async get_payway() {
+      let { data } = await device_pay_channel()
+      if (data.code == 200) {
+        this.payway_list = data.data.list.filter(item => {
+          return item.title.indexOf('余额') < 0
+        })
+        // console.log( this.payway_list )
+      }
+    },
+
+
+
+
     feeClick(index, num) {
       this.pay_num_index = index
       this.money_num = num
@@ -145,27 +204,91 @@ export default {
       this.pay_num_index = 5
     },
 
-    changePayWay: function (payindex) {
-      this.payway_index = payindex
+    changePayWay: function (payid) {
+      this.check_payway_id = payid
     },
 
-    async get_couponlist(){
-        let { data } = await coupon_list({
-           pagesize:200,
-      })
-      if (data.code == 200) {
-
-      }
-    },
-
+    //下单
     async go_pay() {
-      let { data } =await order_recharge({
+      this.order_paystate = true
+      let { data } = await order_recharge({
         money: this.money_num,
+        pay_channel_id: this.check_payway_id,
+      })
+      this.order_paystate = false
+      if (data.code == 200) {
+        this.order_id = data.data.id
+        this.ali_handle_pay(data.data.key, this.check_payway_id)
+      }
+    },
+    //调用支付宝 微信
+    async ali_handle_pay(key, type) {
+      let { data } = await client_v1_pay({
+        key: key,
       })
       if (data.code == 200) {
+        //微信
+        if (type == 3) {
+          this.wechat_modal = true
+          this.$nextTick(function () {
+            this.creatQrCode(data.data.code_url)
+          })
+        }
+
+        //支付宝
+        if (type == 2) {
+          this.alipay_tem = data.data.template
+
+          let dwSafari
+          dwSafari = window.open();
+          dwSafari.document.open();
+          let dataObj = data.data.template
+          let html = dataObj.replace(/[^\u0000-\u00FF]/g, function ($0) { return escape($0).replace(/(%u)(\w{4})/gi, "&#x$2;") });
+          dwSafari.document.write("<html><head><title></title><meta charset='utf-8'><body>" + dataObj + "</body></html>")
+          dwSafari.document.forms[0].submit()
+          dwSafari.document.close()
+
+          this.pay_result = true
+
+        }
 
       }
     },
+    creatQrCode(urldata) {
+      //console.log(urldata)
+      this.$refs.chargefee_qrcode.innerHTML = '';
+      new QRCode(this.$refs.chargefee_qrcode, {
+        text: urldata, //页面地址 ,如果页面需要参数传递请注意哈希模式#
+        width: 160,
+        height: 160,
+      })
+    },
+    wechat_pop_handle() {
+      this.get_orderinfo()
+    },
+    //订单付款状态
+    async get_orderinfo() {
+      let { data } = await order_info({
+        id: this.order_id,
+      })
+      if (data.code == 200) {
+        if (data.data.status == 1) {
+          this.$message.success('充值成功!')
+          location.reload()
+        }
+
+        if (data.data.status == 0) {
+          this.$message.warning('没有检测到付款,请稍后再试!')
+        }
+
+      }
+    },
+    ali_pop_handle() {
+      this.ali_modal = false
+      this.get_orderinfo()
+    },
+
+
 
   }
 }
@@ -173,6 +296,12 @@ export default {
 <style scoped lang="less">
 /deep/ .ant-modal-content {
   min-height: 300px;
+}
+
+.modal_chart {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto;
 }
 
 .charge_info {
@@ -192,10 +321,10 @@ export default {
       box-shadow: 0px 6px 8px 1px rgba(55, 106, 245, 0.24);
       border-radius: 15px;
       .left {
-        display: flex;
-        flex-direction: column;
         margin-left: 85px;
         margin-top: 42px;
+        width: 200px;
+        flex: none;
         .title {
           font-size: 16px;
           font-family: Source Han Sans CN;
@@ -214,7 +343,7 @@ export default {
         }
       }
       .right {
-        margin-left: 120px;
+        margin-left: 32px;
         margin-top: 30px;
         width: 158px;
         height: 117px;

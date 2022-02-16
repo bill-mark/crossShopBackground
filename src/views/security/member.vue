@@ -31,12 +31,12 @@
           {{ formate_login(text) }}
         </div>
         <template slot="operation" slot-scope="text, record">
-          <a href="javascript:;" @click="onChangeLogin(record)">变更登录限制</a>
+          <a href="javascript:;" @click="batch_change(record)">变更登录限制</a>
         </template>
       </a-table>
     </div>
 
-    <a-modal v-model="show" title="成员登录授权" @ok="handleOk">
+    <a-modal v-model="showDialog" title="成员登录授权" @ok="handleOk">
       <a-form-model :model="limitForm" :label-col="labelCol" :wrapper-col="wrapperCol">
         <a-form-model-item label="授权方式">
           <a-radio-group v-model="limitForm.auth_method">
@@ -51,6 +51,7 @@
             </a-radio>
           </a-radio-group>
         </a-form-model-item>
+
         <a-form-model-item label="登录时间限制">
           <a-radio-group v-model="limitForm.login_time" @change="onTimeRadioChange">
             <a-radio :style="radioStyle" :value="0">
@@ -69,7 +70,7 @@
   
 </template>
 <script>
-import { getList, changeWays } from "@/api/member_secruity";
+import { getList, security_change_login_more } from "@/api/member_secruity";
 
 const columns = [
   {
@@ -109,7 +110,7 @@ export default {
   name: 'member_security',
   data() {
     return {
-      labelCol: { span: 8 },
+      labelCol: { span: 5 },
       wrapperCol: { span:  16},
       is_enabled: true,
       loading: false,
@@ -138,7 +139,7 @@ export default {
         height: '30px',
         lineHeight: '30px',
       },
-      show: false,
+      showDialog: false,
       showTime: true,
       record: {}
     }
@@ -174,7 +175,7 @@ export default {
       }
     },
     changeLogin: function() {
-      this.show = true;
+      this.showDialog = true;
     },
     onSelectChange(selectedRowKeys) {
       console.log("selectedRowKeys changed: ", selectedRowKeys.toString());
@@ -196,7 +197,7 @@ export default {
       };
       return loginMap[text];
     },
-    onChangeLogin: function({id, auth_method, login_time, begin_time, end_time}) {
+    batch_change: function({id, auth_method, login_time, begin_time, end_time}) {
       // this.record = record;
       this.limitForm = {
         id,
@@ -205,7 +206,7 @@ export default {
         begin_time,
         end_time
       }
-      this.show = true;
+      this.showDialog = true;
     },
     handleTableChange(pagination) {
       // console.log(pagination);
@@ -215,9 +216,9 @@ export default {
     },
     async handleOk() {
       console.log('this.limitForm', this.limitForm)
-      const data = await changeWays({...this.limitForm, ...this.common});
-      if (data && data.data) {
-        this.$messgae.success('添加/编辑成功');
+      let {data} = await security_change_login_more({...this.limitForm, ...this.common});
+      if (data.code == 200) {
+        this.$message.success('操作成功!')
       }
       this.showDialog = false;
     },

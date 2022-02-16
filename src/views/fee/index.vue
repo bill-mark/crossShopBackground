@@ -35,7 +35,7 @@ export default {
   name: "equipment",
   data() {
     return {
-      current: "1", //选中的目录
+      current: "charge_fee", //选中的目录
     }
   },
   methods: {

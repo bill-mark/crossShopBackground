@@ -163,7 +163,7 @@ export default {
   margin-left: 40px;
   min-width: 1845px;
   //overflow-x: auto;
-  border: 1px solid red;
+  //border: 1px solid red;
   .nav_wrap {
     display: flex;
     justify-content: space-between;

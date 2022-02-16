@@ -8,7 +8,7 @@ export const getList = (data) => {
   })
 }
 
-export const changeWays = (data) => {
+export const security_change_login_more = (data) => {
   return request({
     url: "/client_v1/security/change-login-more",
     method: "POST",

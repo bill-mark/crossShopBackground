@@ -277,9 +277,7 @@
             <div class="cell_t_right">优惠劵</div>
           </div>
 
-          <a-select 
-          @change="handle_coupon" 
-          class="coupon_select">
+          <a-select @change="handle_coupon" class="coupon_select">
             <a-select-option
               v-for="item in coupon_list"
               :key="item.id"
@@ -321,7 +319,18 @@
           <div class="right_d_right">¥{{ need_pay }}</div>
         </div>
 
+        <!-- <a-spin :spinning="true">
         <div class="right_btn" @click="go_order">立即购买</div>
+         </a-spin> -->
+
+        <a-button
+          type="primary"
+          @click="go_order"
+          class="right_btn"
+          :loading="order_paystate"
+        >
+          立即购买
+        </a-button>
 
         <a-checkbox v-model="aggreen_doc" class="right_downtxt">
           我已并阅读并同意洋淘<a
@@ -338,31 +347,31 @@
       v-model="wechat_modal"
       @ok="wechat_pop_handle"
     >
+      <template slot="footer">
+        <a-button key="back" @click="wechat_modal = false"> 取消 </a-button>
+        <a-button key="submit" type="primary" @click="wechat_pop_handle">
+          我已付款
+        </a-button>
+      </template>
+
       <div class="modal_chart" id="buy_equ_qrcode" ref="buy_equ_qrcode"></div>
     </a-modal>
 
-    <!-- <a-modal
-      title="请用支付宝扫一扫支付"
-      v-model="ali_modal"
-      @ok="ali_pop_handle"
-    >
-      <iframe :srcdoc="alipay_tem"
-              frameborder="no"
-              border="0"
-              marginwidth="0"
-              marginheight="0"
-              scrolling="no"
-              width="300"
-              height="300"
-              style="overflow:hidden;">
-      </iframe>
-    </a-modal> -->
+    <a-modal title="付款结果" v-model="pay_result" @ok="ali_pop_handle">
+      <template slot="footer">
+        <a-button key="back" @click="pay_result = false"> 放弃付款 </a-button>
+        <a-button key="submit" type="primary" @click="get_orderinfo">
+          我已付款
+        </a-button>
+      </template>
 
+      <dir>是否已经付款?</dir>
+    </a-modal>
   </div>
 </template>
 <script>
 import { device_purchase_device_list, device_purchase_duration_list, order_place } from '@/api/environment'
-import { device_pay_channel, coupon_list, client_v1_pay, client_v1_pay_balance,order_info} from '@/api/const_manage'
+import { device_pay_channel, coupon_list, client_v1_pay, client_v1_pay_balance, order_info } from '@/api/const_manage'
 import { user_info } from '@/api/login'
 import * as math from "mathjs"
 import QRCode from 'qrcode2'
@@ -401,11 +410,14 @@ export default {
 
       aggreen_doc: false,//同意条款
 
-      order_id:'',//订单id
+      order_id: '',//订单id
+      order_paystate: false,//下单接口状态
       wechat_modal: false,//微信二维码弹窗
 
-      alipay_tem:null,//支付宝支付表单
-      ali_modal:false,//支付宝二维码弹窗
+      alipay_tem: null,//支付宝支付表单
+      ali_modal: false,//支付宝二维码弹窗
+
+      pay_result: false,//付款状态弹窗
     };
   },
   created() {
@@ -424,21 +436,21 @@ export default {
       //let c_1 = parseFloat(this.network_package[this.check_packageindex].package_amount)
       let c_1 = this.network_package[this.check_packageindex].package_amount
       let c_2 = this.duration_list[this.check_durationindex].duration
-     
-     // console.log(c_1)
-     let d_1 = math.evaluate( c_1 * c_2 * this.buy_num)  
-    // console.log(d_1)
 
-    d_1=  (Math.floor(d_1 * 100) / 100).toFixed(2)
-    this.coupon_money=  (Math.floor(this.coupon_money * 100) / 100).toFixed(2)
-   //  console.log(d_1,this.coupon_money)
+      // console.log(c_1)
+      let d_1 = math.evaluate(c_1 * c_2 * this.buy_num)
+      // console.log(d_1)
 
-    // let d_2 = math.add( d_1 ,-this.coupon_money)  
-      let d_2  =( (d_1*100 - this.coupon_money*100)/100).toFixed(2)
+      d_1 = (Math.floor(d_1 * 100) / 100).toFixed(2)
+      this.coupon_money = (Math.floor(this.coupon_money * 100) / 100).toFixed(2)
+      //  console.log(d_1,this.coupon_money)
+
+      // let d_2 = math.add( d_1 ,-this.coupon_money)  
+      let d_2 = ((d_1 * 100 - this.coupon_money * 100) / 100).toFixed(2)
       console.log(d_2)
 
-    
-    //  let c_3 = c_1 * c_2 * this.buy_num - this.coupon_money
+
+      //  let c_3 = c_1 * c_2 * this.buy_num - this.coupon_money
       if (d_2 < 0) {
         return 0
       } else {
@@ -447,13 +459,15 @@ export default {
     }
   },
   methods: {
-    
+
     //下单
     async go_order() {
       if (!this.aggreen_doc) {
         this.$message.warning('需要同意服务协议,才能购买')
         return
       }
+
+      this.order_paystate = true
 
       let c_1 = 0
       if (this.auto_renew) {
@@ -473,6 +487,7 @@ export default {
         count: this.buy_num,
         auto_renew: c_1,
       })
+      this.order_paystate = false
       if (data.code == 200) {
         this.order_id = data.data.id
         if (this.payway_list[this.check_paywayindex].id == 1) {
@@ -493,29 +508,25 @@ export default {
         //微信
         if (type == 3) {
           this.wechat_modal = true
-          this.$nextTick(function(){
-              this.creatQrCode(data.data.code_url)
+          this.$nextTick(function () {
+            this.creatQrCode(data.data.code_url)
           })
         }
 
         //支付宝
         if (type == 2) {
-         // this.ali_modal = true
           this.alipay_tem = data.data.template
 
-          // const div = document.createElement('div')
-          // div.innerHTML = data.data.template
-          // document.body.appendChild(div)
-          // document.forms[0].submit()
-
           let dwSafari
-dwSafari=window.open();
-dwSafari.document.open();
-let dataObj=data.data.template
-let html=  dataObj.replace(/[^\u0000-\u00FF]/g,function($0){return escape($0).replace(/(%u)(\w{4})/gi,"&#x$2;")}); 
-dwSafari.document.write("<html><head><title></title><meta charset='utf-8'><body>"+dataObj+"</body></html>")
-dwSafari.document.forms[0].submit()
-dwSafari.document.close()
+          dwSafari = window.open();
+          dwSafari.document.open();
+          let dataObj = data.data.template
+          let html = dataObj.replace(/[^\u0000-\u00FF]/g, function ($0) { return escape($0).replace(/(%u)(\w{4})/gi, "&#x$2;") });
+          dwSafari.document.write("<html><head><title></title><meta charset='utf-8'><body>" + dataObj + "</body></html>")
+          dwSafari.document.forms[0].submit()
+          dwSafari.document.close()
+
+          this.pay_result = true
 
         }
 
@@ -531,25 +542,28 @@ dwSafari.document.close()
       })
     },
     wechat_pop_handle() {
-      this.wechat_modal = false
       this.get_orderinfo()
     },
-    //订单状态
-    async get_orderinfo(){
-       let { data } = await order_info({
+    //订单付款状态
+    async get_orderinfo() {
+      let { data } = await order_info({
         id: this.order_id,
       })
       if (data.code == 200) {
-        if(data.data.status == 1){
-          this.$message.success('支付成功!')
-          this.$router.push({name:'manage_equipment'})
+        if (data.data.status == 1) {
+          this.$message.success('购买成功!')
+          this.$router.push({ name: 'manage_equipment' })
+        }
+
+        if (data.data.status == 0) {
+          this.$message.warning('没有检测到付款,请稍后再试!')
         }
 
       }
     },
-    ali_pop_handle(){
-         this.ali_modal = false
-         this.get_orderinfo()
+    ali_pop_handle() {
+      this.ali_modal = false
+      this.get_orderinfo()
     },
     //调用余额
     async balance_handle_pay(key) {
@@ -557,7 +571,8 @@ dwSafari.document.close()
         key: key,
       })
       if (data.code == 200) {
-
+        this.$message.success('购买成功!')
+        this.$router.push({ name: 'manage_equipment' })
 
       }
     },
@@ -618,12 +633,12 @@ dwSafari.document.close()
       }
     },
 
-    handle_coupon(value,opti) {
+    handle_coupon(value, opti) {
       //  console.log(item,opti)
       //  console.log(opti.data.attrs.money)
       //   return
       this.check_coupon_id = value
-      this.coupon_money = parseFloat( opti.data.attrs.money )
+      this.coupon_money = parseFloat(opti.data.attrs.money)
     },
 
 
@@ -633,7 +648,7 @@ dwSafari.document.close()
       })
       if (data.code == 200) {
         localStorage.member = JSON.stringify(data.data.member)
-        this.payway_list[0].desc = '可用余额:' + data.data.member.balance + '元'
+        this.payway_list[0].desc = '余额:' + data.data.member.balance + '元'
 
       }
     },
@@ -734,7 +749,7 @@ dwSafari.document.close()
   width: 160px;
   height: 160px;
   margin: 0 auto;
- // border: 1px solid red;
+  // border: 1px solid red;
 }
 
 .buyequ_wrap {
@@ -1267,6 +1282,8 @@ dwSafari.document.close()
         line-height: 44px;
         background: linear-gradient(90deg, #eeb732 0%, #ee9a32 100%);
         border-radius: 2px;
+        border: 0px;
+        margin-left: 20px;
 
         font-size: 14px;
         font-weight: 400;

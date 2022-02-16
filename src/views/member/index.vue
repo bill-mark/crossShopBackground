@@ -233,7 +233,7 @@ export default {
   data() {
     return {
       wrap_height: null, //wrap高度
-      current: "1", //选中的目录
+      current: "0", //选中的目录
       batch_visibal: false, //批量气泡状态
       //默认配置
       standard_config: {

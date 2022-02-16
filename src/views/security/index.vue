@@ -27,7 +27,7 @@ export default {
   name: "equipment",
   data() {
     return {
-      current: "1", //选中的目录
+      current: "member_security", //选中的目录
     }
   },
   methods: {
@@ -83,7 +83,7 @@ export default {
   }
   .info {
     flex: 1;
-    height: calc(100vh - 126px);
+    height: calc(100vh - 90px);
     background-color: #fff;
     margin-left: 11px;
   }

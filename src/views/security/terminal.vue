@@ -20,15 +20,24 @@
         @change="handleTableChange"
         :scroll="{ x: 1200 }"
       >
-      <template slot="operation" slot-scope="text, record">
-        <a href=" " @click="updateAuth(record)">编辑</a >
-        <a href="javascript:;" @click="deleteAuth(record)">编辑</a >
-      </template>
-    </a-table>  
+        <template slot="operation" slot-scope="text, record">
+          <a href=" " @click="updateAuth(record)">编辑</a>
+          <a
+            href="javascript:;"
+            style="margin-left: 20px"
+            @click="open_delet_pop(record)"
+            >删除</a
+          >
+        </template>
+      </a-table>
     </div>
 
     <a-modal v-model="show" title="添加终端" :rules="rules" @ok="handleOk">
-      <a-form-model :model="terminalForm" :label-col="labelCol" :wrapper-col="wrapperCol">
+      <a-form-model
+        :model="terminalForm"
+        :label-col="labelCol"
+        :wrapper-col="wrapperCol"
+      >
         <a-form-item label="终端白名单" ref="white_ip" prop="white_ip">
           <a-input v-model="terminalForm.white_ip" />
         </a-form-item>
@@ -43,6 +52,13 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+
+    <a-modal
+      v-model="delet_pop" title="删除"  @ok="deleteAuth"
+    >
+      确定删除吗?
+    </a-modal>
+
   </div>
 </template>
 <script>
@@ -77,8 +93,8 @@ export default {
   name: 'terminal_security',
   data() {
     return {
-      labelCol: { span: 8 },
-      wrapperCol: { span:  16},
+      labelCol: { span: 5 },
+      wrapperCol: { span: 16 },
       is_enabled: true,
       loading: false,
       selectedRowKeys: [],
@@ -113,6 +129,9 @@ export default {
         height: '30px',
         lineHeight: '30px',
       },
+
+      delet_pop:false,//删除弹窗
+      be_deletid:'',//即将被删除id
     }
   },
   mounted() {
@@ -151,7 +170,7 @@ export default {
 
       this.fetchList();
     },
-    updateAuth: function(record){
+    updateAuth: function (record) {
       this.terminalForm = {
         id: record.id,
         white_ip: record.white_ip,
@@ -161,13 +180,24 @@ export default {
       this.isEdit = true;
       this.show = true;
     },
-    async deleteAuth({ id }) {
-      const data = await deleteAuth(id);
-      if (data && data.data) {
-        this.$messgae.success('删除成功');
+    open_delet_pop(record){
+     // console.log(record)
+   
+      this.be_deletid = record.id
+       this.delet_pop = true
+    },
+    async deleteAuth() {
+      let {data} = await deleteAuth({
+        id:this.be_deletid
+      })
+      if (data.code == 200) {
+        this.$message.success('删除成功');
+         this.delet_pop = false
+         this.fetchList();
       }
     },
-    cancelAuthBatch: function() {},
+    
+    cancelAuthBatch: function () { },
     async handleOk() {
       console.log('this.limitForm', this.terminalForm)
       let data;
@@ -178,12 +208,14 @@ export default {
         delete this.terminalForm.status;
         data = await addTerminal(this.terminalForm);
       }
-      if (data && data.data) {
-        this.$messgae.success('添加/编辑成功');
+      console.log(data)
+      if (data.data.code == 200 ) {
+        this.$message.success('操作成功');
+        this.fetchList();
       }
       this.show = false;
     },
-    showTerminalModal: function() {
+    showTerminalModal: function () {
       this.isEdit = false;
       this.show = true;
 
@@ -198,7 +230,7 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-.security_panel  {
+.security_panel {
   .search_panel {
     margin-top: 25px;
     margin-left: 36px;
