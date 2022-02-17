@@ -44,6 +44,7 @@ export default {
   height: 100%;
   .menu {
     width: 210px;
+    min-height: 500px;
     background-color: #fff;
     padding-top: 38px;
     .menu_one {

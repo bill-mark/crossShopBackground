@@ -28,7 +28,7 @@ export default {
   },
   methods: {
       go_ac(){
-          this.$emit("go_authcation")
+            this.$router.push({name:'company_faren_home'})
       }
   }
 }

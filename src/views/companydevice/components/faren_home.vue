@@ -80,7 +80,8 @@ export default {
     }
   },
   created() {
-    //this.auth_info(0)
+    this.auth_info(0)
+    this.auth_info(1)
   },
   methods: {
     async auth_info(type) {
