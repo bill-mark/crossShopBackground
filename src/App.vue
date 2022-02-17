@@ -25,6 +25,7 @@ export default {
     };
   },
   created() {
+   // console.log(app)
     this.initWebsocket();
   },
   methods: {

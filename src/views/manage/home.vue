@@ -7,15 +7,15 @@
         <div class="top_line"></div>
         <div class="top_content">
           <div class="top_cont_cell">
-            <div class="top_num">{{ shop }}</div>
-            <div class="top_txt">待绑定店铺</div>
+            <div class="top_num">{{ no_auth_environment_count }}</div>
+            <div class="top_txt">待授权环境</div>
           </div>
           <div class="top_cont_cell">
-            <div class="top_num">{{ shebei }}</div>
-            <div class="top_txt">待绑定设备</div>
+            <div class="top_num">{{ no_bind_count }}</div>
+            <div class="top_txt">待绑定设备的环境</div>
           </div>
           <div class="top_cont_cell">
-            <div class="top_num">{{ fufei }}</div>
+            <div class="top_num">{{ urgent_renewal_count }}</div>
             <div class="top_txt">急需付费</div>
           </div>
         </div>
@@ -27,16 +27,16 @@
         <div class="top_line"></div>
         <div class="top_content">
           <div class="top_cont_cell">
-            <div class="top_num">{{ huanjing }}</div>
-            <div class="top_txt">待绑定环境</div>
+            <div class="top_num">{{ about_expire_count }}</div>
+            <div class="top_txt">过期设备</div>
           </div>
           <div class="top_cont_cell">
-            <div class="top_num">{{ will_guoqi }}</div>
-            <div class="top_txt">即将过期</div>
+            <div class="top_num">{{ expired_count }}</div>
+            <div class="top_txt">已过期设备</div>
           </div>
           <div class="top_cont_cell">
-            <div class="top_num">{{ has_guoqi }}</div>
-            <div class="top_txt">已过期</div>
+            <div class="top_num">{{ no_bind_env_count }}</div>
+            <div class="top_txt">待绑定环境的设备</div>
           </div>
         </div>
       </div>
@@ -46,10 +46,10 @@
         <div class="top_cell_ico ico_only"></div>
         <div class="top_line"></div>
         <div class="top_yuer">
-          <div class="top_num">{{ yuer }}</div>
+          <div class="top_num">{{ balance }}</div>
           <div class="top_txt">账户余额</div>
         </div>
-        <div class="chongzhi_btn">充值</div>
+        <div class="chongzhi_btn" @click="go_page('charge_fee')">充值</div>
       </div>
     </div>
 
@@ -77,16 +77,16 @@
           最近打开
         </div>
 
-        <div class="top_btn btn_2">购买设备</div>
-        <div class="btn_3">新建环境</div>
+        <!-- <div class="top_btn btn_2" @click="go_page('manage_buyequipment')">购买设备</div>
+        <div class="btn_3" @click="go_page('manage_addenv')">新建环境</div> -->
 
-        <a-input-search
+        <!-- <a-input-search
           placeholder="搜索设备名称/设备环境/设备信息"
           class="btn_search"
           @search="onSearch"
-        />
+        /> -->
 
-        <a-select
+        <!-- <a-select
           default-value="all"
           class="btn_select"
           :showSearch="true"
@@ -100,7 +100,7 @@
           >
             {{ item.name }}
           </a-select-option>
-        </a-select>
+        </a-select> -->
       </div>
 
       <a-table
@@ -109,6 +109,7 @@
         :row-key="(r, i) => i.toString()"
         class="down_table"
         :pagination="pagination"
+        :loading="table_loading"
         @change="handleTableChange"
       >
         <div
@@ -121,23 +122,25 @@
         </div>
       </a-table>
 
-       <div class="down_txt">共{{pagination.total}}条数据</div>
+       <!-- <div class="down_txt">共{{pagination.total}}条数据</div> -->
 
     </div>
   </div>
 </template>
 <script>
 import {environment_index,environment_first_count} from '@/api/home'
+import { user_info } from '@/api/login'
 export default {
   data() {
     return {
-      shop: 0,
-      shebei: 0,
-      fufei: 0,
-      huanjing: 0,
-      will_guoqi: 0,
-      has_guoqi: 0,
-      yuer: 0,
+      no_auth_environment_count: 0,
+      no_bind_count: 0,
+      urgent_renewal_count: 0,
+      about_expire_count: 0,
+      expired_count: 0,
+      no_bind_env_count: 0,
+      balance: null,
+      table_loading:false,
 
       env_common: "all", //所有环境all 常用1 不选中0
       recent_open: 0,
@@ -160,45 +163,79 @@ export default {
         pageNum: 1, //当前页数
         pageSize: 10, //每页条数
         total: 0,
+         showTotal: (total) => `共 ${total} 条`, // 显示总数
       },
 
       table_column: [
         {
           title: "环境",
           dataIndex: "env_name",
+          scopedSlots: { customRender: "cell_envname" },
+          show: true,
+        },
+        {
+          title: "所属平台",
+          dataIndex: "country",
+          scopedSlots: { customRender: "cell_platform" },
+          show: true,
+        },
+        {
+          title: "标签",
+          dataIndex: "tag",
+          scopedSlots: { customRender: "cell_tag" },
+          show: false,
         },
         {
           title: "企业简称",
           dataIndex: "business_short",
+          show: false,
         },
         {
-          title: "操作",
-          scopedSlots: { customRender: "operator_column" },
+          title: "创建者",
+          dataIndex: "username",
+          show: false,
         },
       ],
       table_data: [
-        {
-          id: "1",
-          env_name: "John Brown",
-          business_short: "企业1",
-        },
-        {
-          id: "2",
-          env_name: "John Brown",
-          business_short: "企业1",
-        },
-        {
-          id: "3",
-          env_name: "John Brown",
-          business_short: "企业1",
-        },
       ],
     };
   },
   created(){
-       this.init()
+       this.top_data()
+       this.get_userinfo()
+
+       this.get_tabledata()
   },
   methods: {
+    async get_userinfo() {
+      let { data } = await user_info({
+        user_role: JSON.parse(localStorage.member).user_role
+      })
+      if (data.code == 200) {
+        localStorage.member = JSON.stringify(data.data.member)
+        this.balance = data.data.member.balance
+
+      }
+    },
+    go_page(name){
+       this.$router.push({ name: name })
+    },
+    async get_tabledata() {
+      this.table_loading = true;
+      let { data } = await environment_index({
+        status: 0,
+        pagesize: 20,
+        page: this.pagination.pageNum,
+      });
+      this.table_loading = false;
+      if (data.code == 200) {
+        this.pagination.total = data.data.total;
+
+        this.table_data = data.data.list;
+      }
+    },
+
+
     click_env_common(data) {
       this.env_common = data;
       this.recent_open = 0;
@@ -219,10 +256,18 @@ export default {
       this.platform_id = data
     },
 
-    async init(){
+    async top_data(){
       let {data} = await environment_first_count()
       if(data.code ==200){
-        this.huanjing = data.data.environment.no_bind_count
+        this.no_auth_environment_count = data.data.environment.no_auth_environment_count
+        this.no_bind_count = data.data.environment.no_bind_count
+        this.urgent_renewal_count = data.data.environment.urgent_renewal_count
+
+        this.about_expire_count = data.data.device.about_expire_count
+        this.expired_count = data.data.device.expired_count
+        this.no_bind_env_count = data.data.device.no_bind_env_count
+
+        
       }
     },
 
@@ -295,7 +340,7 @@ export default {
         display: flex;
         justify-content: space-around;
         .top_cont_cell {
-          width: 80px;
+          width: 116px;
           .top_num {
             font-size: 22px;
             line-height: 22px;

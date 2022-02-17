@@ -657,43 +657,6 @@ export default {
 
     }, 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     //解绑设备弹出
     open_unbuind(record) {
       //console.log(record)
@@ -1144,6 +1107,7 @@ export default {
     background-color: white;
     flex: 1;
     margin-right: 20px;
+    margin-left: 10px;
     .top_line {
       display: flex;
       justify-content: space-between;

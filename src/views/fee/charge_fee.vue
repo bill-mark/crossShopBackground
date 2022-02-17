@@ -294,9 +294,9 @@ export default {
 }
 </script>
 <style scoped lang="less">
-/deep/ .ant-modal-content {
-  min-height: 300px;
-}
+// /deep/ .ant-modal-content {
+//   min-height: 300px;
+// }
 
 .modal_chart {
   width: 160px;

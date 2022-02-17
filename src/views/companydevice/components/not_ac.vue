@@ -14,7 +14,7 @@
         <div class="line_3">无须每30天进行boss账号手机号验证</div>
         <div class="line_3">设备购买数量不受限制</div>
 
-        <a-button type="primary" class="line_btn"> 立即认证 </a-button>
+        <a-button type="primary" class="line_btn" @click="go_ac"> 立即认证 </a-button>
       </div>
     </div>
   </div>
@@ -28,7 +28,7 @@ export default {
   },
   methods: {
       go_ac(){
-          this.$emit.push("go_authcation")
+          this.$emit("go_authcation")
       }
   }
 }

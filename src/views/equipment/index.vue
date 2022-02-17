@@ -734,7 +734,6 @@ export default {
     },
     // 购买设备
     buyEq: function () { 
-      console.log('buyEq')
       this.$router.push({name:'manage_buyequipment'})
     },
     // 续费设备
@@ -820,7 +819,7 @@ export default {
   }
   .content {
     flex: 1;
-    //margin-left: 11px;
+    margin-left: 10px;
     height: calc(100vh - 126px);
     background-color: #fff;
     .search_panel {
