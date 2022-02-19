@@ -18,6 +18,8 @@ export default{
          if(data.code ==200){
            if(data.data.status == 0){
              this.$router.push({name:'company_notac'})
+           }else{
+              this.$router.push({name:'company_faren_home'})
            }
          }
        },

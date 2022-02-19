@@ -107,7 +107,7 @@ const routes = [
               needLogin: true, // 需要登录
             },
             component: () => import(/* webpackChunkName: "company_setting" */ "@/views/companydevice/company_seting.vue"),
-            redirect: { name: "company_faren_act" },
+            redirect: { name: "company_notac" },
             children:[
               {
                 path: "not_ac",
@@ -137,6 +137,22 @@ const routes = [
                 path: "faren_act",
                 name: "company_faren_act",
                 component: () => import(/* webpackChunkName: "company_faren_act" */ "@/views/companydevice/components/faren_act.vue"),
+                meta: {
+                  needLogin: true, // 需要登录
+                },
+              },
+              {
+                path: "wait_act",
+                name: "company_wait_act",
+                component: () => import(/* webpackChunkName: "company_wait_act" */ "@/views/companydevice/components/wait_act.vue"),
+                meta: {
+                  needLogin: true, // 需要登录
+                },
+              },
+              {
+                path: "check_act",
+                name: "company_check_act",
+                component: () => import(/* webpackChunkName: "company_check_act" */ "@/views/companydevice/components/check_act.vue"),
                 meta: {
                   needLogin: true, // 需要登录
                 },

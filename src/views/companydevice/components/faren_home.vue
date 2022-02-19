@@ -29,7 +29,7 @@
           </div>
         </div>
         <div class="con_t_right">
-          <a-button type="primary" class="right_btn">
+          <a-button type="primary" @click="go_pop" class="right_btn">
             {{ pep_btn }}
           </a-button>
         </div>
@@ -56,6 +56,7 @@
         <div class="con_t_right">
           <a-button type="primary" 
           :disabled="company_status == 0"
+          @click="go_com"
           class="right_btn">
             {{ com_btn }}
           </a-button>
@@ -113,6 +114,12 @@ export default {
         }
 
       }
+    },
+    go_pop(){
+       this.$router.push({name:'company_peo_act'})
+    },
+     go_com(){
+       this.$router.push({name:'company_faren_act'})
     },
   }
 }

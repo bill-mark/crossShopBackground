@@ -647,10 +647,11 @@ export default {
       this.webSocketObj && this.webSocketObj.close && this.webSocketObj.close();
     },
     websocket_open_client() {
+      console.log(this.check_record.device_ip)
       let c_1 = {
         "message": "/connection/proxy",
-        "serverIp":this.check_record.device_ip,
-        "环境名":this.check_record.id
+        "serverIp":this.check_record.device_ip+':'+this.websocket_port,
+        "browser_id":this.check_record.id
       }
       c_1 = JSON.stringify(c_1)
       this.webSocketObj.send(c_1);

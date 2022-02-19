@@ -27,3 +27,13 @@ export const certify_enterprise = (data) => {
         data
     })
 }
+
+
+// 确认企业对公打款金额
+export const certify_enterprise_confirm_bank = (data) => {
+    return request({
+        url: "/client_v1/certify/enterprise-confirm-bank",
+        method: "POST",
+        data
+    })
+}
