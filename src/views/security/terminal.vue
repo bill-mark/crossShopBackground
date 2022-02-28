@@ -21,7 +21,7 @@
         :scroll="{ x: 1200 }"
       >
         <template slot="operation" slot-scope="text, record">
-          <a href=" " @click="updateAuth(record)">编辑</a>
+          <a href="javascript:;" @click="updateAuth(record)">编辑</a>
           <a
             href="javascript:;"
             style="margin-left: 20px"
@@ -79,7 +79,7 @@ const columns = [
   },
   {
     title: "添加者",
-    dataIndex: "user_id",
+    dataIndex: "username",
   },
   {
     title: "操作",

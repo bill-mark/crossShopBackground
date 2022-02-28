@@ -2,6 +2,7 @@
   <div class="balance_content">
     <a-table
       class="balance_table"
+      :row-key="(r, i) => i.toString()"
       :columns="columns"
       :data-source="list"
       :pagination="pagination"

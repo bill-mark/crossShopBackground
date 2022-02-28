@@ -3,7 +3,7 @@
     <div class="content">
       <div class="top">
         <div :class="[type == 5 ? 'top_left_checked' : 'top_left']">
-          企业登录
+          企业员工登录
         </div>
       </div>
 
@@ -29,7 +29,7 @@
       <div class="middle_password_line" v-show="type == 5">
         <div class="middle_p_left">密码：</div>
         <a-input-password
-          placeholder="输入公司密码"
+          placeholder="输入公司告诉你的员工密码"
           v-model="business_password"
           style="width: 250px"
         />
@@ -53,7 +53,7 @@
       </a-button>
 
       <a-button class="com_btn" @click="go_company_login">
-        切换到普通登录
+        切换到企业老板登录
       </a-button>
     </div>
   </div>

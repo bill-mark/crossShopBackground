@@ -224,6 +224,9 @@ export default {
              this.$message.success('认证成功')
              this.$router.push({name:'company_setting'})
            }
+           if(data.data.status != 1){
+             this.$message.warning('暂未检测到认证成功,请完成认证或稍后再试')
+           }
          }
        },
 

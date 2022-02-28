@@ -7,12 +7,12 @@
         <div class="line_title" style="margin-top: 28px">手机号</div>
 
         <a-input-group compact class="phone_line">
-          <a-select default-value="+86" v-model="register_code">
+          <!-- <a-select default-value="+86" v-model="register_code">
             <a-select-option value="+86"> 中国(+86) </a-select-option>
             <a-select-option value="+1"> 美国(+1) </a-select-option>
-          </a-select>
+          </a-select> -->
           <a-input
-            style="width: 370px; height: 50px"
+            style="width: 469px; height: 50px"
             placeholder="输入手机号"
             v-model="phone"
           />
@@ -21,7 +21,7 @@
         <div class="line_title">验证码</div>
 
         <div class="middle_password_line">
-          <a-input-number
+          <a-input
             placeholder="请输入验证码"
             v-model="messagecode"
             style="width: 356px; height: 50px; line-height: 50px"
@@ -82,14 +82,20 @@ export default {
   },
   methods: {
     async get_messagecode() {
+      if (this.get_messagecode_state) {
+        return
+      }
       this.get_messagecode_state = true
       let { data } = await user_send_sms({
         phone: this.phone,
       })
-      this.get_messagecode_state = false
       if (data.code == 200) {
 
-        this.$message.success('验证码已发出')
+        this.$message.success('验证码已发出,60秒之后可再次点击获取')
+
+        setTimeout(() => {
+          this.get_messagecode_state = false
+        }, 60000)
       }
     },
     go_login() {
@@ -113,6 +119,10 @@ export default {
       if (data.code == 200) {
 
         this.$message.success('注册成功')
+        localStorage.member = JSON.stringify(data.data.member)
+            localStorage.user = JSON.stringify(data.data.user)
+            localStorage.token = data.data.token
+            this.$router.push({name:'manage_home'})
       }
     }
   }

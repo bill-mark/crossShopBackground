@@ -16,10 +16,10 @@
 
       <div class="con_txt">
         <div class="con_txt_1">
-          洋淘已于2022-01-23向贵公司尾号1151的对公账户发起打款，
+          洋淘已于 {{pay_time}} 向贵公司的对公账户发起打款，
         </div>
         <div class="con_txt_1">
-          请您于有效期2022-01-28前输入准确的金额完成验证。
+          请您于有效期{{expired_at}}前输入准确的金额完成验证。
         </div>
         <div class="con_txt_1">
           超过有效期系统将自动驳回，实名认证失败。请勿向任何人泄露您收到的验证信息。洋淘
@@ -34,7 +34,7 @@
       </div>
 
       <div class="last">
-        <a-button type="primary" @click="auth_info"> 下一步 </a-button>
+        <a-button type="primary" @click="go_next"> 下一步 </a-button>
       </div>
 
 
@@ -42,21 +42,37 @@
   </div>
 </template>
 <script>
-import { certify_enterprise_confirm_bank } from "@/api/authencation";
+import { certify_enterprise_confirm_bank,certify_latest_info_v2 } from "@/api/authencation";
 
 export default {
   data() {
     return {
       step_now: 2,
-      payment_amount:'',
+      payment_amount:null,
+
+      pay_time:'',//企业对公打款时间
+      expired_at:'',//企业对公打款过期时间
     };
   },
+  mounted(){
+     this.auth_info()
+  },
   methods:{
-       async auth_info(){
+       async go_next(){
          let {data} = await certify_enterprise_confirm_bank({
              payment_amount:this.payment_amount
          })
          if(data.code ==200){
+            this.$router.push({name:'company_faren_home'})
+         }
+       },
+         async auth_info(){
+         let {data} = await certify_latest_info_v2({
+             type:1
+         })
+         if(data.code ==200){
+           this.pay_time = data.data.pay_time
+            this.expired_at = data.data.expired_at
            
          }
        },

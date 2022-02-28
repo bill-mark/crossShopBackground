@@ -650,7 +650,7 @@ export default {
       console.log(this.check_record.device_ip)
       let c_1 = {
         "message": "/connection/proxy",
-        "serverIp":this.check_record.device_ip+':'+this.websocket_port,
+        "serverIp":this.check_record.device_ip,
         "browser_id":this.check_record.id
       }
       c_1 = JSON.stringify(c_1)

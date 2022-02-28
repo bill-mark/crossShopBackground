@@ -59,12 +59,12 @@
           </div>
         </div>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="登录日志" force-render>
-        Content of Tab Pane 2
+      <!-- <a-tab-pane key="2" tab="登录日志" force-render>
+      
       </a-tab-pane>
       <a-tab-pane key="3" tab="操作日志" force-render>
-        Content of Tab Pane 3
-      </a-tab-pane>
+        
+      </a-tab-pane> -->
     </a-tabs>
   </a-modal>
 </template>

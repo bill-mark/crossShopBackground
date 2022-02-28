@@ -323,7 +323,7 @@ export default {
       .left {
         margin-left: 85px;
         margin-top: 42px;
-        width: 200px;
+        width: 220px;
         flex: none;
         .title {
           font-size: 16px;
@@ -343,7 +343,7 @@ export default {
         }
       }
       .right {
-        margin-left: 32px;
+        margin-left: 12px;
         margin-top: 30px;
         width: 158px;
         height: 117px;

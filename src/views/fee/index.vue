@@ -4,7 +4,6 @@
       <a-menu
         style="width: 210px; height: 100%"
         mode="inline"
-        :default-selected-keys="['charge_fee']"
         :selected-keys="[current]"
         @click="handleClick"
       >
@@ -38,10 +37,32 @@ export default {
       current: "charge_fee", //选中的目录
     }
   },
+  mounted() {
+    this.check_navstate()
+  },
   methods: {
+    check_navstate() {
+      //console.log(this.$route.name)
+      if (this.$route.name == 'charge_fee') {
+        this.current = 'charge_fee'
+        return
+      }
+      if (this.$route.name == 'balance_fee') {
+        this.current = 'balance_fee'
+        return
+      }
+      if (this.$route.name == 'order_fee') {
+        this.current = 'order_fee'
+        return
+      }
+      if (this.$route.name == 'invite_fee') {
+        this.current = 'invite_fee'
+        return
+      }
+    },
     handleClick: function ({ key }) {
       this.current = key;
-      this.$router.push({name: key});
+      this.$router.push({ name: key });
     }
   }
 }

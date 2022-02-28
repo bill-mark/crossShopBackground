@@ -148,7 +148,7 @@ function getBase64(img, callback) {
   reader.addEventListener("load", () => callback(reader.result));
   reader.readAsDataURL(img);
 }
-import { certify_enterprise } from "@/api/authencation";
+import { certify_enterprise,certify_latest_info_v2} from "@/api/authencation";
 
 export default {
   data() {
@@ -169,7 +169,7 @@ export default {
       com_name: "",
       reg_num: "",
       person: "",
-      certify_type: 1, //认证方式
+      certify_type: 0, //认证方式
 
       bank_account: "",
       bank: "",
@@ -202,6 +202,12 @@ export default {
         cities: this.cities,
       });
       if (data.code == 200) {
+         if(this.certify_type ==0){
+              this.$router.push({name:'company_faren_home'})
+         }
+          if(this.certify_type ==1){
+              this.$router.push({name:'company_wait_act'})
+         }
       }
     },
     handleChange(info) {

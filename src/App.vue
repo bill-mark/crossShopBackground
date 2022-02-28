@@ -76,7 +76,7 @@ export default {
 
         }, 1000);
       } else {
-        this.$message.error('获取公共参数失败,websocket通信异常!');
+        this.$message.error('websocket通信异常,请刷新页面或者重新打开软件后1分钟再试!');
         this.onClose();
       }
     },

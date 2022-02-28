@@ -51,3 +51,11 @@ export const user_register = (data) => {
         data
     })
 }
+
+export const user_edit_business_name = (data) => {
+    return request({
+        url: "/client_v1/user/edit-business-name",
+        method: "POST",
+        data
+    })
+}

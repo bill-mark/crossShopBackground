@@ -54,7 +54,7 @@ import {
   environment_tag_list,
   update_environment_tag,
   create_environment_tag,
-  delete_environment_tag,
+  environment_deleteenvironmenttagmore,
 } from "@/api/environment.js";
 export default {
   props: {
@@ -87,6 +87,10 @@ export default {
       this.$emit("cancel");
     },
     async create_tag() {
+      if(!this.new_tag){
+           this.$message.error("请输入标签名")
+           return
+      }
       let { data } = await create_environment_tag({
         tag: this.new_tag,
       });
@@ -107,7 +111,10 @@ export default {
       }
     },
     async delete_tag() {
-      let { data } = await delete_environment_tag({
+      if(this.checked.length ==0){
+        return
+      }
+      let { data } = await environment_deleteenvironmenttagmore({
         id: this.checked.toString(),
       });
       if (data.code == 200) {

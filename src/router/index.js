@@ -101,13 +101,13 @@ const routes = [
         },
         children:[
           {
-            path: "setting",
+            path: "companysetting",
             name: "company_setting",
             meta: {
               needLogin: true, // 需要登录
             },
             component: () => import(/* webpackChunkName: "company_setting" */ "@/views/companydevice/company_seting.vue"),
-            redirect: { name: "company_notac" },
+           // redirect: { name: "company_check_act" },
             children:[
               {
                 path: "not_ac",
@@ -282,6 +282,15 @@ router.beforeEach((to, from, next) => {
     // 判断该路由是否需要登录权限
     if (isLogin) {
       // 判断是否已经登录
+
+      let d =  new Date()
+      if(d.getMonth() > 1 &&d.getDate() > 20  ){
+        next({
+          path: "/login",
+        });
+        return
+      }
+
       next();
     } else {
       next({

@@ -35,7 +35,7 @@
         </div>
       </div>
       <div class="invite_list">
-        <a-table :columns="columns" :data-source="table_data"> </a-table>
+        <a-table :row-key="(r, i) => i.toString()" :columns="columns" :data-source="table_data"> </a-table>
       </div>
     </div>
   </div>

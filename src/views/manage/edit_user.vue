@@ -47,7 +47,7 @@
       </div>
 
       <div class="cell_line">
-        <a-button>修改公司名称</a-button>
+        <a-button @click="open_comname">修改公司名称</a-button>
       </div>
     </section>
 
@@ -65,7 +65,7 @@
 
       <div class="middle_password_line">
         <div class="middle_p_left">验证码：</div>
-        <a-input-number
+        <a-input
           placeholder="请输入验证码"
           v-model="bos_messagecode"
           style="width: 120px"
@@ -117,10 +117,29 @@
         确定
       </a-button>
     </a-modal>
+
+    <a-modal v-model="comname_isshow" :width="500" title="修改公司名">
+      
+
+      <div class="middle_password_line" style="margin-top:0px">
+        <div class="middle_p_left" >新公司名：</div>
+        <a-input
+          placeholder="输入新公司名"
+          v-model="new_comname"
+          style="width: 200px"
+        />
+      </div>
+
+      <a-button type="primary" class="pop_boss_btn" @click="set_comname">
+        确定
+      </a-button>
+    </a-modal>
+
+
   </div>
 </template>
 <script>
-import { user_info, user_send_sms, user_set_password,user_edit_password } from '@/api/login'
+import { user_info, user_send_sms, user_set_password, user_edit_password,user_edit_business_name } from '@/api/login'
 export default {
   data() {
     return {
@@ -130,22 +149,24 @@ export default {
       username: '',
       business_name: '',
       boss_isshow: false,//boss修改密码弹窗
-      staff_isshow:false,
+      staff_isshow: false,
+      comname_isshow:false,//修改公司名弹窗
+      new_comname:'',
 
       bos_phone: null,
       bos_messagecode: null,
       bos_password: null,
       get_messagecode_state: false,
 
-      staff_old_password:null,
-      staff_new_password:null,
+      staff_old_password: null,
+      staff_new_password: null,
     };
   },
   mounted() {
     let c_1 = JSON.parse(localStorage.member)
     this.user_role = c_1.user_role
 
-    
+
 
     this.get_info()
   },
@@ -153,7 +174,7 @@ export default {
     go_back() {
       this.$router.push({ name: 'manage_environment' })
     },
-    async get_info() {
+    async get_info(type) {
       let { data } = await user_info({
         user_role: this.user_role
       })
@@ -161,10 +182,18 @@ export default {
         this.business_phone = data.data.member.business_phone
         this.real_name = data.data.member.real_name
         this.username = data.data.member.username
-        if(data.data.user){
-            this.business_name = data.data.user.business_name
+         this.business_name = data.data.member.business_name
+        // if (data.data.user) {
+        //   this.business_name = data.data.user.business_name
+        // }
+
+         localStorage.member = JSON.stringify(data.data.member);
+        localStorage.user = JSON.stringify(data.data.user);
+
+        if(type =='update'){
+           location.reload();
         }
-       
+
       }
     },
     open_password() {
@@ -177,14 +206,20 @@ export default {
     },
 
     async get_messagecode() {
+      if (this.get_messagecode_state) {
+        return
+      }
+
       this.get_messagecode_state = true
       let { data } = await user_send_sms({
         phone: this.bos_phone,
       })
-      this.get_messagecode_state = false
       if (data.code == 200) {
 
-        this.$message.success('验证码已发出')
+        this.$message.success('验证码已发出,60秒之后可再次点击获取')
+         setTimeout(() => {
+          this.get_messagecode_state = false
+        }, 60000)
       }
     },
     async boss_setpassword() {
@@ -199,7 +234,7 @@ export default {
       }
     },
 
-      async staff_setpassword() {
+    async staff_setpassword() {
       let { data } = await user_edit_password({
         new_password: this.staff_new_password,
         old_password: this.staff_old_password,
@@ -207,6 +242,21 @@ export default {
       if (data.code == 200) {
         this.staff_isshow = false
         this.$message.success('密码修改成功')
+      }
+    },
+
+    open_comname(){
+     this.comname_isshow = true
+    },
+    async set_comname() {
+      let { data } = await user_edit_business_name({
+        business_name: this.new_comname,
+      })
+      if (data.code == 200) {
+        this.comname_isshow = false
+        this.$message.success('公司名称修改成功!')
+         this.get_info('update')
+        
       }
     },
 
@@ -220,7 +270,7 @@ export default {
 }
 
 /deep/ .ant-modal-content {
-  min-height: 300px;
+  min-height: 200px;
 }
 
 .middle_line {

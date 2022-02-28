@@ -16,11 +16,6 @@
       </div>
 
       <div class="nav_w_right">
-        <!-- <div class="rightcell_1">APP下载</div>
-        <div class="rightcell_line"></div>
-        <div class="rightcell_2">帮助中心</div>
-        <div class="rightcell_line"></div> -->
-
         <a-popover trigger="click" overlayClassName="manage-popover">
           <div slot="content" class="pop_wrap">
             <div class="pop_top">
@@ -46,19 +41,22 @@
 
             <div class="pop_line">
               <div class="pop_line_ico"></div>
-              <div class="pop_line_txt" @click="go_page('manage_edituser')">修改个人信息</div>
+              <div class="pop_line_txt" @click="go_page('manage_edituser')">
+                修改个人信息
+              </div>
             </div>
 
             <div class="pop_line">
               <div class="pop_line_ico_2"></div>
-              <div class="pop_line_txt"  @click="go_page('invite_fee')">邀请有礼</div>
+              <div class="pop_line_txt" @click="go_page('invite_fee')">
+                邀请有礼
+              </div>
             </div>
 
             <div class="pop_line">
               <div class="pop_line_ico_3"></div>
               <div class="pop_line_txt" @click="go_out">退出登录</div>
             </div>
-
           </div>
 
           <div class="rightcell_3">{{ username }}</div>
@@ -115,6 +113,25 @@ export default {
           menuName: 'manage_fee'
         },
       ],
+
+      member_list: [
+        {
+          name: "首页",
+          value: "1",
+          menuName: "manage_home"
+        },
+        {
+          name: "环境管理",
+          value: "11",
+          menuName: "manage_environment"
+        },
+        {
+          name: "设备管理",
+          value: "2",
+          menuName: 'manage_equipment'
+        },
+      ],
+
       check_nav: 0,
       username: "",
       coupon_count: null,
@@ -122,25 +139,65 @@ export default {
       balance: null,
     };
   },
-  mounted() {
+  created() {
     let c_1 = JSON.parse(localStorage.member)
     this.username = c_1.real_name
     this.env_count = c_1.env_count
     this.coupon_count = c_1.coupon_count
     this.balance = c_1.balance
+    if (c_1.user_role == 1) {
+      this.nav_list = this.member_list
+    }
+  },
+  mounted() {
+   this.check_navstate() 
   },
   methods: {
+    //判断导航栏
+    check_navstate() {
+      console.log(this.$route)
+      if (this.$route.name == 'manage_home') {
+        this.check_nav = 0
+        return
+      }
+      if (this.$route.name == 'manage_environment') {
+        this.check_nav = 1
+        return
+      }
+      if (this.$route.name == 'manage_equipment') {
+        this.check_nav = 2
+        return
+      }
+      if (this.$route.name == 'manage_member') {
+        this.check_nav = 3
+        return
+      }
+      if (this.$route.name == 'member_security') {
+        this.check_nav = 4
+        return
+      }
+      if (this.$route.name == 'charge_fee') {
+        this.check_nav = 6
+        return
+      }
+      this.check_nav = 5
+    },
+
     //菜单跳转
     nav_click(index, menuName) {
+
+      // console.log(this.$route)
+      //  return
+
       this.check_nav = index;
       this.$router.push({ name: menuName })
     },
-    go_page(name){
-       this.$router.push({ name: name })
+    go_page(name) {
+      this.$router.push({ name: name })
     },
-    go_out(){
-       localStorage.clear()
-        this.$router.push({ name: 'login' })
+    go_out() {
+      localStorage.clear()
+      this.$router.push({ name: 'login' })
     }
 
 
@@ -366,7 +423,7 @@ export default {
     margin-left: 25px;
     cursor: pointer;
 
-   // border: 1px solid red;
+    // border: 1px solid red;
     .pop_line_ico {
       width: 18px;
       height: 18px;
@@ -375,7 +432,7 @@ export default {
       background-size: 100%;
       background-image: url("../../assets/img/个人信息 (2)@2x.png");
     }
-     .pop_line_ico_2 {
+    .pop_line_ico_2 {
       width: 18px;
       height: 18px;
       background-repeat: no-repeat;
@@ -395,8 +452,8 @@ export default {
       margin-left: 10px;
       line-height: 18px;
     }
-    .pop_line_txt:hover{
-     color: #4c84ff;
+    .pop_line_txt:hover {
+      color: #4c84ff;
     }
   }
 }

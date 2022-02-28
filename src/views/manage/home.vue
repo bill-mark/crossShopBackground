@@ -112,6 +112,21 @@
         :loading="table_loading"
         @change="handleTableChange"
       >
+
+      <div slot="cell_envname" slot-scope="text" class="content_envname">
+            {{ text }}
+          </div>
+
+          <div slot="cell_platform" slot-scope="text, record">
+            {{ text }}{{ record.site }}
+          </div>
+
+          <div slot="cell_tag" slot-scope="text">
+            <span v-for="item in text" :key="item.id">
+              {{ item.tag }}
+            </span>
+          </div>
+          
         <div
           slot="operator_column"
           slot-scope="record"
