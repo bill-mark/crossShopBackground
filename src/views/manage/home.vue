@@ -176,9 +176,9 @@ export default {
       platform_id:'',
       pagination: {
         pageNum: 1, //当前页数
-        pageSize: 10, //每页条数
+        pageSize: 20, //每页条数
         total: 0,
-         showTotal: (total) => `共 ${total} 条`, // 显示总数
+        showTotal: (total) => `共 ${total} 条`, // 显示总数
       },
 
       table_column: [
@@ -238,6 +238,8 @@ export default {
     async get_tabledata() {
       this.table_loading = true;
       let { data } = await environment_index({
+        env_common:this.env_common,
+        recent_open:this.recent_open,
         status: 0,
         pagesize: 20,
         page: this.pagination.pageNum,
@@ -254,10 +256,12 @@ export default {
     click_env_common(data) {
       this.env_common = data;
       this.recent_open = 0;
+      this.get_tabledata()
     },
     click_recent() {
       this.env_common = 0;
       this.recent_open = 1;
+      this.get_tabledata()
     },
     filterOptionEvent(input, option) {
       return (

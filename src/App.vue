@@ -25,10 +25,19 @@ export default {
     };
   },
   created() {
-   // console.log(app)
     this.initWebsocket();
   },
+  mounted(){
+    
+
+    console.log('ppoo')
+    this.$router.push({name:'manage_home'})
+
+
+
+  },
   methods: {
+    
     nav_click(menuName) {
       return
       this.$router.push({ name: menuName })

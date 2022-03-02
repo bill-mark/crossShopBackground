@@ -152,7 +152,7 @@ export default {
 </script>
 <style scoped lang="less">
 /deep/ .ant-modal-content {
-  height: 650px;
+  min-height: 300px;
 }
 
 /deep/ .ant-modal-body{

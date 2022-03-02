@@ -2,7 +2,7 @@
   <div class="environment_wrap" :style="{ height: wrap_height + 'px' }">
     <div class="content_left">
       <a-menu
-        style="width: 256px; height: 100%"
+        style="width: 210px; height: 100%"
         :default-selected-keys="['1']"
         mode="inline"
         :selected-keys="[current]"
@@ -51,6 +51,7 @@
             trigger="click"
             v-model="batch_visibal"
             overlayClassName="table-popover"
+             v-show="selectedRowKeys.length != 0"
           >
             <div
               slot="content"
@@ -111,6 +112,12 @@
               批量操作
             </a-button>
           </a-popover>
+
+             <a-button class="top_btn" 
+              v-show="selectedRowKeys.length == 0"
+             :disabled="selectedRowKeys.length === 0">
+              批量操作
+            </a-button>
 
           <a-input-search
             placeholder="多个环境名/设备名称/设备信息/环境标签间用逗号隔开搜索"
@@ -219,7 +226,7 @@
             </a-popover>
           </div>
         </a-table>
-        <div class="down_txt">共{{ pagination.total }}条数据</div>
+        <!-- <div class="down_txt">共{{ pagination.total }}条数据</div> -->
       </div>
     </div>
 
@@ -473,6 +480,7 @@ export default {
         pageNum: 1, //当前页数
         pageSize: 20, //每页条数
         total: 0,
+        showTotal: (total) => `共 ${total} 条`, // 显示总数
       },
       no_auth_environment: "", //待授权
       no_bind_count: "", //待绑定
@@ -1101,7 +1109,8 @@ export default {
   //border: 1px solid green;
   display: flex;
   .content_left {
-    min-width: 220px;
+    padding-top: 38px;
+    min-width: 210px;
     background-color: white;
   }
   .content_right {

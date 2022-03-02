@@ -283,7 +283,7 @@ export default {
     this.get_device_list()
     this.get_tag_list()
 
-    this.get_member_data()
+    
   },
   methods: {
     test() {
@@ -295,7 +295,7 @@ export default {
       let { data } = await environment_info({
         id: this.$route.query.id,
       });
-      this.spinning = false
+     
       if (data.code == 200) {
         this.old_config = data.data
         this.platform_defaultvalue[0] = data.data.platform_id
@@ -326,6 +326,8 @@ export default {
         this.env_linux = data.data.config.linux
         this.env_mac = data.data.config.mac
         this.env_android = data.data.config.android
+
+        this.get_member_data()
       }
     },
 
@@ -334,6 +336,7 @@ export default {
       let { data } = await user_member_list({
         keywords: keywords,
       })
+       this.spinning = false
       if (data.code == 200) {
         this.member_list = data.data.list
         this.drawer_memberlist = this.member_list

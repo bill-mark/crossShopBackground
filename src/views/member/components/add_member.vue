@@ -61,13 +61,13 @@
           <a-radio :value="1" :style="radioStyle">
             每日允许访问时间:
             <a-time-picker
-              format="HH:mm"
+              valueFormat="HH:mm:ss"
               placeholder="访问开始时间"
               v-model="begin_time"
             />
             -
             <a-time-picker
-              format="HH:mm"
+              valueFormat="HH:mm:ss"
               placeholder="访问结束时间"
               v-model="end_time"
             />
@@ -179,6 +179,10 @@ export default {
       }
     },
     async ok_handle() {
+      if(this.department_id.length == 0){
+        this.$message.error('部门必选')
+        return
+      }
       
       let { data } = await user_createmember({
         username:this.username,

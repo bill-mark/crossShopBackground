@@ -160,7 +160,7 @@ export default {
         this.check_nav = 0
         return
       }
-      if (this.$route.name == 'manage_environment') {
+      if (this.$route.name == 'manage_environment'||this.$route.name == 'manage_addenv') {
         this.check_nav = 1
         return
       }
@@ -172,7 +172,7 @@ export default {
         this.check_nav = 3
         return
       }
-      if (this.$route.name == 'member_security') {
+      if (this.$route.name == 'member_security'||this.$route.name == 'terminal_security') {
         this.check_nav = 4
         return
       }

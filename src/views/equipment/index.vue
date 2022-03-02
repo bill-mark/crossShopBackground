@@ -46,16 +46,16 @@
           type="primary"
           class="eq_buy_btn"
           @click="show_tagmanage = true"
-          >标签管理</a-button
-        >
+          >标签管理
+        </a-button>
 
-        <a-button
+        <!-- <a-button
           type="primary"
           class="eq_buy_btn"
           :disabled="selectedRowKeys.length === 0"
           @click="renewalEq"
           >续费设备</a-button
-        >
+        > -->
 
         <a-input-search
           class="eq_buy_btn"
@@ -97,6 +97,10 @@
             {{ formate_remote(text) }}
           </div>
 
+          <div slot="cell_tags" slot-scope="text">
+            {{ formate_tags(text) }}
+          </div>
+
           <div slot="cell_renew" slot-scope="text">
             {{ formate_renew(text) }}
           </div>
@@ -106,7 +110,9 @@
           </div>
 
           <template slot="operation" slot-scope="text, record">
-            <a-button type="primary" @click="onRenew(record)">续费</a-button>
+
+            <!-- <a-button type="primary" @click="onRenew(record)">续费</a-button> -->
+
             <a-button @click="show_detail(record)" class="view_btn"
               >详情</a-button
             >
@@ -335,6 +341,11 @@ const columns = [
     scopedSlots: { customRender: "cell_name" },
   },
   {
+    title: "标签",
+    dataIndex: "tags",
+    scopedSlots: { customRender: "cell_tags" },
+  },
+  {
     title: "设备归属",
     dataIndex: "device_area_title",
     scopedSlots: { customRender: "cell_under" },
@@ -430,8 +441,9 @@ export default {
       wrapperCol: { span: 24 },
       pagination: {
         pageNum: 1, //当前页数
-        pageSize: 10, //每页条数
+        pageSize: 20, //每页条数
         total: 0,
+        showTotal: (total) => `共 ${total} 条`, // 显示总数
       },
       loading: false,
       about_expire: 0,
@@ -616,6 +628,16 @@ export default {
         return "可远程";
       }
     },
+    formate_tags(data){
+      console.log(data)
+      let c_1 = []
+      if(data.length >0){
+       data.forEach(item=>{
+          c_1.push(item.tag)
+       })
+      }
+     return c_1.toString()
+    },
     //格式化自动续费
     formate_renew(data) {
       if (data == 0) {
@@ -766,7 +788,7 @@ export default {
 }
 
 .equipment {
-  margin-top: 11px;
+  margin-top: 20px;
   display: flex;
   flex-direction: row;
   margin-left: 15px;
@@ -820,7 +842,7 @@ export default {
   .content {
     flex: 1;
     margin-left: 10px;
-    height: calc(100vh - 126px);
+    min-height: calc(100vh - 126px);
     background-color: #fff;
     .search_panel {
       margin-top: 25px;

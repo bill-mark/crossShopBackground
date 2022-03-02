@@ -299,6 +299,7 @@ export default {
     //获得成员列表
     async get_member_data(keywords) {
       let { data } = await user_member_list({
+        status:0,
         keywords: keywords,
       })
       if (data.code == 200) {

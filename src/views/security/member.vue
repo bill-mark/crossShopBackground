@@ -53,7 +53,7 @@
         </a-form-model-item>
 
         <a-form-model-item label="登录时间限制">
-          <a-radio-group v-model="limitForm.login_time" @change="onTimeRadioChange">
+          <a-radio-group v-model="limitForm.login_time" >
             <a-radio :style="radioStyle" :value="0">
               24小时可登录
             </a-radio>
@@ -62,8 +62,8 @@
             </a-radio>
           </a-radio-group>
         </a-form-model-item>
-        <a-time-picker use12-hours v-modal="limitForm.begin_time" v-if="showTime" />
-        <a-time-picker  style="marginLeft: 10px" use12-hours v-modal="limitForm.end_time" v-if="showTime" />
+        <a-time-picker use12-hours v-modal="limitForm.begin_time" v-if="limitForm.login_time == '1' " />
+        <a-time-picker  style="marginLeft: 10px" use12-hours v-modal="limitForm.end_time" v-if="limitForm.login_time == '1' " />
       </a-form-model>
     </a-modal>
   </div>
@@ -120,6 +120,7 @@ export default {
         pageNum: 1, //当前页数
         pageSize: 10, //每页条数
         total: 0,
+        showTotal: (total) => `共 ${total} 条`, // 显示总数
       },
       common: {
         version: "1.0.0",
@@ -218,6 +219,7 @@ export default {
       console.log('this.limitForm', this.limitForm)
       let {data} = await security_change_login_more({...this.limitForm, ...this.common});
       if (data.code == 200) {
+        this.fetchList();
         this.$message.success('操作成功!')
       }
       this.showDialog = false;

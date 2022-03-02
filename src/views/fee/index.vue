@@ -69,7 +69,7 @@ export default {
 </script>
 <style scoped lang="less">
 .equipment {
-  margin-top: 11px;
+  margin-top: 20px;
   display: flex;
   flex-direction: row;
   margin-left: 15px;
@@ -114,7 +114,7 @@ export default {
   }
   .info {
     flex: 1;
-    height: calc(100vh - 126px);
+    min-height: calc(100vh - 126px);
     background-color: #fff;
     margin-left: 11px;
   }

@@ -298,7 +298,7 @@ export default {
 }
 
 /deep/ .ant-modal-content {
-  height: 700px;
+  min-height: 400px;
 }
 
 .detail_line {

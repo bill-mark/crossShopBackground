@@ -30,19 +30,34 @@ export default {
       current: "member_security", //选中的目录
     }
   },
+  mounted() {
+    this.check_navstate()
+  },
   methods: {
     handleClick: function ({ key }) {
       this.current = key;
       this.$router.push({name: key});
-    }
+    },
+    check_navstate() {
+      //console.log(this.$route.name)
+      if (this.$route.name == 'member_security') {
+        this.current = 'member_security'
+        return
+      }
+      if (this.$route.name == 'terminal_security') {
+        this.current = 'terminal_security'
+        return
+      }
+    },
   }
 }
 </script>
 <style scoped lang="less">
 .equipment {
-  margin-top: 11px;
+  margin-top: 20px;
   display: flex;
   flex-direction: row;
+  padding-left: 15px;
   .menu {
     width: 210px;
     background-color: #fff;

@@ -36,7 +36,7 @@ export default {
 </script>
 <style scoped lang="less">
 .company_wrap {
-  margin-top: 11px;
+  margin-top: 20px;
   display: flex;
   flex-direction: row;
   margin-left: 15px;

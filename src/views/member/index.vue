@@ -1,8 +1,8 @@
 <template>
-  <div class="member_wrap" :style="{ height: wrap_height + 'px' }">
+  <div class="member_wrap" >
     <div class="content_left">
       <a-menu
-        style="width: 256px; height: 100%"
+        style="width: 210px; height: 100%"
         :default-selected-keys="['1']"
         mode="inline"
         :selected-keys="[current]"
@@ -51,21 +51,24 @@
             trigger="click"
             v-model="batch_visibal"
             overlayClassName="table-popover"
+            v-show="selectedRowKeys.length != 0"
           >
-            <div slot="content" class="popover-content"
-            @click="batch_enable"
+            <div
+              slot="content"
+              class="popover-content"
+              @click="batch_enable"
             >
               <div>批量启用成员</div>
             </div>
 
-            <div slot="content" class="popover-content"
-            @click="batch_ban"
-            >
+            <div slot="content" class="popover-content" @click="batch_ban">
               <div>批量禁用成员</div>
             </div>
 
-            <div slot="content" class="popover-content"
-            @click="batch_opendelet"
+            <div
+              slot="content"
+              class="popover-content"
+              @click="batch_opendelet"
             >
               <div>批量删除成员</div>
             </div>
@@ -75,20 +78,29 @@
             </a-button>
           </a-popover>
 
+           <a-button class="top_btn"
+            v-show="selectedRowKeys.length == 0"
+            :disabled="selectedRowKeys.length === 0">
+              批量操作
+            </a-button>
+
+
+
           <a-input-search
-            placeholder="多个用户名"
+            placeholder="多个用户名/姓名用逗号隔开"
             class="btn_search"
             @search="handle_search"
           />
         </div>
 
-        <div class="top_l_right">
+        <!-- <div class="top_l_right">
           <a-button class="top_btn"> 所有部门 </a-button>
-        </div>
+        </div> -->
       </div>
 
       <div class="down_table">
         <a-table
+          v-if="table_state"
           :row-selection="rowSelection"
           :loading="table_loading"
           :columns="columns"
@@ -247,7 +259,7 @@ export default {
       table_data: [],
       table_loading: false,
       pagination: {
-        pageNum: 1, //当前页数
+        current: 1, //当前页数
         pageSize: 20, //每页条数
         total: 0,
         showTotal: (total) => `共 ${total} 条`, // 显示总数
@@ -321,6 +333,8 @@ export default {
       auth_modalstatus: false,
 
       view_modalstatus: false,
+
+      table_state:true,
     };
   },
   mounted() {
@@ -366,7 +380,7 @@ export default {
     },
     batch_opendelet() {
       let c_1 = []
-      this.selectedRows.forEach(item=>{
+      this.selectedRows.forEach(item => {
         c_1.push(item.id)
       })
 
@@ -375,7 +389,7 @@ export default {
         title: '批量删除成员',
         content: "确定批量删除所选成员吗",
         onOk() {
-          that.go_delet( c_1.toString() )
+          that.go_delet(c_1.toString())
           return false;
         },
         onCancel() { },
@@ -403,9 +417,9 @@ export default {
         onCancel() { },
       });
     },
-      batch_ban() {
+    batch_ban() {
       let c_1 = []
-      this.selectedRows.forEach(item=>{
+      this.selectedRows.forEach(item => {
         c_1.push(item.id)
       })
 
@@ -414,7 +428,7 @@ export default {
         title: '批量禁用成员',
         content: "确定批量禁用所选成员吗",
         onOk() {
-          that.go_ban( c_1.toString() )
+          that.go_ban(c_1.toString())
           return false;
         },
         onCancel() { },
@@ -443,9 +457,9 @@ export default {
         onCancel() { },
       });
     },
-     batch_enable() {
+    batch_enable() {
       let c_1 = []
-      this.selectedRows.forEach(item=>{
+      this.selectedRows.forEach(item => {
         c_1.push(item.id)
       })
 
@@ -454,7 +468,7 @@ export default {
         title: '批量启用成员',
         content: "确定批量启用所选成员吗",
         onOk() {
-          that.go_enable( c_1.toString() )
+          that.go_enable(c_1.toString())
           return false;
         },
         onCancel() { },
@@ -488,7 +502,7 @@ export default {
       let { data } = await user_member_list({
         ...this.standard_config,
         pagesize: 20,
-        page: this.pagination.pageNum,
+        page: this.pagination.current,
       });
       this.table_loading = false;
       if (data.code == 200) {
@@ -499,8 +513,9 @@ export default {
     },
     //菜单点击
     menu_handleClick(e) {
-      console.log("click ", e.key);
+      //console.log("click ", e.key);
       //return
+      this.table_state = false
 
       this.current = e.key;
 
@@ -519,6 +534,11 @@ export default {
       if (e.key == "jiucai") {
         this.standard_config.role_id = 2;
       }
+
+      this.pagination.current = 1
+      this.pagination.total = 1
+
+      this.table_state = true
 
       this.get_tabledata();
     },
@@ -611,13 +631,13 @@ export default {
     //搜索回调
     handle_search(keywords) {
       this.standard_config.keywords = keywords;
-      this.pagination.pageNum = 1;
+      this.pagination.current = 1;
       this.get_tabledata();
     },
 
     //表格 切换页码
     handleTableChange(pagination) {
-      this.pagination.pageNum = pagination.current;
+      this.pagination.current = pagination.current;
       this.get_tabledata();
     },
 
@@ -721,7 +741,8 @@ export default {
   //border: 1px solid green;
   display: flex;
   .content_left {
-    min-width: 220px;
+    padding-top: 38px;
+    min-width: 210px;
     background-color: white;
     .menu_one {
       display: flex;

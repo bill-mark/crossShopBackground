@@ -103,6 +103,7 @@ export default {
         pageNum: 1, //当前页数
         pageSize: 10, //每页条数
         total: 0,
+        showTotal: (total) => `共 ${total} 条`, // 显示总数
       },
       common: {
         version: "1.0.0",

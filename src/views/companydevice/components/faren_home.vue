@@ -55,7 +55,7 @@
         </div>
         <div class="con_t_right">
           <a-button type="primary" 
-          :disabled="company_status == 0"
+          :disabled="peo_status != 1"
           @click="go_com"
           class="right_btn">
             {{ com_btn }}
@@ -103,11 +103,11 @@ export default {
         }
         if (type == 1) {
           this.company_status = data.data.status
-          if (this.peo_status == 0) {
-            this.com_btn = '进行个人认证'
+          if (this.company_status == 0) {
+            this.com_btn = '进行组织认证'
             this.com_status = '未认证'
           }
-          if (this.peo_status == 1) {
+          if (this.company_status == 1) {
             this.com_btn = '重新认证'
             this.com_status = '已认证'
           }

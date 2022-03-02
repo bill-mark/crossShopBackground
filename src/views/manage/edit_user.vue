@@ -172,7 +172,7 @@ export default {
   },
   methods: {
     go_back() {
-      this.$router.push({ name: 'manage_environment' })
+     this.$router.back(-1)
     },
     async get_info(type) {
       let { data } = await user_info({

@@ -54,13 +54,13 @@
           <a-radio :value="1" :style="radioStyle">
             每日允许访问时间:
             <a-time-picker
-              format="HH:mm"
+              format="HH:mm:ss"
               placeholder="访问开始时间"
               v-model="begin_time"
             />
             -
             <a-time-picker
-              format="HH:mm"
+              format="HH:mm:ss"
               placeholder="访问结束时间"
               v-model="end_time"
             />
@@ -140,7 +140,6 @@ export default {
   },
   mounted() {
     this.isshow = this.modalstatus;
-    console.log(this.modaldata)
     this.init_data()
     this.get_departlist()
   },
@@ -157,8 +156,10 @@ export default {
       this.role_id = this.modaldata.role_id
       this.auth_method = this.modaldata.auth_method
       this.login_time = this.modaldata.login_time
-      this.begin_time = this.modaldata.begin_time
-      this.end_time = this.modaldata.end_time
+
+      this.begin_time = moment(this.modaldata.begin_time,'HH:mm:ss')
+      this.end_time = moment(this.modaldata.end_time,'HH:mm:ss')
+
       this.edit_info = this.modaldata.edit_info
       this.department_id = this.modaldata.depart.map(item => item.id)
     },
