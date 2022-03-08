@@ -32,6 +32,7 @@ const routes = [
         name: "manage_home",
         meta: {
           needLogin: true, // 需要登录
+          ismember:true,//员工可见
         },
         component: () => import(/* webpackChunkName: "manage_home" */ "@/views/manage/home.vue"),
       },
@@ -40,6 +41,7 @@ const routes = [
         name: "manage_environment",
         meta: {
           needLogin: true, // 需要登录
+          ismember:true,//员工可见
         },
         component: () => import(/* webpackChunkName: "manage_environment" */ "@/views/manage/environment.vue"),
       },
@@ -48,6 +50,7 @@ const routes = [
         name: "manage_equipment",
         meta: {
           needLogin: true, // 需要登录
+          ismember:true,//员工可见
         },
         component: () => import(/* webpackChunkName: "equipment" */ "@/views/equipment/index.vue"),
       },
@@ -88,6 +91,7 @@ const routes = [
         name: "manage_edituser",
         meta: {
           needLogin: true, // 需要登录
+          ismember:true,//员工可见
         },
         component: () => import(/* webpackChunkName: "edituser" */ "@/views/manage/edit_user.vue"),
       },
@@ -278,16 +282,22 @@ const router = new VueRouter({
 // 全局路由守卫
 router.beforeEach((to, from, next) => {
   let isLogin = localStorage.token;
-  if (to.meta.needLogin) {
-    // 判断该路由是否需要登录权限
-    if (isLogin) {
-      // 判断是否已经登录
 
-      let d =  new Date()
-      if(d.getMonth() > 1 &&d.getDate() > 20  ){
+   // 判断该路由是否需要登录权限
+  if (to.meta.needLogin) {
+    console.log('is need login')
+    // 判断是否已经登录
+    if (isLogin) {
+
+      console.log(to.meta.ismember)
+      let c_3 = JSON.parse(localStorage.member).user_role
+      console.log(c_3  )
+      if(to.meta.ismember == undefined && c_3 != 0){
+        Vue.prototype.$message.error("没有权限");
         next({
-          path: "/login",
+          path: "/manage/home",
         });
+        location.reload();
         return
       }
 
@@ -298,6 +308,7 @@ router.beforeEach((to, from, next) => {
       });
     }
   } else {
+    console.log('99kk')
     next();
   }
 });

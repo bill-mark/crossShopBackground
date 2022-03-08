@@ -42,7 +42,7 @@
             <div class="pop_line">
               <div class="pop_line_ico"></div>
               <div class="pop_line_txt" @click="go_page('manage_edituser')">
-                修改个人信息
+                查看个人信息
               </div>
             </div>
 
@@ -198,6 +198,7 @@ export default {
     go_out() {
       localStorage.clear()
       this.$router.push({ name: 'login' })
+      location.reload();
     }
 
 

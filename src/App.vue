@@ -28,10 +28,14 @@ export default {
     this.initWebsocket();
   },
   mounted(){
-    
+    //console.log(window.location.href)
+   // console.log(this.$route)
 
-    console.log('ppoo')
-    this.$router.push({name:'manage_home'})
+    if(window.location.href.indexOf('register')<0){
+       this.$router.push({name:'manage_home'})
+    }
+
+   // this.$router.push({name:'manage_home'})
 
 
 
@@ -91,7 +95,7 @@ export default {
     },
     //连接关闭的回调方法
     onClose() {
-      console.log('onClose')
+     // console.log('onClose')
       this.webSocketObj && this.webSocketObj.close && this.webSocketObj.close();
     },
     get_client_params() {

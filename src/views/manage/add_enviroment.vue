@@ -354,6 +354,7 @@ export default {
         type: "all",
         pagesize: 100,
         page: 1,
+        status:0,
       });
       if (data.code == 200) {
         data.data.list.forEach((item) => {
@@ -376,6 +377,7 @@ export default {
       let { data } = await client_v1_device({
         pagesize: 100,
         page: 1,
+        status:0,
       });
       if (data.code == 200) {
         this.device_list = data.data.list

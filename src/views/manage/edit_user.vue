@@ -4,7 +4,7 @@
       <a-button type="primary" class="top_l_btn" @click="go_back">
         <a-icon type="left" />返回
       </a-button>
-      <div class="top_l_right">修改个人信息</div>
+      <div class="top_l_right">查看个人信息</div>
     </div>
 
     <div class="cell_title">

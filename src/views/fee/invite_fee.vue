@@ -22,7 +22,7 @@
         <div class="r_count">
           <div class="count_back"></div>
           <div class="count_info">
-            <div class="co">{{ total }}</div>
+            <div class="co">{{ num }}</div>
             <div class="co_title">累计邀请好友 (人)</div>
           </div>
         </div>
@@ -35,7 +35,12 @@
         </div>
       </div>
       <div class="invite_list">
-        <a-table :row-key="(r, i) => i.toString()" :columns="columns" :data-source="table_data"> </a-table>
+        <a-table
+          :row-key="(r, i) => i.toString()"
+          :columns="columns"
+          :data-source="table_data"
+        >
+        </a-table>
       </div>
     </div>
   </div>
@@ -45,19 +50,16 @@
 import { coupon_invite } from "@/api/const_manage";
 const columns = [{
   title: "注册时间",
-  dataIndex: "trade_no1"
+  dataIndex: "register_at"
 }, {
   title: "注册公司名",
-  dataIndex: "trade_no2"
+  dataIndex: "business_name"
 }, {
-  title: "第一次下单时间",
-  dataIndex: "trade_no3"
+  title: "优惠券金额",
+  dataIndex: "money"
 }, {
-  title: "礼金券",
-  dataIndex: "trade_no4"
-}, {
-  title: "时间",
-  dataIndex: "trade_no5"
+  title: "过期时间",
+  dataIndex: "expire_at"
 }
 ]
 import { copy } from 'iclipboard';
@@ -88,12 +90,13 @@ export default {
     },
 
     async get_data() {
-      let { data } =await coupon_invite({
+      let { data } = await coupon_invite({
 
       })
       if (data.code == 200) {
         this.count = data.data.count
         this.total = data.data.total
+        this.table_data = data.data.list
       }
     },
   }

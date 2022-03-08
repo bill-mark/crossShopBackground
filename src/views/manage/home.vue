@@ -28,7 +28,7 @@
         <div class="top_content">
           <div class="top_cont_cell">
             <div class="top_num">{{ about_expire_count }}</div>
-            <div class="top_txt">过期设备</div>
+            <div class="top_txt">即将过期设备</div>
           </div>
           <div class="top_cont_cell">
             <div class="top_num">{{ expired_count }}</div>

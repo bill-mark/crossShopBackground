@@ -153,3 +153,11 @@ export const device_devicebindtag = (data) => {
   })
 }
 
+//设备回收站批量恢复设备
+export const recovery_device_more = (data) => {
+  return request({
+      url: "/client_v1/device/recovery-device-more",
+      method: "POST",
+      data
+  })
+}

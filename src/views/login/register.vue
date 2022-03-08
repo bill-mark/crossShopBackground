@@ -78,7 +78,7 @@ export default {
   },
   mounted() {
     this.invite_code = this.$route.query.invite
-    console.log(this.invite_code)
+    //console.log(this.invite_code)
   },
   methods: {
     async get_messagecode() {

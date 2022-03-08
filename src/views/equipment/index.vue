@@ -36,7 +36,7 @@
       </a-menu>
     </div>
 
-    <div class="content" >
+    <div class="content">
       <div class="search_panel">
         <a-button type="primary" class="eq_buy_btn" @click="buyEq"
           >购买设备</a-button
@@ -46,7 +46,7 @@
           type="primary"
           class="eq_buy_btn"
           @click="show_tagmanage = true"
-          >标签管理
+          >设备标签管理
         </a-button>
 
         <!-- <a-button
@@ -67,20 +67,15 @@
       </div>
 
       <div class="eq_info">
-        <no-equipment v-if="!has_device"></no-equipment>
+        <!-- <no-equipment v-if="!has_device"></no-equipment> -->
 
         <a-table
-          :row-selection="{
-            selectedRowKeys: selectedRowKeys,
-            onChange: onSelectChange,
-          }"
           :row-key="(record) => record.id"
           :columns="columns"
           :data-source="list"
           :pagination="pagination"
           :loading="loading"
           @change="handleTableChange"
-          v-show="has_device"
           :scroll="{ x: 1200 }"
         >
           <div slot="cell_under" slot-scope="text, record">
@@ -110,14 +105,17 @@
           </div>
 
           <template slot="operation" slot-scope="text, record">
-
             <!-- <a-button type="primary" @click="onRenew(record)">续费</a-button> -->
 
             <a-button @click="show_detail(record)" class="view_btn"
               >详情</a-button
             >
 
-            <a-popover trigger="hover" overlayClassName="table-popover">
+            <a-popover
+              v-if="query.status != 4 || record.status != 4"
+              trigger="hover"
+              overlayClassName="table-popover"
+            >
               <div
                 slot="content"
                 v-if="record.renew_status == 0"
@@ -156,8 +154,10 @@
               >
                 <div>解绑环境</div>
               </div>
-              <div slot="content" class="popover_edit-content"
-              @click="open_edit_devicetag_pop(record)"
+              <div
+                slot="content"
+                class="popover_edit-content"
+                @click="open_edit_devicetag_pop(record)"
               >
                 <div>编辑标签</div>
               </div>
@@ -171,6 +171,13 @@
 
               <a-button class="view_btn">更多</a-button>
             </a-popover>
+
+            <a-button
+              v-if="query.status == 4 && record.status == 4"
+              @click="recover_device(record)"
+              class="view_btn"
+              >恢复</a-button
+            >
           </template>
         </a-table>
       </div>
@@ -318,6 +325,7 @@ import {
   device_cancelrenewstatus,
   device_updatedevicename,
   device_deletedevicemore,
+  recovery_device_more,
 } from "@/api/equipment";
 
 import device_detail from "./compoents/device_detail.vue";
@@ -419,7 +427,7 @@ const query = {
   page: null,
 };
 export default {
-  components: { noEquipment, TagList, device_detail, device_unbind, device_bind, tag_device,edit_devicetag },
+  components: { noEquipment, TagList, device_detail, device_unbind, device_bind, tag_device, edit_devicetag },
   name: "equipment",
   data() {
     return {
@@ -459,7 +467,9 @@ export default {
 
       unbinddevice_modalstatus: false,//解绑环境弹窗
       binddevice_modalstatus: false,//绑定环境弹窗
-      edit_devicetag_modalstatus:false,//编辑绑定设备
+      edit_devicetag_modalstatus: false,//编辑绑定设备
+
+
     };
   },
   computed: {
@@ -471,6 +481,17 @@ export default {
     this.fetchList();
   },
   methods: {
+    //恢复设备
+    async recover_device(record) {
+      console.log('recover_device')
+      let { data } = await recovery_device_more({
+        device_id: record.id
+      });
+      if (data.code == 200) {
+        this.fetchList();
+        this.$message.success("操作成功");
+      }
+    },
     //取消标签管理
     cancel_tagmanage() {
       this.show_tagmanage = false;
@@ -614,7 +635,7 @@ export default {
       data.env_name.forEach(item => {
         c_1.push(item.env_name)
       })
-     // console.log(c_1)
+      // console.log(c_1)
       return c_1.toString()
     },
 
@@ -628,15 +649,15 @@ export default {
         return "可远程";
       }
     },
-    formate_tags(data){
-      console.log(data)
+    formate_tags(data) {
+      // console.log(data)
       let c_1 = []
-      if(data.length >0){
-       data.forEach(item=>{
+      if (data.length > 0) {
+        data.forEach(item => {
           c_1.push(item.tag)
-       })
+        })
       }
-     return c_1.toString()
+      return c_1.toString()
     },
     //格式化自动续费
     formate_renew(data) {
@@ -686,6 +707,8 @@ export default {
         this.query = { ...query, renew_status: 1 };
       }
 
+      this.pagination.pageNum = 1
+
       this.fetchList();
     },
     // 设备类别改变
@@ -722,7 +745,7 @@ export default {
       this.loading = true;
       const { data } = await getList({
         ...this.query,
-        pagesize: 10,
+        pagesize: 20,
         page: this.pagination.pageNum,
       });
 
@@ -755,8 +778,8 @@ export default {
       this.fetchList();
     },
     // 购买设备
-    buyEq: function () { 
-      this.$router.push({name:'manage_buyequipment'})
+    buyEq: function () {
+      this.$router.push({ name: 'manage_buyequipment' })
     },
     // 续费设备
     renewalEq: function () {

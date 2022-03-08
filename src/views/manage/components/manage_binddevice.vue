@@ -15,6 +15,7 @@
         :data-source="table_data"
         :row-key="(r, i) => i.toString()"
         class="down_table"
+         :loading="table_loading"
         :pagination="pagination"
         @change="handleTableChange"
       >
@@ -32,9 +33,7 @@
       </a-table>
        </a-spin>
 
-      <div class="down_wrap">
-          <div class="down_w_left">共{{ pagination.total }} 条</div>
-       </div>
+      
     </a-modal>
   </div>
 </template>
@@ -87,8 +86,10 @@ export default {
         pageNum: 1, //当前页数
         pageSize: 5, //每页条数
         total: 0,
+        showTotal: (total) => `共 ${total} 条`, // 显示总数
       },
        spinning:false,
+       table_loading:false,
     }
   },
   mounted() {
@@ -103,11 +104,13 @@ export default {
       this.search_key = value
     },
     async get_list() {
+      this.table_loading = true
       let { data } = await client_v1_device({
         pagesize: 200,
         status:0,
         page: this.pagination.pageNum,
       })
+      this.table_loading = false
       if (data.code == 200) {
         this.pagination.total = data.data.total;
         this.table_data = data.data.list
@@ -167,7 +170,7 @@ export default {
 
 .down_table {
   margin-top: 10px;
-   height: 375px;
+   min-height: 200px;
   .cell_blue {
     cursor: pointer;
     color: #4c84ff;
