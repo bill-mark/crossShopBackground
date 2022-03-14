@@ -285,13 +285,13 @@ router.beforeEach((to, from, next) => {
 
    // 判断该路由是否需要登录权限
   if (to.meta.needLogin) {
-    console.log('is need login')
+    //console.log('is need login')
     // 判断是否已经登录
     if (isLogin) {
 
-      console.log(to.meta.ismember)
+     // console.log(to.meta.ismember)
       let c_3 = JSON.parse(localStorage.member).user_role
-      console.log(c_3  )
+     // console.log(c_3  )
       if(to.meta.ismember == undefined && c_3 != 0){
         Vue.prototype.$message.error("没有权限");
         next({

@@ -179,7 +179,7 @@ export default {
       }
     },
     async ok_handle() {
-      console.log(this.begin_time.format('HH:mm'))
+      console.log(this.begin_time?.format('HH:mm'))
       console.log(this.end_time)
       
       if(this.department_id.length == 0){
@@ -197,8 +197,8 @@ export default {
         role_id:this.role_id,
         auth_method:this.auth_method,
         login_time:this.login_time,
-        begin_time:this.begin_time.format('HH:mm'),
-        end_time:this.end_time.format('HH:mm'),
+        begin_time:this.begin_time?.format('HH:mm'),
+        end_time:this.end_time?.format('HH:mm'),
         edit_info:this.edit_info,
         department_id:this.department_id.toString(),
       });

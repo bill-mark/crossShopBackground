@@ -167,7 +167,7 @@
                   {{ item.package_title }}
                 </div>
                 <div class="package_c_money">
-                  {{ item.package_amount }}/{{ item.package_unit }}
+                  {{ item.package_amount }}元/{{ item.package_unit }}
                 </div>
 
                 <div
@@ -312,11 +312,11 @@
 
         <div class="right_down">
           <div class="right_d_txt">优惠立减</div>
-          <div class="right_d_right">-¥{{ coupon_money }}</div>
+          <div class="right_d_right">-¥{{ coupon_money }}元</div>
         </div>
         <div class="right_down">
           <div class="right_d_txt">应付金额</div>
-          <div class="right_d_right">¥{{ need_pay }}</div>
+          <div class="right_d_right">¥{{ need_pay }}元</div>
         </div>
 
         <!-- <a-spin :spinning="true">

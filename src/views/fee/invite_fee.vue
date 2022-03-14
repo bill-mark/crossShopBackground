@@ -72,6 +72,7 @@ export default {
       table_data: [],
       count: null,
       total: null,
+      num:null,
     }
   },
   mounted() {
@@ -96,6 +97,7 @@ export default {
       if (data.code == 200) {
         this.count = data.data.count
         this.total = data.data.total
+        this.num = data.data.num
         this.table_data = data.data.list
       }
     },

@@ -112,7 +112,7 @@
             >
 
             <a-popover
-              v-if="query.status != 4 || record.status != 4"
+              v-if="record.status != 4 || query.status != 4 "
               trigger="hover"
               overlayClassName="table-popover"
             >
@@ -169,7 +169,11 @@
                 <div>删除设备</div>
               </div>
 
-              <a-button class="view_btn">更多</a-button>
+              <a-button  class="view_btn"
+               v-if="record.status != 4 "
+              >
+                更多
+                </a-button>
             </a-popover>
 
             <a-button
