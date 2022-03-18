@@ -87,7 +87,7 @@ export default {
     async fetchList() {
       this.loading = true;
       const { data } = await order_index({
-        pagesize: 10,
+        pagesize: 20,
         page: this.pagination.pageNum,
       });
 

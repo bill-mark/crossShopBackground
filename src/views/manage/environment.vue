@@ -1,5 +1,5 @@
 <template>
-  <div class="environment_wrap" :style="{ height: wrap_height + 'px' }">
+  <div class="environment_wrap" >
     <div class="content_left">
       <a-menu
         style="width: 210px; height: 100%"
@@ -92,13 +92,7 @@
               <div>取消常用环境</div>
             </div>
 
-            <div
-              slot="content"
-              class="popover-content"
-              @click="batch_open('删除环境标签')"
-            >
-              <div>删除环境标签</div>
-            </div>
+           
 
             <div
               slot="content"

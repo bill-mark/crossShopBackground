@@ -62,7 +62,7 @@ export default {
     async fetchList() {
       this.loading = true;
       const { data } = await order_balance_log_list({
-        pagesize: 10,
+        pagesize: 20,
         page: this.pagination.pageNum,
       });
 

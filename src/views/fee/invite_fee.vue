@@ -29,7 +29,7 @@
         <div class="r_count q_count">
           <div class="count_back"></div>
           <div class="count_info">
-            <div class="co">{{ count }}</div>
+            <div class="co">{{ total }}</div>
             <div class="co_title">获得礼金券 (元)</div>
           </div>
         </div>
@@ -203,7 +203,7 @@ export default {
           flex-direction: column;
           margin-top: 10px;
           .co {
-            margin-left: 42px;
+            //margin-left: 42px;
             font-size: 30px;
             font-family: Source Han Sans CN;
             font-weight: 500;

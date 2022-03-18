@@ -77,30 +77,6 @@
           最近打开
         </div>
 
-        <!-- <div class="top_btn btn_2" @click="go_page('manage_buyequipment')">购买设备</div>
-        <div class="btn_3" @click="go_page('manage_addenv')">新建环境</div> -->
-
-        <!-- <a-input-search
-          placeholder="搜索设备名称/设备环境/设备信息"
-          class="btn_search"
-          @search="onSearch"
-        /> -->
-
-        <!-- <a-select
-          default-value="all"
-          class="btn_select"
-          :showSearch="true"
-          :filterOption="filterOptionEvent"
-          @change="select_handleChange"
-        >
-          <a-select-option
-            :value="item.value"
-            v-for="item in plate_list"
-            :key="item.name"
-          >
-            {{ item.name }}
-          </a-select-option>
-        </a-select> -->
       </div>
 
       <a-table
@@ -308,7 +284,7 @@ export default {
     handleTableChange(pagination) {
       console.log(pagination);
       this.pagination.pageNum = pagination.current;
-      this.onSearch();
+      this.get_tabledata();
     },
     go_open(data) {
       console.log(data);

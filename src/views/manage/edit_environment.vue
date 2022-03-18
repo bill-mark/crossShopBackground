@@ -201,7 +201,7 @@ export default {
       shop_password: "",
 
       device_list: [],
-      device_id: '',
+      device_id: null,
       tagIds: [],
       check_tagids: [],
 
@@ -306,7 +306,7 @@ export default {
         this.country_id = data.data.country_id
         this.shop_account = data.data.shop_account
         this.shop_password = data.data.shop_password
-        this.device_id = data.data.config.device_id
+        this.device_id = data.data.config.id
 
         let c_1 = data.data.tag.map(item => {
           return item.id

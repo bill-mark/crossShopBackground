@@ -49,7 +49,7 @@ export default {
     return {
       show_state: false,
       table_data: [],
-      search_key: '',
+      search_key: null,
       columns: [
         {
           title: '设备名称',
@@ -102,12 +102,14 @@ export default {
     },
     onSearch(value) {
       this.search_key = value
+      this.get_list()
     },
     async get_list() {
       this.table_loading = true
       let { data } = await client_v1_device({
         pagesize: 200,
         status:0,
+        keyword: this.search_key ,
         page: this.pagination.pageNum,
       })
       this.table_loading = false

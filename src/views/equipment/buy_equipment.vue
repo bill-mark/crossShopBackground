@@ -290,7 +290,7 @@
 
           <div class="payway_down">
             <a-checkbox v-model="auto_renew"> 到期自动续费 </a-checkbox>
-            <div class="payway_d_right"></div>
+            <!-- <div class="payway_d_right"></div> -->
           </div>
         </div>
       </div>
@@ -319,9 +319,7 @@
           <div class="right_d_right">¥{{ need_pay }}元</div>
         </div>
 
-        <!-- <a-spin :spinning="true">
-        <div class="right_btn" @click="go_order">立即购买</div>
-         </a-spin> -->
+        
 
         <a-button
           type="primary"
@@ -383,13 +381,13 @@ export default {
       check_deviceindex: 0,//选中的设备
 
       network_type: [],//网络类型列表
-      check_networkindex: 0,//选中的网络类型
+      check_networkindex: null,//选中的网络类型
 
       network_region: [],//地域列表
-      check_regionindex: 0,//选中的地域
+      check_regionindex: null,//选中的地域
 
       network_area: [],//地区列表
-      check_areaindex: 0,//选中的地区
+      check_areaindex: null,//选中的地区
 
       network_package: [],//套餐列表
       check_packageindex: 0,//选中的套餐
@@ -458,6 +456,20 @@ export default {
       }
     }
   },
+  watch:{
+    check_deviceindex:function(){
+      this.get_taocao_1()
+    },
+    check_networkindex:function(){
+      this.get_taocao_2()
+    },
+    check_regionindex:function(){
+      this.get_taocao_3()
+    },
+    check_areaindex:function(){
+      this.get_taocao_4()
+    },
+  },
   methods: {
 
     //下单
@@ -466,6 +478,12 @@ export default {
         this.$message.warning('需要同意服务协议,才能购买')
         return
       }
+
+      if (this.network_package.length ==0) {
+        this.$message.warning('套餐未选择')
+        return
+      }
+
 
       this.order_paystate = true
 
@@ -591,25 +609,25 @@ export default {
       return this.format_devicetype(this.device_info[this.check_deviceindex].device_type)
     },
     text_3() {
-      if (this.network_type.length == 0) {
+      if (this.network_type.length == 0 || this.check_networkindex == null) {
         return
       }
       return this.network_type[this.check_networkindex].type_title
     },
     text_4() {
-      if (this.network_region.length == 0) {
+      if (this.network_region.length == 0 || this.check_regionindex == null) {
         return
       }
       return this.network_region[this.check_regionindex].region_title
     },
     text_5() {
-      if (this.network_area.length == 0) {
+      if (this.network_area.length == 0 || this.check_areaindex == null) {
         return
       }
       return this.network_area[this.check_areaindex].area_title
     },
     text_6() {
-      if (this.network_package.length == 0) {
+      if (this.network_package.length == 0 ) {
         return
       }
       return this.network_package[this.check_packageindex].package_title
@@ -720,19 +738,79 @@ export default {
 
     async get_init_data() {
       let { data } = await device_purchase_device_list({
-        info_id: 1,
-        type_id: 1,
-        region_id: 1,
-        area_id: 1,
       })
       if (data.code == 200) {
         this.device_info = data.data.device_info
+       // this.network_type = data.data.network_type
+       // this.network_region = data.data.network_region
+      //  this.network_area = data.data.network_area
+       // this.network_package = data.data.network_package
+
+         this.get_taocao_1()
+      }
+    },
+    //获取最新套餐-1
+    async get_taocao_1(){
+      this.check_networkindex = null
+       this.check_regionindex = null
+       this.check_areaindex = null
+      this.check_packageindex = 0
+      let { data } = await device_purchase_device_list({
+        info_id: this.device_info[this.check_deviceindex].id,
+      })
+      if (data.code == 200) {
         this.network_type = data.data.network_type
-        this.network_region = data.data.network_region
-        this.network_area = data.data.network_area
+        this.network_region =[]
+         this.network_area = []
+         this.network_package =[]
+      }
+    },
+    //获取最新套餐-2
+    async get_taocao_2(){
+      this.check_regionindex = null
+       this.check_areaindex = null
+        this.check_packageindex = 0
+      let { data } = await device_purchase_device_list({
+        info_id: this.device_info[this.check_deviceindex].id,
+        type_id: this.network_type[this.check_networkindex].id,
+      })
+      if (data.code == 200) {
+         this.network_region = data.data.network_region
+          this.network_area = []
+         this.network_package =[]
+      }
+    },
+    //获取最新套餐-3
+    async get_taocao_3(){
+      this.check_areaindex = null
+       this.check_packageindex = 0
+      let { data } = await device_purchase_device_list({
+        info_id: this.device_info[this.check_deviceindex].id,
+        type_id: this.network_type[this.check_networkindex].id,
+        region_id:this.network_region[this.check_regionindex].id,
+      })
+      if (data.code == 200) {
+         this.network_area = data.data.network_area
+          this.network_package =[]
+      }
+    },
+    //获取最新套餐-4
+    async get_taocao_4(){
+      this.check_packageindex = 0
+      let { data } = await device_purchase_device_list({
+        info_id: this.device_info[this.check_deviceindex].id,
+        type_id: this.network_type[this.check_networkindex].id,
+        region_id:this.network_region[this.check_regionindex].id,
+        area_id: this.network_area[this.check_areaindex].id,
+      })
+      if (data.code == 200) {
         this.network_package = data.data.network_package
       }
     },
+
+
+
+
 
     async get_duration_data() {
       let { data } = await device_purchase_duration_list()
